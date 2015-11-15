@@ -35,7 +35,6 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
         int orientation = context.getResources().getConfiguration().orientation;
         newWidth = screenWidth / (orientation == Configuration.ORIENTATION_LANDSCAPE ? 3 : 2);
         newHeight = (int) (((double) newWidth / 185) * 278);
-        Log.d("TAG", screenWidth + " " + newWidth);
     }
 
     @Override
