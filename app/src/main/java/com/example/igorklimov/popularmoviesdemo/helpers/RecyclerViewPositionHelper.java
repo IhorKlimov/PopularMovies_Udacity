@@ -1,4 +1,4 @@
-package com.example.igorklimov.popularmoviesdemo.helper;
+package com.example.igorklimov.popularmoviesdemo.helpers;
 
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;

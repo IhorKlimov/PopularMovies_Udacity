@@ -1,4 +1,4 @@
-package com.example.igorklimov.popularmoviesdemo;
+package com.example.igorklimov.popularmoviesdemo.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -7,11 +7,11 @@ import android.os.Parcelable;
  * Created by Igor Klimov on 11/4/2015.
  */
 public class Movie implements Parcelable {
-    String postersUrl;
-    String title;
-    String releaseDate;
-    String vote;
-    String plot;
+    private String postersUrl;
+    private String title;
+    private String releaseDate;
+    private String vote;
+    private String plot;
 
     public Movie(String posterUrl, String title, String releaseDate, String vote, String plot) {
         this.postersUrl = posterUrl;
@@ -57,4 +57,43 @@ public class Movie implements Parcelable {
 
     };
 
+    public String getPostersUrl() {
+        return postersUrl;
+    }
+
+    public void setPostersUrl(String postersUrl) {
+        this.postersUrl = postersUrl;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getReleaseDate() {
+        return releaseDate;
+    }
+
+    public void setReleaseDate(String releaseDate) {
+        this.releaseDate = releaseDate;
+    }
+
+    public String getVote() {
+        return vote;
+    }
+
+    public void setVote(String vote) {
+        this.vote = vote;
+    }
+
+    public String getPlot() {
+        return plot;
+    }
+
+    public void setPlot(String plot) {
+        this.plot = plot;
+    }
 }

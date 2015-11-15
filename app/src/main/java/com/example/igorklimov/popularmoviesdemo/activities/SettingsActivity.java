@@ -1,4 +1,4 @@
-package com.example.igorklimov.popularmoviesdemo;
+package com.example.igorklimov.popularmoviesdemo.activities;
 
 
 import android.app.Activity;
@@ -7,8 +7,9 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.support.v4.app.NavUtils;
-import android.view.MenuItem;
+
+import com.example.igorklimov.popularmoviesdemo.fragments.MoviesGridFragment;
+import com.example.igorklimov.popularmoviesdemo.R;
 
 public class SettingsActivity extends Activity {
 

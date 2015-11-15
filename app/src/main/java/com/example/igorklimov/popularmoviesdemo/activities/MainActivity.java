@@ -1,4 +1,4 @@
-package com.example.igorklimov.popularmoviesdemo;
+package com.example.igorklimov.popularmoviesdemo.activities;
 
 import android.content.Context;
 import android.preference.PreferenceManager;
@@ -10,6 +10,7 @@ import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 
+import com.example.igorklimov.popularmoviesdemo.R;
 import com.squareup.picasso.OkHttpDownloader;
 import com.squareup.picasso.Picasso;
 

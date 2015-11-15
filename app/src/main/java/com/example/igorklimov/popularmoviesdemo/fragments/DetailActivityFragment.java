@@ -1,6 +1,5 @@
-package com.example.igorklimov.popularmoviesdemo;
+package com.example.igorklimov.popularmoviesdemo.fragments;
 
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -11,8 +10,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.example.igorklimov.popularmoviesdemo.model.Movie;
+import com.example.igorklimov.popularmoviesdemo.R;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -50,7 +50,7 @@ public class DetailActivityFragment extends Fragment {
         posterView.setMinimumHeight(newHeight);
 
         Picasso.with(activity)
-                .load(movie.postersUrl.replace("w185", "w342"))
+                .load(movie.getPostersUrl().replace("w185", "w342"))
                 .resize(newWidth, newHeight)
                 .into(posterView, new Callback() {
                     @Override
@@ -64,10 +64,10 @@ public class DetailActivityFragment extends Fragment {
                     }
                 });
 
-        titleView.setText(movie.title);
-        releaseDateView.append("Release date: " + movie.releaseDate.replaceAll("-", " "));
-        voteView.append("Average vote: " + movie.vote);
-        plotView.setText(movie.plot);
+        titleView.setText(movie.getTitle());
+        releaseDateView.append("Release date: " + movie.getReleaseDate().replaceAll("-", " "));
+        voteView.append("Average vote: " + movie.getVote());
+        plotView.setText(movie.getPlot());
 
         return rootView;
     }

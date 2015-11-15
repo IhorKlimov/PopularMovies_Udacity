@@ -1,4 +1,4 @@
-package com.example.igorklimov.popularmoviesdemo;
+package com.example.igorklimov.popularmoviesdemo.helpers;
 
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +11,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
+import com.example.igorklimov.popularmoviesdemo.model.Movie;
+import com.example.igorklimov.popularmoviesdemo.R;
+import com.example.igorklimov.popularmoviesdemo.activities.DetailActivity;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -49,7 +52,7 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
         holder.progressBar.setVisibility(View.VISIBLE);
 
         Picasso.with(context)
-                .load(movies.get(position).postersUrl)
+                .load(movies.get(position).getPostersUrl())
                 .resize(0, newHeight)
                 .noFade()
                 .into(holder.imageView, new Callback() {

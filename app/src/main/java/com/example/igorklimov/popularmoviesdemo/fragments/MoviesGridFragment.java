@@ -1,4 +1,4 @@
-package com.example.igorklimov.popularmoviesdemo;
+package com.example.igorklimov.popularmoviesdemo.fragments;
 
 import android.app.Fragment;
 import android.content.Intent;
@@ -17,7 +17,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 
-import com.example.igorklimov.popularmoviesdemo.helper.RecyclerViewPositionHelper;
+import com.example.igorklimov.popularmoviesdemo.helpers.CustomAdapter;
+import com.example.igorklimov.popularmoviesdemo.model.Movie;
+import com.example.igorklimov.popularmoviesdemo.R;
+import com.example.igorklimov.popularmoviesdemo.activities.SettingsActivity;
+import com.example.igorklimov.popularmoviesdemo.helpers.RecyclerViewPositionHelper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -42,7 +46,7 @@ public class MoviesGridFragment extends Fragment {
     private String JsonResponse;
     private CustomAdapter customAdapter;
     private int page = 1;
-    static boolean sortChanged = false;
+    public static boolean sortChanged = false;
 
     public MoviesGridFragment() {
         // Required empty public constructor
