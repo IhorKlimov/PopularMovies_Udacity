@@ -1,5 +1,4 @@
 # PopularMovies_Udacity
-An app to get the latest info about movies
 
 An app which I'm making during Udacity - Developing Adndroid Apps course.
 
