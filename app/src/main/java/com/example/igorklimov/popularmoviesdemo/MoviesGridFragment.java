@@ -53,7 +53,6 @@ public class MoviesGridFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
     }
-//asdfasdf
 
     @Override
     public void onResume() {
@@ -73,7 +72,13 @@ public class MoviesGridFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_movies, container, false);
         recyclerView = (RecyclerView) rootView.findViewById(R.id.movies_grid);
-        moviesList = new ArrayList<>();
+        if (savedInstanceState != null && savedInstanceState.containsKey("movies")) {
+            Log.d("TAG", "Found saved array");
+            moviesList = savedInstanceState.getParcelableArrayList("movies");
+        } else {
+            moviesList = new ArrayList<>();
+        }
+
         customAdapter = new CustomAdapter(moviesList, getActivity());
         recyclerView.setAdapter(customAdapter);
         recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), (
@@ -85,7 +90,9 @@ public class MoviesGridFragment extends Fragment {
 
         recyclerView.addOnScrollListener(new ScrollListener());
 
-        new FetchAsyncTask().execute();
+        if (savedInstanceState == null || !savedInstanceState.containsKey("movies")) {
+            new FetchAsyncTask().execute();
+        }
 
         return rootView;
     }
@@ -243,22 +250,22 @@ public class MoviesGridFragment extends Fragment {
         private int visibleThreshold = 6; // The minimum amount of items to have below your current scroll position before loading more.
         int firstVisibleItem, visibleItemCount, totalItemCount;
 
-        RecyclerViewPositionHelper mRecyclerViewHelper;
+        RecyclerViewPositionHelper helper;
 
         @Override
         public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
             super.onScrolled(recyclerView, dx, dy);
-            mRecyclerViewHelper = RecyclerViewPositionHelper.createHelper(recyclerView);
+            helper = RecyclerViewPositionHelper.createHelper(recyclerView);
             visibleItemCount = recyclerView.getChildCount();
-            totalItemCount = mRecyclerViewHelper.getItemCount();
-            firstVisibleItem = mRecyclerViewHelper.findFirstVisibleItemPosition();
+            totalItemCount = helper.getItemCount();
+            firstVisibleItem = helper.findFirstVisibleItemPosition();
             if (loading) {
                 if (totalItemCount > previousTotal) {
                     loading = false;
                     previousTotal = totalItemCount;
                 }
             }
-
+            Log.d("TAG", helper.getItemCount()+"");
             if (!loading && (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)) {
 
                 new FetchAsyncTask().execute();
