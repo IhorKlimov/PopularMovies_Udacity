@@ -116,7 +116,7 @@ public class MoviesGridFragment extends Fragment {
         private final static String IMAGE_BASE = "http://image.tmdb.org/t/p";
         private final static String W_185 = "/w185/";
         private final static String DISCOVER_MOVIES = "http://api.themoviedb.org/3/discover/movie";
-        private final static String API_KEY = "&api_key=daa8e62fb35a4e6821d58725b5abb88f";
+        private final static String API_KEY = "&api_key=";
         private final static String SORT_BY = "?sort_by=";
         private final static String PAGE = "&page=";
         private final static String POPULARITY_DESC = "popularity.desc";
