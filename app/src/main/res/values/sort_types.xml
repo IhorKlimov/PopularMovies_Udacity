@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="sort_types">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
+    <string-array name="sort_types_names">
+        <item>Popularity</item>
+        <item>Release Date</item>
+        <item>Votes</item>
+    </string-array>
+
+</resources>
