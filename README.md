@@ -6,3 +6,5 @@ I use Apiary Movie Database API to get movies data in JSON format http://docs.th
 And Picasso Image Downloading and caching library for posters http://square.github.io/picasso/
 
 In order for you to use it you need to get an Apiary DB API key and put  in code
+
+![Me](https://drive.google.com/file/d/0By64AMn_ODRnWDRuZ0QxWHNGcDg/view?usp=sharing)
