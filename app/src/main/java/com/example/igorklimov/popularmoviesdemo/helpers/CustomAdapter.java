@@ -52,7 +52,6 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
 
         Picasso.with(context)
                 .load(movies.get(position).getPostersUrl())
-                .resize(0, newHeight)
                 .noFade()
                 .into(holder.imageView, new Callback() {
                     @Override

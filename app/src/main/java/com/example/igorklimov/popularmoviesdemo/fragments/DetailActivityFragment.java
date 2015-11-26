@@ -22,7 +22,7 @@ import com.squareup.picasso.Picasso;
  * A placeholder fragment containing a simple view.
  */
 public class DetailActivityFragment extends Fragment {
-
+//todo Add director, cast, genre
     public DetailActivityFragment() {
     }
 
