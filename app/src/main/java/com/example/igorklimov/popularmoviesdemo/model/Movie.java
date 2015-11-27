@@ -12,13 +12,16 @@ public class Movie implements Parcelable {
     private String releaseDate;
     private String vote;
     private String plot;
+    private int[] genres;
 
-    public Movie(String posterUrl, String title, String releaseDate, String vote, String plot) {
+    public Movie(String posterUrl, String title, String releaseDate, String vote,
+                 String plot, int[] genres) {
         this.postersUrl = posterUrl;
         this.title = title;
         this.releaseDate = releaseDate;
         this.vote = vote;
         this.plot = plot;
+        this.genres = genres;
     }
 
     private Movie(Parcel in) {
@@ -61,10 +64,6 @@ public class Movie implements Parcelable {
         return postersUrl;
     }
 
-    public void setPostersUrl(String postersUrl) {
-        this.postersUrl = postersUrl;
-    }
-
     public String getTitle() {
         return title;
     }
@@ -77,23 +76,15 @@ public class Movie implements Parcelable {
         return releaseDate;
     }
 
-    public void setReleaseDate(String releaseDate) {
-        this.releaseDate = releaseDate;
-    }
-
     public String getVote() {
         return vote;
-    }
-
-    public void setVote(String vote) {
-        this.vote = vote;
     }
 
     public String getPlot() {
         return plot;
     }
 
-    public void setPlot(String plot) {
-        this.plot = plot;
+    public int[] getGenres() {
+        return genres;
     }
 }

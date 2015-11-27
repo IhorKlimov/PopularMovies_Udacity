@@ -1,19 +1,17 @@
 package com.example.igorklimov.popularmoviesdemo.helpers;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
+import com.example.igorklimov.popularmoviesdemo.activities.MainActivity;
 import com.example.igorklimov.popularmoviesdemo.model.Movie;
 import com.example.igorklimov.popularmoviesdemo.R;
-import com.example.igorklimov.popularmoviesdemo.activities.DetailActivity;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -25,24 +23,31 @@ import java.util.ArrayList;
 public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder> {
     private static ArrayList<Movie> movies;
     private static Context context;
-    private int newWidth;
-    private int newHeight;
+    private final int orientation;
+    private int minWidth = 0;
+    private int minHeight = 0;
+    private RecyclerView recyclerView;
 
-    public CustomAdapter(ArrayList<Movie> movies, Context context) {
+    public CustomAdapter(ArrayList<Movie> movies, Context context, RecyclerView recyclerView) {
         CustomAdapter.movies = movies;
         CustomAdapter.context = context;
-        int screenWidth = context.getResources().getDisplayMetrics().widthPixels;
-        int orientation = context.getResources().getConfiguration().orientation;
-        newWidth = screenWidth / (orientation == Configuration.ORIENTATION_LANDSCAPE ? 3 : 2);
-        newHeight = (int) (((double) newWidth / 185) * 278);
+        orientation = context.getResources().getConfiguration().orientation;
+        this.recyclerView = recyclerView;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_movie, parent, false);
-        ImageView viewById = (ImageView) view.findViewById(R.id.poster);
-        viewById.setMinimumWidth(newWidth);
-        viewById.setMinimumHeight(newHeight);
+        ImageView posterImageView = (ImageView) view.findViewById(R.id.poster);
+
+        if (minWidth == 0) {
+            minWidth = recyclerView.getWidth()
+                    / (orientation == Configuration.ORIENTATION_LANDSCAPE ? 3 : 2);
+            minHeight = (int) (((double) minWidth / 185) * 278);
+        }
+
+        posterImageView.setMinimumWidth(minWidth);
+        posterImageView.setMinimumHeight(minHeight);
         return new ViewHolder(view);
     }
 
@@ -64,7 +69,6 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
 
                     }
                 });
-
     }
 
     @Override
@@ -85,9 +89,8 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
 
         @Override
         public void onClick(View v) {
-            Intent getDetails = new Intent(context, DetailActivity.class);
-            getDetails.putExtra("movie", movies.get(getAdapterPosition()));
-            context.startActivity(getDetails);
+            MainActivity mainActivity = (MainActivity) CustomAdapter.context;
+            mainActivity.onItemClick(movies.get(getAdapterPosition()));
         }
     }
 }

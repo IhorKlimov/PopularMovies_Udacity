@@ -4,10 +4,10 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.widget.ArrayAdapter;
 
 import com.example.igorklimov.popularmoviesdemo.R;
 import com.example.igorklimov.popularmoviesdemo.helpers.CustomAdapter;
+import com.example.igorklimov.popularmoviesdemo.helpers.Utility;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,6 +24,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import static com.example.igorklimov.popularmoviesdemo.helpers.Utility.getGenres;
+import static com.example.igorklimov.popularmoviesdemo.helpers.Utility.getJsonMovies;
 import static java.util.Arrays.asList;
 
 /**
@@ -46,13 +48,13 @@ public class FetchAsyncTask extends AsyncTask<Void, Void, Movie[]> {
     private String JsonResponse;
     private List<Movie> moviesList;
     private CustomAdapter customAdapter;
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd", Locale.US);
 
     public FetchAsyncTask(Context context, List<Movie> moviesList, CustomAdapter customAdapter) {
         this.context = context;
         this.moviesList = moviesList;
         this.customAdapter = customAdapter;
     }
-
 
     @Override
     protected Movie[] doInBackground(Void... params) {
@@ -69,7 +71,7 @@ public class FetchAsyncTask extends AsyncTask<Void, Void, Movie[]> {
                     sortType = POPULARITY_DESC;
                     break;
                 case "2":
-                    String twoWeeksAhead = new SimpleDateFormat("yyyyMMdd", Locale.US)
+                    String twoWeeksAhead = DATE_FORMAT
                             .format(new Date(System.currentTimeMillis() + 1_296_000_000));
                     sortType = RELEASE_DATE_DESC + twoWeeksAhead;
                     break;
@@ -79,9 +81,10 @@ public class FetchAsyncTask extends AsyncTask<Void, Void, Movie[]> {
             }
 
             Log.d("TAG", DISCOVER_MOVIES + SORT_BY + sortType + API_KEY);
-            Log.d("TAG",  " " + page);
+            Log.d("TAG", " " + page);
 
-            connection = (HttpURLConnection) new URL(DISCOVER_MOVIES + SORT_BY + sortType + PAGE + page + API_KEY).openConnection();
+            connection = (HttpURLConnection) new URL(DISCOVER_MOVIES
+                    + SORT_BY + sortType + PAGE + page + API_KEY).openConnection();
             connection.setRequestMethod("GET");
             connection.connect();
             input = connection.getInputStream();
@@ -129,33 +132,14 @@ public class FetchAsyncTask extends AsyncTask<Void, Void, Movie[]> {
                 String releaseDate = JsonMovies[i].getString("release_date");
                 String vote = JsonMovies[i].getString("vote_average");
                 String plot = JsonMovies[i].getString("overview");
-
-                movies[i] = new Movie(poster_path, title, releaseDate, vote, plot);
+                int[] genres = getGenres(JsonMovies[i]);
+                movies[i] = new Movie(poster_path, title, releaseDate, vote, plot, genres);
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
         return movies;
-    }
-
-    private JSONObject[] getJsonMovies(String jsonResponse) {
-        JSONObject[] jsonObjects = null;
-        try {
-            JSONObject jObj = new JSONObject(jsonResponse);
-            JSONArray results = jObj.getJSONArray("results");
-            jsonObjects = new JSONObject[20];
-
-            for (int j = 0; j < 20; j++) {
-                jsonObjects[j] = results.getJSONObject(j);
-            }
-
-        } catch (JSONException e) {
-            Log.e("TAG", "JSON ERROR ");
-            e.printStackTrace();
-        }
-
-        return jsonObjects;
     }
 
     @Override

@@ -3,9 +3,7 @@ package com.example.igorklimov.popularmoviesdemo.fragments;
 import android.app.Fragment;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -23,24 +21,8 @@ import com.example.igorklimov.popularmoviesdemo.model.FetchAsyncTask;
 import com.example.igorklimov.popularmoviesdemo.model.Movie;
 import com.example.igorklimov.popularmoviesdemo.R;
 import com.example.igorklimov.popularmoviesdemo.activities.SettingsActivity;
-import com.example.igorklimov.popularmoviesdemo.helpers.RecyclerViewPositionHelper;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Locale;
-
-import static java.util.Arrays.asList;
 
 public class MoviesGridFragment extends Fragment {
     private ArrayList<Movie> moviesList;
@@ -70,12 +52,11 @@ public class MoviesGridFragment extends Fragment {
             listener.refresh();
             new FetchAsyncTask(getActivity(), moviesList, customAdapter).execute();
         }
-
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_movies, container, false);
+        View rootView = inflater.inflate(R.layout.movies_grid, container, false);
         recyclerView = (RecyclerView) rootView.findViewById(R.id.movies_grid);
         if (savedInstanceState != null && savedInstanceState.containsKey("movies")) {
             Log.d("TAG", "Found saved array");
@@ -84,7 +65,7 @@ public class MoviesGridFragment extends Fragment {
             moviesList = new ArrayList<>();
         }
 
-        customAdapter = new CustomAdapter(moviesList, getActivity());
+        customAdapter = new CustomAdapter(moviesList, getActivity(), recyclerView);
         recyclerView.setAdapter(customAdapter);
         recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), (
                 getActivity()

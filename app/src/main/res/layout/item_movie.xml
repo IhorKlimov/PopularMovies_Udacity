@@ -8,10 +8,8 @@
         android:id="@+id/poster"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="fitXY"
         android:contentDescription="@string/poster"
-
-         />
+        android:scaleType="fitXY" />
 
     <ProgressBar
         android:id="@+id/progressBar"

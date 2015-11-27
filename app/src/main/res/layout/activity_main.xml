@@ -4,5 +4,5 @@
     android:name="com.example.igorklimov.popularmoviesdemo.fragments.MoviesGridFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:layout="@layout/fragment_movies"
+    tools:layout="@layout/movies_grid"
     android:id="@+id/movies_view" />
