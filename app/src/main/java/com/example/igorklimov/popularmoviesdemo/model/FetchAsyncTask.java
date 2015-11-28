@@ -1,11 +1,17 @@
 package com.example.igorklimov.popularmoviesdemo.model;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.example.igorklimov.popularmoviesdemo.R;
+import com.example.igorklimov.popularmoviesdemo.data.MovieContract;
+import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieEntry;
+import com.example.igorklimov.popularmoviesdemo.data.MoviesDbHelper;
 import com.example.igorklimov.popularmoviesdemo.helpers.CustomAdapter;
 import com.example.igorklimov.popularmoviesdemo.helpers.Utility;
 
@@ -58,87 +64,121 @@ public class FetchAsyncTask extends AsyncTask<Void, Void, Movie[]> {
 
     @Override
     protected Movie[] doInBackground(Void... params) {
-        Log.d("TAG", "Getting more data");
+        SQLiteDatabase db = new MoviesDbHelper(context).getWritableDatabase();
         HttpURLConnection connection = null;
         InputStream input = null;
         BufferedReader reader = null;
-
-        try {
-            String sortType = PreferenceManager.getDefaultSharedPreferences(context)
-                    .getString(context.getString(R.string.key_sort_types), "");
-            switch (sortType) {
-                case "1":
-                    sortType = POPULARITY_DESC;
-                    break;
-                case "2":
-                    String twoWeeksAhead = DATE_FORMAT
-                            .format(new Date(System.currentTimeMillis() + 1_296_000_000));
-                    sortType = RELEASE_DATE_DESC + twoWeeksAhead;
-                    break;
-                case "3":
-                    sortType = VOTE_AVG_DESC;
-                    break;
-            }
-
-            Log.d("TAG", DISCOVER_MOVIES + SORT_BY + sortType + API_KEY);
-            Log.d("TAG", " " + page);
-
-            connection = (HttpURLConnection) new URL(DISCOVER_MOVIES
-                    + SORT_BY + sortType + PAGE + page + API_KEY).openConnection();
-            connection.setRequestMethod("GET");
-            connection.connect();
-            input = connection.getInputStream();
-            StringBuilder builder = new StringBuilder();
-
-            if (input != null) {
-                reader = new BufferedReader(new InputStreamReader(input));
-                String line;
-
-                while ((line = reader.readLine()) != null) {
-                    builder.append(line).append("\n");
-                }
-                JsonResponse = builder.toString();
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (connection != null) {
-                connection.disconnect();
-            }
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (input != null) {
-                try {
-                    input.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
         Movie[] movies = new Movie[20];
 
-        try {
-            JSONObject[] JsonMovies = getJsonMovies(JsonResponse);
-            for (int i = 0; i < JsonMovies.length; i++) {
-                String poster_path = IMAGE_BASE + W_185 + JsonMovies[i].getString("poster_path");
-                String title = JsonMovies[i].getString("title");
-                String releaseDate = JsonMovies[i].getString("release_date");
-                String vote = JsonMovies[i].getString("vote_average");
-                String plot = JsonMovies[i].getString("overview");
-                int[] genres = getGenres(JsonMovies[i]);
-                movies[i] = new Movie(poster_path, title, releaseDate, vote, plot, genres);
+        Cursor cursor = db.query(MovieEntry.TABLE_NAME, null, null, null, null, null, null);
+
+        if (cursor.getCount() < page * 20) {
+            try {
+                String sortType = PreferenceManager.getDefaultSharedPreferences(context)
+                        .getString(context.getString(R.string.key_sort_types), "");
+                switch (sortType) {
+                    case "1":
+                        sortType = POPULARITY_DESC;
+                        break;
+                    case "2":
+                        String twoWeeksAhead = DATE_FORMAT
+                                .format(new Date(System.currentTimeMillis() + 1_296_000_000));
+                        sortType = RELEASE_DATE_DESC + twoWeeksAhead;
+                        break;
+                    case "3":
+                        sortType = VOTE_AVG_DESC;
+                        break;
+                }
+
+                Log.d("TAG", DISCOVER_MOVIES + SORT_BY + sortType + API_KEY);
+                Log.d("TAG", " " + page);
+
+                connection = (HttpURLConnection) new URL(DISCOVER_MOVIES
+                        + SORT_BY + sortType + PAGE + page + API_KEY).openConnection();
+                connection.setRequestMethod("GET");
+                connection.connect();
+                input = connection.getInputStream();
+                StringBuilder builder = new StringBuilder();
+                Log.d("TAG", "Getting more data from server");
+
+                if (input != null) {
+                    reader = new BufferedReader(new InputStreamReader(input));
+                    String line;
+
+                    while ((line = reader.readLine()) != null) {
+                        builder.append(line).append("\n");
+                    }
+                    JsonResponse = builder.toString();
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (connection != null) {
+                    connection.disconnect();
+                }
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (input != null) {
+                    try {
+                        input.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
-        } catch (JSONException e) {
-            e.printStackTrace();
+
+            try {
+                JSONObject[] JsonMovies = getJsonMovies(JsonResponse);
+                Log.d("TAG", "INSERTING EXTRA DATA");
+                for (int i = 0; i < JsonMovies.length; i++) {
+                    String poster = IMAGE_BASE + W_185 + JsonMovies[i].getString("poster_path");
+                    String title = JsonMovies[i].getString("title");
+                    String releaseDate = JsonMovies[i].getString("release_date");
+                    String vote = JsonMovies[i].getString("vote_average");
+                    String plot = JsonMovies[i].getString("overview");
+                    String genres = Utility.formatGenres(getGenres(JsonMovies[i]));
+
+                    ContentValues values = new ContentValues();
+                    values.put(MovieEntry.COLUMN_TITLE, title);
+                    values.put(MovieEntry.COLUMN_POSTER, poster);
+                    values.put(MovieEntry.COLUMN_RELEASE_DATE, releaseDate);
+                    values.put(MovieEntry.COLUMN_GENRES, genres);
+                    values.put(MovieEntry.COLUMN_AVERAGE_VOTE, vote);
+                    values.put(MovieEntry.COLUMN_PLOT, plot);
+
+                    db.insert(MovieEntry.TABLE_NAME, null, values);
+
+                    movies[i] = new Movie(poster, title, releaseDate, vote, plot, genres);
+                }
+
+                db.close();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        } else {
+            Log.d("TAG", "GETTING DATA FROM SQLite DATABASE");
+            int start = (page - 1) * 20;
+            int movieIndex = 0;
+            for (int i = start; i < start + 20; i++) {
+                cursor.moveToPosition(i);
+                String title = cursor.getString(0);
+                String poster = cursor.getString(1);
+                String releaseDate = cursor.getString(2);
+                String genres = cursor.getString(3);
+                String vote = cursor.getString(4);
+                String plot = cursor.getString(5);
+
+                movies[movieIndex++] = new Movie(poster, title, releaseDate, vote, plot, genres);
+            }
         }
 
+        cursor.close();
         return movies;
     }
 

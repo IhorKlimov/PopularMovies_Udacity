@@ -12,10 +12,10 @@ public class Movie implements Parcelable {
     private String releaseDate;
     private String vote;
     private String plot;
-    private int[] genres;
+    private String genres;
 
     public Movie(String posterUrl, String title, String releaseDate, String vote,
-                 String plot, int[] genres) {
+                 String plot, String genres) {
         this.postersUrl = posterUrl;
         this.title = title;
         this.releaseDate = releaseDate;
@@ -84,7 +84,7 @@ public class Movie implements Parcelable {
         return plot;
     }
 
-    public int[] getGenres() {
+    public String getGenres() {
         return genres;
     }
 }

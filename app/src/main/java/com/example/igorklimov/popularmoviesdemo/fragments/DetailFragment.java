@@ -90,7 +90,7 @@ public class DetailFragment extends Fragment {
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-            genresView.append(Utility.formatGenres(movie.getGenres()));
+            genresView.append(movie.getGenres());
             voteView.append(String.format(getString(R.string.format_average_vote), movie.getVote()));
             plotView.setText(movie.getPlot());
         }
