@@ -30,6 +30,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieEntry.COLUMN_AVERAGE_VOTE;
+import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieEntry.COLUMN_GENRES;
+import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieEntry.COLUMN_PLOT;
+import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieEntry.COLUMN_POSTER;
+import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieEntry.COLUMN_RELEASE_DATE;
+import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieEntry.COLUMN_TITLE;
 import static com.example.igorklimov.popularmoviesdemo.helpers.Utility.getGenres;
 import static com.example.igorklimov.popularmoviesdemo.helpers.Utility.getJsonMovies;
 import static java.util.Arrays.asList;
@@ -145,12 +151,12 @@ public class FetchAsyncTask extends AsyncTask<Void, Void, Movie[]> {
                     String genres = Utility.formatGenres(getGenres(JsonMovies[i]));
 
                     ContentValues values = new ContentValues();
-                    values.put(MovieEntry.COLUMN_TITLE, title);
-                    values.put(MovieEntry.COLUMN_POSTER, poster);
-                    values.put(MovieEntry.COLUMN_RELEASE_DATE, releaseDate);
-                    values.put(MovieEntry.COLUMN_GENRES, genres);
-                    values.put(MovieEntry.COLUMN_AVERAGE_VOTE, vote);
-                    values.put(MovieEntry.COLUMN_PLOT, plot);
+                    values.put(COLUMN_TITLE, title);
+                    values.put(COLUMN_POSTER, poster);
+                    values.put(COLUMN_RELEASE_DATE, releaseDate);
+                    values.put(COLUMN_GENRES, genres);
+                    values.put(COLUMN_AVERAGE_VOTE, vote);
+                    values.put(COLUMN_PLOT, plot);
 
                     db.insert(MovieEntry.TABLE_NAME, null, values);
 
@@ -167,12 +173,12 @@ public class FetchAsyncTask extends AsyncTask<Void, Void, Movie[]> {
             int movieIndex = 0;
             for (int i = start; i < start + 20; i++) {
                 cursor.moveToPosition(i);
-                String title = cursor.getString(0);
-                String poster = cursor.getString(1);
-                String releaseDate = cursor.getString(2);
-                String genres = cursor.getString(3);
-                String vote = cursor.getString(4);
-                String plot = cursor.getString(5);
+                String title = cursor.getString(cursor.getColumnIndex(COLUMN_TITLE));
+                String poster = cursor.getString(cursor.getColumnIndex(COLUMN_POSTER));
+                String releaseDate = cursor.getString(cursor.getColumnIndex(COLUMN_RELEASE_DATE));
+                String genres = cursor.getString(cursor.getColumnIndex(COLUMN_GENRES));
+                String vote = cursor.getString(cursor.getColumnIndex(COLUMN_AVERAGE_VOTE));
+                String plot = cursor.getString(cursor.getColumnIndex(COLUMN_PLOT));
 
                 movies[movieIndex++] = new Movie(poster, title, releaseDate, vote, plot, genres);
             }
