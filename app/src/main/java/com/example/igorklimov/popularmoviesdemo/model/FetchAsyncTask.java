@@ -96,16 +96,16 @@ public class FetchAsyncTask extends AsyncTask<Void, Void, Movie[]> {
                         break;
                 }
 
-                Log.d("TAG", DISCOVER_MOVIES + SORT_BY + sortType + API_KEY);
-                Log.d("TAG", " " + page);
 
-                connection = (HttpURLConnection) new URL(DISCOVER_MOVIES
-                        + SORT_BY + sortType + PAGE + page + API_KEY).openConnection();
+                URL url = new URL(DISCOVER_MOVIES
+                        + SORT_BY + sortType + PAGE + page + API_KEY);
+                Log.d("TAG", "Getting more data from server");
+                Log.d("TAG", url.toString());
+                connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
                 connection.connect();
                 input = connection.getInputStream();
                 StringBuilder builder = new StringBuilder();
-                Log.d("TAG", "Getting more data from server");
 
                 if (input != null) {
                     reader = new BufferedReader(new InputStreamReader(input));

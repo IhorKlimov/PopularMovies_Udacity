@@ -1,8 +1,10 @@
 package com.example.igorklimov.popularmoviesdemo.data;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
@@ -47,30 +49,104 @@ public class TestDB extends AndroidTestCase {
 //        db.close();
 //    }
 
-    public void testReadDb() {
-        SQLiteDatabase db = new MoviesDbHelper(mContext).getReadableDatabase();
-        Cursor cursor = db.query(MovieEntry.TABLE_NAME, null, null, null, null, null, null);
+//    public void testReadDb() {
+//        SQLiteDatabase db = new MoviesDbHelper(mContext).getReadableDatabase();
+//        Cursor cursor = db.query(MovieEntry.TABLE_NAME, null, null, null, null, null, null);
 //        assertTrue(cursor.moveToFirst());
-
+//
 //        Log.d(LOG_TAG, cursor.getString(0));
-
+//
 //        while (cursor.moveToNext()) {
 //            Log.d(LOG_TAG, cursor.getString(0));
 //        }
+//
+//
+//        for (int i = 20; i < 40; i++) {
+//            if (cursor.moveToPosition(i)) {
+//                Log.d(LOG_TAG, cursor.getString(0) + "");
+//            }
+//        }
+//
+//        cursor.close();
+//        db.close();
+//
+//    }
 
+//    public void testInsert() {
+//        mContext.deleteDatabase(MoviesDbHelper.DATABASE_NAME);
+//        ContentResolver contentResolver = mContext.getContentResolver();
+//        ContentValues values = new ContentValues();
+//        values.put(MovieEntry.COLUMN_TITLE, "Title");
+//        values.put(MovieEntry.COLUMN_POSTER, "Poster");
+//        values.put(MovieEntry.COLUMN_RELEASE_DATE, "Release Date");
+//        values.put(MovieEntry.COLUMN_GENRES, "Genres");
+//        values.put(MovieEntry.COLUMN_AVERAGE_VOTE, "Votes");
+//        values.put(MovieEntry.COLUMN_PLOT, "Plot");
+//
+//        Uri insert = contentResolver.insert(MovieEntry.CONTENT_URI, values);
+//        Log.d(LOG_TAG, "testInsert: " + insert);
+//
+//        ContentValues values2 = new ContentValues();
+//        values2.put(MovieEntry.COLUMN_TITLE, "Title");
+//        values2.put(MovieEntry.COLUMN_POSTER, "Poster");
+//        values2.put(MovieEntry.COLUMN_RELEASE_DATE, "Release Date");
+//        values2.put(MovieEntry.COLUMN_GENRES, "Genres");
+//        values2.put(MovieEntry.COLUMN_AVERAGE_VOTE, "Votes");
+//        values2.put(MovieEntry.COLUMN_PLOT, "Plot");
+//
+//        Uri insert2 = contentResolver.insert(MovieEntry.CONTENT_URI, values);
+//        Log.d(LOG_TAG, "testInsert: " + insert2);
+//
+//        ContentValues values3 = new ContentValues();
+//        values3.put(MovieEntry.COLUMN_TITLE, "Title");
+//        values3.put(MovieEntry.COLUMN_POSTER, "Poster");
+//        values3.put(MovieEntry.COLUMN_RELEASE_DATE, "Release Date");
+//        values3.put(MovieEntry.COLUMN_GENRES, "Genres");
+//        values3.put(MovieEntry.COLUMN_AVERAGE_VOTE, "Votes");
+//        values3.put(MovieEntry.COLUMN_PLOT, "Plot");
+//
+//        Uri insert3 = contentResolver.insert(MovieEntry.CONTENT_URI, values);
+//        Log.d(LOG_TAG, "testInsert: " + insert3);
+//
+//        ContentValues values4 = new ContentValues();
+//        values4.put(MovieEntry.COLUMN_TITLE, "Title");
+//        values4.put(MovieEntry.COLUMN_POSTER, "Poster");
+//        values4.put(MovieEntry.COLUMN_RELEASE_DATE, "Release Date");
+//        values4.put(MovieEntry.COLUMN_GENRES, "Genres");
+//        values4.put(MovieEntry.COLUMN_AVERAGE_VOTE, "Votes");
+//        values4.put(MovieEntry.COLUMN_PLOT, "Plot");
+//
+//        Uri insert4 = contentResolver.insert(MovieEntry.CONTENT_URI, values);
+//        Log.d(LOG_TAG, "testInsert: " + insert4);
+//    }
 
-        for (int i = 20; i < 40; i++) {
-            if (cursor.moveToPosition(i)) {
-                Log.d(LOG_TAG, cursor.getString(0) + "");
-            }
-        }
+//    public void testQuery() {
+//        ContentResolver contentResolver = mContext.getContentResolver();
+//        Cursor cursor = contentResolver.query(MovieEntry.CONTENT_URI, null, null, null, null);
+//        assertTrue(cursor != null);
+//
+//        while (cursor.moveToNext()) {
+//            Log.d(LOG_TAG, "testQuery: " + cursor.getString(1));
+//        }
+//        cursor.close();
+//
+//        Cursor cursor2 = contentResolver.query(MovieEntry.buildMovieUri(1), null, null, null, null);
+//        assertTrue(cursor2 != null);
+//        while (cursor2.moveToNext()) {
+//            Log.d(LOG_TAG, "testQuery: 2 " + cursor2.getString(1));
+//        }
+//        cursor2.close();
+//    }
 
-        cursor.close();
-        db.close();
+    public void testDelete() {
+        ContentResolver contentResolver = mContext.getContentResolver();
+        Cursor cursor = contentResolver.query(MovieEntry.CONTENT_URI, null, null, null, null);
+        assertTrue(cursor != null);
+        Log.d(LOG_TAG, "testDelete: cursor size " + cursor.getCount());
+        int delete = contentResolver.delete(MovieEntry.buildMovieUri(3), null, null);
+        Log.d(LOG_TAG, "testDelete: " + delete);
+        Log.d(LOG_TAG, "testDelete: cursor size " + cursor.getCount());
 
     }
-
-
-
 
 }

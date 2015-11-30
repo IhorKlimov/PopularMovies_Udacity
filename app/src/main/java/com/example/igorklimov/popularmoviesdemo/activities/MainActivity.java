@@ -18,6 +18,7 @@ import com.example.igorklimov.popularmoviesdemo.R;
 import com.example.igorklimov.popularmoviesdemo.fragments.DetailFragment;
 import com.example.igorklimov.popularmoviesdemo.fragments.MoviesGridFragment;
 import com.example.igorklimov.popularmoviesdemo.model.Movie;
+import com.example.igorklimov.popularmoviesdemo.sync.SyncAdapter;
 import com.squareup.picasso.OkHttpDownloader;
 import com.squareup.picasso.Picasso;
 
@@ -35,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         PreferenceManager.setDefaultValues(getApplication(), R.xml.pref_general, false);
+        SyncAdapter.initializeSyncAdapter(this);
         twoPane = findViewById(R.id.details_fragment) != null;
         Log.d("TAG", twoPane + "");
     }

@@ -21,6 +21,7 @@ import com.example.igorklimov.popularmoviesdemo.model.FetchAsyncTask;
 import com.example.igorklimov.popularmoviesdemo.model.Movie;
 import com.example.igorklimov.popularmoviesdemo.R;
 import com.example.igorklimov.popularmoviesdemo.activities.SettingsActivity;
+import com.example.igorklimov.popularmoviesdemo.sync.SyncAdapter;
 
 import java.util.ArrayList;
 
@@ -73,6 +74,8 @@ public class MoviesGridFragment extends Fragment {
                         .getConfiguration()
                         .orientation) == Configuration.ORIENTATION_PORTRAIT ? 2 : 3
         ));
+
+        SyncAdapter.syncImmediately(getActivity());
 
         listener = new ScrollListener(getActivity(), moviesList, customAdapter);
         recyclerView.addOnScrollListener(listener);
