@@ -116,12 +116,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         long lastUpdate = prefs.getLong(context.getString(R.string.last_update), System.currentTimeMillis());
         Log.d("TAG", "onPerformSync: IF " + (System.currentTimeMillis() - lastUpdate));
         if (System.currentTimeMillis() - lastUpdate >= DAY_IN_MILLISECONDS) {
-            Cursor query = mContentResolver.query(MovieEntry.CONTENT_URI, null, null, null, null);
-            if (query != null) {
-                prefs.edit().putLong(context.getString(R.string.row_count),
-                        (Utility.getRowCountPreference(context) + query.getCount())).apply();
-                query.close();
-            }
+            Utility.updateRowCountPreference(context);
             int delete = mContentResolver.delete(MovieEntry.CONTENT_URI, null, null);
             prefs.edit().putLong(context.getString(R.string.last_update), System.currentTimeMillis()).apply();
             Log.d("TAG", "onPerformSync: ERASE THE DATABASE -------" + delete);

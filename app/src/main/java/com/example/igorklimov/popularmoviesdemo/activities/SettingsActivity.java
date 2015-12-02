@@ -12,6 +12,7 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.bumptech.glide.util.Util;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieEntry;
 import com.example.igorklimov.popularmoviesdemo.fragments.MoviesGridFragment;
@@ -50,17 +51,10 @@ public class SettingsActivity extends Activity {
                                 ? listPreference.getEntries()[index]
                                 : null);
                 if (!listPreference.getValue().equals(value)) {
-                    Cursor query = context.getContentResolver().query(MovieEntry.CONTENT_URI, null, null, null, null);
-                    if (query != null) {
-                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-                        prefs.edit().putLong(context.getString(R.string.row_count),
-                                (Utility.getRowCountPreference(context) + query.getCount())).apply();
-                        SyncAdapter.page = 1;
-                        context.getContentResolver().delete(MovieEntry.CONTENT_URI, null, null);
-                        MainActivity.sortChanged = true;
-                        SyncAdapter.syncImmediately(context);
-                        query.close();
-                    }
+                    Utility.updateRowCountPreference(context);
+                    context.getContentResolver().delete(MovieEntry.CONTENT_URI, null, null);
+                    MainActivity.sortChanged = true;
+                    SyncAdapter.syncImmediately(context);
                 }
 
             } else {

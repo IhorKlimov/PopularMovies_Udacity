@@ -53,7 +53,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onItemClick(Uri movieUri) {
-        Log.d("TAG", "onItemClick: "+ movieUri);
         if (twoPane) {
             int height = findViewById(R.id.details_fragment).getHeight();
             DetailFragment fragment = new DetailFragment();

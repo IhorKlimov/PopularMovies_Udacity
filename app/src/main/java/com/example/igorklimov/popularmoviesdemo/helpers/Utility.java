@@ -1,6 +1,7 @@
 package com.example.igorklimov.popularmoviesdemo.helpers;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.preference.PreferenceManager;
@@ -9,6 +10,7 @@ import android.util.Log;
 import com.example.igorklimov.popularmoviesdemo.R;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieEntry;
+import com.example.igorklimov.popularmoviesdemo.sync.SyncAdapter;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -153,6 +155,17 @@ public class Utility {
 
     public static long getRowCountPreference(Context c) {
         return PreferenceManager.getDefaultSharedPreferences(c).getLong(c.getString(R.string.row_count), 0);
+    }
+
+    public static void updateRowCountPreference(Context c) {
+        Cursor query = c.getContentResolver().query(MovieEntry.CONTENT_URI, null, null, null, null);
+        if (query != null) {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
+            prefs.edit().putLong(c.getString(R.string.row_count),
+                    (Utility.getRowCountPreference(c) + query.getCount())).apply();
+            SyncAdapter.page = 1;
+            query.close();
+        }
     }
 
 }

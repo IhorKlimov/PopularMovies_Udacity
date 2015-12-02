@@ -34,7 +34,7 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
     private CustomAdapter customAdapter;
     private ScrollListener listener;
     private static final int LOADER = 1;
-
+    private MainActivity mainActivity;
 
     public MoviesGridFragment() {
     }
@@ -46,18 +46,17 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
     }
 
     public void sortChanged() {
-        Log.d("TAG", "onResume: " +
-                PreferenceManager.getDefaultSharedPreferences(getActivity())
-                        .getString(getActivity().getString(R.string.key_sort_types), ""));
+
         getLoaderManager().restartLoader(LOADER, null, this);
-        final MainActivity mainActivity = (MainActivity) getContext();
-        if (mainActivity.twoPane) {
-//            recyclerView.setItemChecked(0, true);
-            recyclerView.smoothScrollToPosition(0);
-            mainActivity.onItemClick(MovieContract.MovieEntry
-                    .buildMovieUri(Utility.getRowCountPreference(getActivity()) + 1));
-        }
+        if (mainActivity.twoPane) selectFirstItem();
         listener.refresh();
+    }
+
+    private void selectFirstItem() {
+//            recyclerView.setItemChecked(0, true);
+        recyclerView.smoothScrollToPosition(0);
+        mainActivity.onItemClick(MovieContract.MovieEntry
+                .buildMovieUri(Utility.getRowCountPreference(getActivity()) + 1));
     }
 
     @Override
@@ -89,6 +88,7 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         getLoaderManager().initLoader(LOADER, null, this);
+        mainActivity = (MainActivity) getContext();
     }
 
     @Override
@@ -116,20 +116,20 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         customAdapter.swapCursor(cursor);
-
+        if (mainActivity.twoPane) {
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    selectFirstItem();
+                }
+            },300);
+        }
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
         customAdapter.swapCursor(null);
     }
-
-
-//    @Override
-//    public void onSaveInstanceState(Bundle outState) {
-//        outState.putParcelableArrayList("movies", moviesList);
-//        super.onSaveInstanceState(outState);
-//    }
 
 }
 

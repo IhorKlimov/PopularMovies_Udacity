@@ -13,7 +13,7 @@ import com.example.igorklimov.popularmoviesdemo.sync.SyncAdapter;
  * Created by Igor Klimov on 11/15/2015.
  */
 public class ScrollListener extends RecyclerView.OnScrollListener {
-    private int previousTotal = 0; // The total number of items in the dataset after the last load
+    private int previousTotal = 0; // The total number of items in the data set after the last load
     private boolean loading = true; // True if we are still waiting for the last set of data to load.
     private int visibleThreshold = 6; // The minimum amount of items to have below your current scroll position before loading more.
     private Context context;
