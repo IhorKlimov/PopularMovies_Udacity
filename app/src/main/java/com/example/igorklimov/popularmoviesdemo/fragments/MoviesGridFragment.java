@@ -4,12 +4,15 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -18,21 +21,22 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.igorklimov.popularmoviesdemo.R;
+import com.example.igorklimov.popularmoviesdemo.activities.MainActivity;
 import com.example.igorklimov.popularmoviesdemo.activities.SettingsActivity;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract;
 import com.example.igorklimov.popularmoviesdemo.helpers.CustomAdapter;
 import com.example.igorklimov.popularmoviesdemo.helpers.ScrollListener;
+import com.example.igorklimov.popularmoviesdemo.helpers.Utility;
 import com.example.igorklimov.popularmoviesdemo.sync.SyncAdapter;
 
 public class MoviesGridFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private RecyclerView recyclerView;
     private CustomAdapter customAdapter;
-    public static boolean sortChanged = false;
     private ScrollListener listener;
+    private static final int LOADER = 1;
 
 
     public MoviesGridFragment() {
-        // Required empty public constructor
     }
 
     @Override
@@ -41,21 +45,26 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
         setHasOptionsMenu(true);
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        if (sortChanged) {
-            sortChanged = false;
-            listener.refresh();
+    public void sortChanged() {
+        Log.d("TAG", "onResume: " +
+                PreferenceManager.getDefaultSharedPreferences(getActivity())
+                        .getString(getActivity().getString(R.string.key_sort_types), ""));
+        getLoaderManager().restartLoader(LOADER, null, this);
+        final MainActivity mainActivity = (MainActivity) getContext();
+        if (mainActivity.twoPane) {
+//            recyclerView.setItemChecked(0, true);
+            recyclerView.smoothScrollToPosition(0);
+            mainActivity.onItemClick(MovieContract.MovieEntry
+                    .buildMovieUri(Utility.getRowCountPreference(getActivity()) + 1));
         }
+        listener.refresh();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.movies_grid, container, false);
         recyclerView = (RecyclerView) rootView.findViewById(R.id.movies_grid);
-        customAdapter = new CustomAdapter(getActivity(), null, 0, recyclerView);
+        customAdapter = new CustomAdapter(getActivity(), null, recyclerView);
         recyclerView.setAdapter(customAdapter);
         recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), (
                 getActivity()
@@ -70,7 +79,7 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
         }
         cursor.close();
 
-        listener = new ScrollListener(getActivity(), customAdapter);
+        listener = new ScrollListener(getActivity());
         recyclerView.addOnScrollListener(listener);
 
         return rootView;
@@ -79,7 +88,7 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        getLoaderManager().initLoader(1, null, this);
+        getLoaderManager().initLoader(LOADER, null, this);
     }
 
     @Override
@@ -107,19 +116,7 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         customAdapter.swapCursor(cursor);
-//        if (mainActivity.mTwoPane) {
-//            listView.setItemChecked(pos, true);
-//            listView.smoothScrollToPosition(pos);
-//            new Handler().postDelayed(new Runnable() {
-//                @Override
-//                public void run() {
-//                    listView.performItemClick(
-//                            listView.getAdapter().getView(pos, null, null),
-//                            pos,
-//                            listView.getAdapter().getItemId(pos));
-//                }
-//            }, 300);
-//        }
+
     }
 
     @Override

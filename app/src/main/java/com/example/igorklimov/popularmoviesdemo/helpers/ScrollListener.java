@@ -19,7 +19,7 @@ public class ScrollListener extends RecyclerView.OnScrollListener {
     private Context context;
     private int firstVisibleItem, visibleItemCount, totalItemCount;
 
-    public ScrollListener(Context context, CustomAdapter customAdapter) {
+    public ScrollListener(Context context) {
         this.context = context;
     }
 
@@ -38,13 +38,6 @@ public class ScrollListener extends RecyclerView.OnScrollListener {
         }
         if (!loading && (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)) {
             Log.d("TAG", "onScrolled: RUNNING syncImmediately");
-//            Cursor cursor = context.getContentResolver()
-//                    .query(MovieContract.MovieEntry.CONTENT_URI, null, null, null, null);
-//            if (!(cursor.getCount() < SyncAdapter.page * 20)) {
-//                SyncAdapter.setPage(cursor.getCount() / 20 + 1);
-//                Log.d("TAG", "onScrolled: SETTING PAGE ---------->>>> TO " + SyncAdapter.page);
-//            }
-//            cursor.close();
             SyncAdapter.syncImmediately(context);
             loading = true;
         }

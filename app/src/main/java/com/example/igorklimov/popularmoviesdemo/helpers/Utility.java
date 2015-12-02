@@ -1,7 +1,12 @@
 package com.example.igorklimov.popularmoviesdemo.helpers;
 
+import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
+import android.preference.PreferenceManager;
+import android.util.Log;
 
+import com.example.igorklimov.popularmoviesdemo.R;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieEntry;
 
@@ -50,6 +55,7 @@ public class Utility {
     public static String formatGenres(int[] genres) {
         String result = "";
         for (int genreId : genres) {
+            if (result.contains(",")) return result;
             switch (genreId) {
                 case 28:
                     result = concat(result, "Action");
@@ -121,9 +127,32 @@ public class Utility {
         return to.concat(to.length() == 0 ? concat : ", " + concat);
     }
 
+    public static String getPoster(Cursor c) {
+        return c.getString(c.getColumnIndex(MovieEntry.COLUMN_POSTER));
+    }
 
-    public static String getUrl(Cursor cursor) {
-        return cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_POSTER));
+    public static String getGenres(Cursor c) {
+        return c.getString(c.getColumnIndex(MovieEntry.COLUMN_GENRES));
+    }
+
+    public static String getTitle(Cursor c) {
+        return c.getString(c.getColumnIndex(MovieEntry.COLUMN_TITLE));
+    }
+
+    public static String getReleaseDate(Cursor c) {
+        return c.getString(c.getColumnIndex(MovieEntry.COLUMN_RELEASE_DATE));
+    }
+
+    public static String getVote(Cursor c) {
+        return c.getString(c.getColumnIndex(MovieEntry.COLUMN_AVERAGE_VOTE));
+    }
+
+    public static String getPlot(Cursor c) {
+        return c.getString(c.getColumnIndex(MovieEntry.COLUMN_PLOT));
+    }
+
+    public static long getRowCountPreference(Context c) {
+        return PreferenceManager.getDefaultSharedPreferences(c).getLong(c.getString(R.string.row_count), 0);
     }
 
 }

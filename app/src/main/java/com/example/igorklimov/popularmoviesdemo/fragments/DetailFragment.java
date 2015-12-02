@@ -1,8 +1,12 @@
 package com.example.igorklimov.popularmoviesdemo.fragments;
 
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,27 +16,30 @@ import android.widget.TextView;
 
 import com.example.igorklimov.popularmoviesdemo.R;
 import com.example.igorklimov.popularmoviesdemo.helpers.Utility;
-import com.example.igorklimov.popularmoviesdemo.model.Movie;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
-import java.util.logging.SimpleFormatter;
 
-/**
- * A placeholder fragment containing a simple view.
- */
-public class DetailFragment extends Fragment {
+public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private View rootView;
-    private int fragmentHeight;
+    private static int fragmentHeight;
 
     private static final SimpleDateFormat initialFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
     private static final SimpleDateFormat monthYearFormat = new SimpleDateFormat("MMMM, yyyy", Locale.US);
+    private static final int DETAIL_LOADER = 300;
 
-    //todo Add director, cast, genre
+    private ImageView posterView;
+    private TextView titleView;
+    private TextView releaseDateView;
+    private TextView voteView;
+    private TextView plotView;
+    private TextView genresView;
+
+    //todo Add director, cast
     public DetailFragment() {
     }
 
@@ -41,36 +48,50 @@ public class DetailFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         rootView = inflater.inflate(R.layout.fragment_details, container, false);
-        ImageView posterView = (ImageView) rootView.findViewById(R.id.details_poster);
-        TextView titleView = (TextView) rootView.findViewById(R.id.title);
-        TextView releaseDateView = (TextView) rootView.findViewById(R.id.release_date);
-        TextView voteView = (TextView) rootView.findViewById(R.id.vote);
-        TextView plotView = (TextView) rootView.findViewById(R.id.plot);
-        TextView genresView = (TextView) rootView.findViewById(R.id.genres);
+        posterView = (ImageView) rootView.findViewById(R.id.details_poster);
+        titleView = (TextView) rootView.findViewById(R.id.title);
+        releaseDateView = (TextView) rootView.findViewById(R.id.release_date);
+        voteView = (TextView) rootView.findViewById(R.id.vote);
+        plotView = (TextView) rootView.findViewById(R.id.plot);
+        genresView = (TextView) rootView.findViewById(R.id.genres);
 
-        FragmentActivity activity = getActivity();
-        Movie movie = null;
-        if (activity.getIntent() != null && activity.getIntent().hasExtra("movie")) {
-            movie = activity.getIntent().getParcelableExtra("movie");
+        return rootView;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        getLoaderManager().initLoader(DETAIL_LOADER, null, this);
+        Log.d("TAG", "onActivityCreated: INIT LOADER");
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        Uri movieUri = getActivity().getIntent().getData();
+        if (movieUri != null) {
+            Log.d("TAG", "onCreateLoader: ------------------");
             fragmentHeight = this.getResources().getDisplayMetrics().heightPixels;
-            Log.d("TAG", fragmentHeight + "");
+            return new CursorLoader(getActivity(), movieUri, null, null, null, null);
         } else {
+            Log.d("TAG", "onCreateLoader: ------------------");
             Bundle arguments = getArguments();
-            if (arguments.containsKey("movie")) {
-                movie = arguments.getParcelable("movie");
-                fragmentHeight = arguments.getInt("fragmentHeight");
-            }
+            movieUri = arguments.getParcelable("movie");
+            fragmentHeight = arguments.getInt("fragmentHeight");
+            return new CursorLoader(getActivity(), movieUri, null, null, null, null);
         }
+    }
 
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         int minHeight = fragmentHeight / 3;
         int minWidth = (int) (((double) minHeight / 513) * 342);
 
         posterView.setMinimumWidth(minWidth);
         posterView.setMinimumHeight(minHeight);
-
-        if (movie != null) {
-            Picasso.with(activity)
-                    .load(movie.getPostersUrl().replace("w185", "w342"))
+        if (data.moveToFirst()) {
+            Log.d("TAG", "onLoadFinished: ");
+            Picasso.with(getActivity())
+                    .load(Utility.getPoster(data).replace("w185", "w342"))
                     .resize(minWidth, minHeight)
                     .into(posterView, new Callback() {
                         @Override
@@ -83,18 +104,25 @@ public class DetailFragment extends Fragment {
 
                         }
                     });
-            titleView.setText(movie.getTitle());
+            titleView.setText(Utility.getTitle(data));
             try {
-                releaseDateView.append(monthYearFormat
-                        .format(initialFormat.parse(movie.getReleaseDate())));
+                releaseDateView.setText(monthYearFormat
+                        .format(initialFormat.parse(Utility.getReleaseDate(data))));
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-            genresView.append(movie.getGenres());
-            voteView.append(String.format(getString(R.string.format_average_vote), movie.getVote()));
-            plotView.setText(movie.getPlot());
+            genresView.setText(Utility.getGenres(data));
+            voteView.setText(String.format(getString(R.string.format_average_vote), Utility.getVote(data)));
+            plotView.setText(Utility.getPlot(data));
         }
+    }
 
-        return rootView;
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
+    }
+
+    public void sortChanged() {
+        getLoaderManager().restartLoader(DETAIL_LOADER, null, this);
     }
 }

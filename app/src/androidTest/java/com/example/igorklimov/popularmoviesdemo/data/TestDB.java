@@ -9,6 +9,7 @@ import android.test.AndroidTestCase;
 import android.util.Log;
 
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieEntry;
+import com.example.igorklimov.popularmoviesdemo.helpers.Utility;
 
 import java.util.ArrayList;
 
@@ -152,44 +153,54 @@ public class TestDB extends AndroidTestCase {
 //    }
 
     public void testBulkInsert() {
-        mContext.deleteDatabase(MoviesDbHelper.DATABASE_NAME);
+//        mContext.deleteDatabase(MoviesDbHelper.DATABASE_NAME);
         ContentResolver contentResolver = mContext.getContentResolver();
-        ArrayList<ContentValues> values = new ArrayList<>();
+//        ArrayList<ContentValues> values = new ArrayList<>();
+//
+//        ContentValues value1 = new ContentValues();
+//        value1.put(MovieEntry.COLUMN_TITLE, "Title");
+//        value1.put(MovieEntry.COLUMN_POSTER, "Poster");
+//        value1.put(MovieEntry.COLUMN_RELEASE_DATE, "Release Date");
+//        value1.put(MovieEntry.COLUMN_GENRES, "Genres");
+//        value1.put(MovieEntry.COLUMN_AVERAGE_VOTE, "Votes");
+//        value1.put(MovieEntry.COLUMN_PLOT, "Plot");
+//
+//        ContentValues value2 = new ContentValues();
+//        value2.put(MovieEntry.COLUMN_TITLE, "Title2");
+//        value2.put(MovieEntry.COLUMN_POSTER, "Poster");
+//        value2.put(MovieEntry.COLUMN_RELEASE_DATE, "Release Date");
+//        value2.put(MovieEntry.COLUMN_GENRES, "Genres");
+//        value2.put(MovieEntry.COLUMN_AVERAGE_VOTE, "Votes");
+//        value2.put(MovieEntry.COLUMN_PLOT, "Plot");
+//
+//        ContentValues value3 = new ContentValues();
+//        value3.put(MovieEntry.COLUMN_TITLE, "Title3");
+//        value3.put(MovieEntry.COLUMN_POSTER, "Poster");
+//        value3.put(MovieEntry.COLUMN_RELEASE_DATE, "Release Date");
+//        value3.put(MovieEntry.COLUMN_GENRES, "Genres");
+//        value3.put(MovieEntry.COLUMN_AVERAGE_VOTE, "Votes");
+//        value3.put(MovieEntry.COLUMN_PLOT, "Plot");
+//
+//        values.add(value1);
+//        values.add(value2);
+//        values.add(value3);
+//
+//        ContentValues[] objects =  values.toArray(new ContentValues[values.size()]);
+//
+//        int bulkInsert = contentResolver.bulkInsert(MovieEntry.CONTENT_URI, objects);
+//        assertTrue(bulkInsert == 3);
+//
+//        Log.d(LOG_TAG, "testBulkInsert: "+ bulkInsert);
 
-        ContentValues value1 = new ContentValues();
-        value1.put(MovieEntry.COLUMN_TITLE, "Title");
-        value1.put(MovieEntry.COLUMN_POSTER, "Poster");
-        value1.put(MovieEntry.COLUMN_RELEASE_DATE, "Release Date");
-        value1.put(MovieEntry.COLUMN_GENRES, "Genres");
-        value1.put(MovieEntry.COLUMN_AVERAGE_VOTE, "Votes");
-        value1.put(MovieEntry.COLUMN_PLOT, "Plot");
-
-        ContentValues value2 = new ContentValues();
-        value2.put(MovieEntry.COLUMN_TITLE, "Title2");
-        value2.put(MovieEntry.COLUMN_POSTER, "Poster");
-        value2.put(MovieEntry.COLUMN_RELEASE_DATE, "Release Date");
-        value2.put(MovieEntry.COLUMN_GENRES, "Genres");
-        value2.put(MovieEntry.COLUMN_AVERAGE_VOTE, "Votes");
-        value2.put(MovieEntry.COLUMN_PLOT, "Plot");
-
-        ContentValues value3 = new ContentValues();
-        value3.put(MovieEntry.COLUMN_TITLE, "Title3");
-        value3.put(MovieEntry.COLUMN_POSTER, "Poster");
-        value3.put(MovieEntry.COLUMN_RELEASE_DATE, "Release Date");
-        value3.put(MovieEntry.COLUMN_GENRES, "Genres");
-        value3.put(MovieEntry.COLUMN_AVERAGE_VOTE, "Votes");
-        value3.put(MovieEntry.COLUMN_PLOT, "Plot");
-
-        values.add(value1);
-        values.add(value2);
-        values.add(value3);
-
-        ContentValues[] objects =  values.toArray(new ContentValues[values.size()]);
-
-        int bulkInsert = contentResolver.bulkInsert(MovieEntry.CONTENT_URI, objects);
-        assertTrue(bulkInsert == 3);
-
-        Log.d(LOG_TAG, "testBulkInsert: "+ bulkInsert);
+        Cursor cursor = contentResolver.query(MovieEntry.buildMovieUri(1), null, null, null, null);
+        assertTrue(cursor != null);
+        assertTrue(cursor.moveToFirst());
+        Log.d("TAG", "testBulkInsert: " + Utility.getPoster(cursor));
+        Log.d("TAG", "testBulkInsert: " + Utility.getTitle(cursor));
+        Log.d("TAG", "testBulkInsert: " + Utility.getReleaseDate(cursor));
+        Log.d("TAG", "testBulkInsert: " + Utility.getGenres(cursor));
+        Log.d("TAG", "testBulkInsert: " + Utility.getPlot(cursor));
+        Log.d("TAG", "testBulkInsert: " + Utility.getVote(cursor));
     }
 
 }

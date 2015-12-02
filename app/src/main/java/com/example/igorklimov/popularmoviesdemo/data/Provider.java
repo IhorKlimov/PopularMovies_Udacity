@@ -119,7 +119,7 @@ public class Provider extends ContentProvider {
     @Override
     public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
         SQLiteDatabase db = moviesDbHelper.getWritableDatabase();
-        int deleted = 0;
+        int deleted;
         switch (uriMatcher.match(uri)) {
             case MOVIE:
                 deleted = db.delete(MovieEntry.TABLE_NAME, selection, selectionArgs);
@@ -131,7 +131,7 @@ public class Provider extends ContentProvider {
             default:
                 throw new UnsupportedOperationException();
         }
-        if (deleted != 0) contentResolver.notifyChange(uri, null);
+        if (deleted >0) contentResolver.notifyChange(uri, null);
 
         return deleted;
     }
