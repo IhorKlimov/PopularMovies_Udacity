@@ -46,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
         return super.onCreateView(name, context, attrs);
     }
 
-
     public void onItemClick(Movie movie) {
         if (twoPane) {
             int height = findViewById(R.id.details_fragment).getHeight();

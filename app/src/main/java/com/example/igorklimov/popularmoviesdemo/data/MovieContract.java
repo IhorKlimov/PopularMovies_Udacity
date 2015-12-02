@@ -15,7 +15,6 @@ public final class MovieContract {
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
     public static final String PATH_MOVIE = "movie";
 
-
     private MovieContract() {
 
     }
@@ -60,9 +59,7 @@ public final class MovieContract {
         }
 
         public static String getIdFromUri(Uri uri) {
-            String s = uri.getPathSegments().get(1);
-            Log.d("TestDb", s + "   STRING");
-            return s;
+            return uri.getPathSegments().get(1);
         }
 
     }

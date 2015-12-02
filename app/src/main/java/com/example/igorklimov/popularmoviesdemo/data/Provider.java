@@ -48,14 +48,10 @@ public class Provider extends ContentProvider {
      * Return no type for MIME type
      */
     @Override
-    public String getType(Uri uri) {
+    public String getType(@NonNull Uri uri) {
         return null;
     }
 
-    /*
-     * query() always returns no results
-     *
-     */
     @Override
     public Cursor query(@NonNull Uri uri, String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
@@ -77,9 +73,6 @@ public class Provider extends ContentProvider {
         return cursor;
     }
 
-    /*
-     * insert() always returns null (no URI)
-     */
     @Override
     public Uri insert(@NonNull Uri uri, ContentValues values) {
         Log.d("TAG", "insert: ");
@@ -97,9 +90,32 @@ public class Provider extends ContentProvider {
         return result;
     }
 
-    /*
-     * delete() always returns "no rows affected" (0)
-     */
+    @Override
+    public int bulkInsert(@NonNull Uri uri, @NonNull ContentValues[] values) {
+        int inserted = 0;
+        SQLiteDatabase db = moviesDbHelper.getWritableDatabase();
+        switch (uriMatcher.match(uri)) {
+            case MOVIE:
+                db.beginTransaction();
+                try {
+                    for (ContentValues value : values) {
+                        long insert = db.insert(MovieEntry.TABLE_NAME, null, value);
+                        if (insert != -1) inserted++;
+                    }
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                }
+
+                if (inserted != 0) contentResolver.notifyChange(uri, null);
+                break;
+            default:
+                throw new UnsupportedOperationException();
+        }
+
+        return inserted;
+    }
+
     @Override
     public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
         SQLiteDatabase db = moviesDbHelper.getWritableDatabase();
@@ -120,10 +136,7 @@ public class Provider extends ContentProvider {
         return deleted;
     }
 
-    /*
-     * update() always returns "no rows affected" (0)
-     */
-    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+    public int update(@NonNull Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         return 0;
     }
 

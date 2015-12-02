@@ -4,6 +4,7 @@
     <string name="poster">Poster</string>
     <string name="acc_sync_type">igorklimov.example.com</string>
     <string name="content_authority">com.example.igorklimov.popularmoviesdemo</string>
+    <string name="last_update">last update</string>
 
     <!-- Strings related to Settings -->
     <string name="action_settings">Settings</string>

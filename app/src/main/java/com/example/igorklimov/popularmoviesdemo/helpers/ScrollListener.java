@@ -1,13 +1,13 @@
 package com.example.igorklimov.popularmoviesdemo.helpers;
 
 import android.content.Context;
+import android.database.Cursor;
+import android.preference.PreferenceManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
-import com.example.igorklimov.popularmoviesdemo.model.FetchAsyncTask;
-import com.example.igorklimov.popularmoviesdemo.model.Movie;
-
-import java.util.List;
+import com.example.igorklimov.popularmoviesdemo.data.MovieContract;
+import com.example.igorklimov.popularmoviesdemo.sync.SyncAdapter;
 
 /**
  * Created by Igor Klimov on 11/15/2015.
@@ -16,16 +16,11 @@ public class ScrollListener extends RecyclerView.OnScrollListener {
     private int previousTotal = 0; // The total number of items in the dataset after the last load
     private boolean loading = true; // True if we are still waiting for the last set of data to load.
     private int visibleThreshold = 6; // The minimum amount of items to have below your current scroll position before loading more.
-    int firstVisibleItem, visibleItemCount, totalItemCount;
-
     private Context context;
-    private List<Movie> moviesList;
-    private CustomAdapter customAdapter;
+    private int firstVisibleItem, visibleItemCount, totalItemCount;
 
-    public ScrollListener(Context context, List<Movie> moviesList, CustomAdapter customAdapter) {
+    public ScrollListener(Context context, CustomAdapter customAdapter) {
         this.context = context;
-        this.moviesList = moviesList;
-        this.customAdapter = customAdapter;
     }
 
     @Override
@@ -42,7 +37,15 @@ public class ScrollListener extends RecyclerView.OnScrollListener {
             }
         }
         if (!loading && (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)) {
-            new FetchAsyncTask(context, moviesList, customAdapter).execute();
+            Log.d("TAG", "onScrolled: RUNNING syncImmediately");
+//            Cursor cursor = context.getContentResolver()
+//                    .query(MovieContract.MovieEntry.CONTENT_URI, null, null, null, null);
+//            if (!(cursor.getCount() < SyncAdapter.page * 20)) {
+//                SyncAdapter.setPage(cursor.getCount() / 20 + 1);
+//                Log.d("TAG", "onScrolled: SETTING PAGE ---------->>>> TO " + SyncAdapter.page);
+//            }
+//            cursor.close();
+            SyncAdapter.syncImmediately(context);
             loading = true;
         }
     }

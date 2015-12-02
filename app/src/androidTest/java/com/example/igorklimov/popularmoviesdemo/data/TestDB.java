@@ -10,6 +10,8 @@ import android.util.Log;
 
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieEntry;
 
+import java.util.ArrayList;
+
 /**
  * Created by Igor Klimov on 11/27/2015.
  */
@@ -138,15 +140,56 @@ public class TestDB extends AndroidTestCase {
 //        cursor2.close();
 //    }
 
-    public void testDelete() {
-        ContentResolver contentResolver = mContext.getContentResolver();
-        Cursor cursor = contentResolver.query(MovieEntry.CONTENT_URI, null, null, null, null);
-        assertTrue(cursor != null);
-        Log.d(LOG_TAG, "testDelete: cursor size " + cursor.getCount());
-        int delete = contentResolver.delete(MovieEntry.buildMovieUri(3), null, null);
-        Log.d(LOG_TAG, "testDelete: " + delete);
-        Log.d(LOG_TAG, "testDelete: cursor size " + cursor.getCount());
+//    public void testDelete() {
+//        ContentResolver contentResolver = mContext.getContentResolver();
+//        Cursor cursor = contentResolver.query(MovieEntry.CONTENT_URI, null, null, null, null);
+//        assertTrue(cursor != null);
+//        Log.d(LOG_TAG, "testDelete: cursor size " + cursor.getCount());
+//        int delete = contentResolver.delete(MovieEntry.buildMovieUri(3), null, null);
+//        Log.d(LOG_TAG, "testDelete: " + delete);
+//        Log.d(LOG_TAG, "testDelete: cursor size " + cursor.getCount());
+//
+//    }
 
+    public void testBulkInsert() {
+        mContext.deleteDatabase(MoviesDbHelper.DATABASE_NAME);
+        ContentResolver contentResolver = mContext.getContentResolver();
+        ArrayList<ContentValues> values = new ArrayList<>();
+
+        ContentValues value1 = new ContentValues();
+        value1.put(MovieEntry.COLUMN_TITLE, "Title");
+        value1.put(MovieEntry.COLUMN_POSTER, "Poster");
+        value1.put(MovieEntry.COLUMN_RELEASE_DATE, "Release Date");
+        value1.put(MovieEntry.COLUMN_GENRES, "Genres");
+        value1.put(MovieEntry.COLUMN_AVERAGE_VOTE, "Votes");
+        value1.put(MovieEntry.COLUMN_PLOT, "Plot");
+
+        ContentValues value2 = new ContentValues();
+        value2.put(MovieEntry.COLUMN_TITLE, "Title2");
+        value2.put(MovieEntry.COLUMN_POSTER, "Poster");
+        value2.put(MovieEntry.COLUMN_RELEASE_DATE, "Release Date");
+        value2.put(MovieEntry.COLUMN_GENRES, "Genres");
+        value2.put(MovieEntry.COLUMN_AVERAGE_VOTE, "Votes");
+        value2.put(MovieEntry.COLUMN_PLOT, "Plot");
+
+        ContentValues value3 = new ContentValues();
+        value3.put(MovieEntry.COLUMN_TITLE, "Title3");
+        value3.put(MovieEntry.COLUMN_POSTER, "Poster");
+        value3.put(MovieEntry.COLUMN_RELEASE_DATE, "Release Date");
+        value3.put(MovieEntry.COLUMN_GENRES, "Genres");
+        value3.put(MovieEntry.COLUMN_AVERAGE_VOTE, "Votes");
+        value3.put(MovieEntry.COLUMN_PLOT, "Plot");
+
+        values.add(value1);
+        values.add(value2);
+        values.add(value3);
+
+        ContentValues[] objects =  values.toArray(new ContentValues[values.size()]);
+
+        int bulkInsert = contentResolver.bulkInsert(MovieEntry.CONTENT_URI, objects);
+        assertTrue(bulkInsert == 3);
+
+        Log.d(LOG_TAG, "testBulkInsert: "+ bulkInsert);
     }
 
 }

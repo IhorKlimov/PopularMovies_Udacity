@@ -1,12 +1,15 @@
 package com.example.igorklimov.popularmoviesdemo.fragments;
 
-import android.app.Fragment;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -14,23 +17,19 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-
-import com.example.igorklimov.popularmoviesdemo.helpers.CustomAdapter;
-import com.example.igorklimov.popularmoviesdemo.helpers.ScrollListener;
-import com.example.igorklimov.popularmoviesdemo.model.FetchAsyncTask;
-import com.example.igorklimov.popularmoviesdemo.model.Movie;
 import com.example.igorklimov.popularmoviesdemo.R;
 import com.example.igorklimov.popularmoviesdemo.activities.SettingsActivity;
+import com.example.igorklimov.popularmoviesdemo.data.MovieContract;
+import com.example.igorklimov.popularmoviesdemo.helpers.CustomAdapter;
+import com.example.igorklimov.popularmoviesdemo.helpers.ScrollListener;
 import com.example.igorklimov.popularmoviesdemo.sync.SyncAdapter;
 
-import java.util.ArrayList;
-
-public class MoviesGridFragment extends Fragment {
-    private ArrayList<Movie> moviesList;
+public class MoviesGridFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private RecyclerView recyclerView;
     private CustomAdapter customAdapter;
     public static boolean sortChanged = false;
     private ScrollListener listener;
+
 
     public MoviesGridFragment() {
         // Required empty public constructor
@@ -47,11 +46,8 @@ public class MoviesGridFragment extends Fragment {
         super.onResume();
 
         if (sortChanged) {
-            FetchAsyncTask.page = 1;
-            moviesList.clear();
             sortChanged = false;
             listener.refresh();
-            new FetchAsyncTask(getActivity(), moviesList, customAdapter).execute();
         }
     }
 
@@ -59,14 +55,7 @@ public class MoviesGridFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.movies_grid, container, false);
         recyclerView = (RecyclerView) rootView.findViewById(R.id.movies_grid);
-        if (savedInstanceState != null && savedInstanceState.containsKey("movies")) {
-            Log.d("TAG", "Found saved array");
-            moviesList = savedInstanceState.getParcelableArrayList("movies");
-        } else {
-            moviesList = new ArrayList<>();
-        }
-
-        customAdapter = new CustomAdapter(moviesList, getActivity(), recyclerView);
+        customAdapter = new CustomAdapter(getActivity(), null, 0, recyclerView);
         recyclerView.setAdapter(customAdapter);
         recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), (
                 getActivity()
@@ -74,17 +63,23 @@ public class MoviesGridFragment extends Fragment {
                         .getConfiguration()
                         .orientation) == Configuration.ORIENTATION_PORTRAIT ? 2 : 3
         ));
+        Cursor cursor = getContext().getContentResolver()
+                .query(MovieContract.MovieEntry.CONTENT_URI, null, null, null, null);
+        if (cursor.getCount() == 0) {
+            SyncAdapter.syncImmediately(getActivity());
+        }
+        cursor.close();
 
-        SyncAdapter.syncImmediately(getActivity());
-
-        listener = new ScrollListener(getActivity(), moviesList, customAdapter);
+        listener = new ScrollListener(getActivity(), customAdapter);
         recyclerView.addOnScrollListener(listener);
 
-        if (savedInstanceState == null || !savedInstanceState.containsKey("movies")) {
-            new FetchAsyncTask(getActivity(), moviesList, customAdapter).execute();
-        }
-
         return rootView;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        getLoaderManager().initLoader(1, null, this);
     }
 
     @Override
@@ -104,10 +99,40 @@ public class MoviesGridFragment extends Fragment {
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
-        outState.putParcelableArrayList("movies", moviesList);
-        super.onSaveInstanceState(outState);
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        return new CursorLoader(getActivity(),
+                MovieContract.MovieEntry.CONTENT_URI, null, null, null, null);
     }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+        customAdapter.swapCursor(cursor);
+//        if (mainActivity.mTwoPane) {
+//            listView.setItemChecked(pos, true);
+//            listView.smoothScrollToPosition(pos);
+//            new Handler().postDelayed(new Runnable() {
+//                @Override
+//                public void run() {
+//                    listView.performItemClick(
+//                            listView.getAdapter().getView(pos, null, null),
+//                            pos,
+//                            listView.getAdapter().getItemId(pos));
+//                }
+//            }, 300);
+//        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> cursorLoader) {
+        customAdapter.swapCursor(null);
+    }
+
+
+//    @Override
+//    public void onSaveInstanceState(Bundle outState) {
+//        outState.putParcelableArrayList("movies", moviesList);
+//        super.onSaveInstanceState(outState);
+//    }
 
 }
 

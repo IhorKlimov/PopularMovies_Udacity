@@ -1,5 +1,10 @@
 package com.example.igorklimov.popularmoviesdemo.helpers;
 
+import android.database.Cursor;
+
+import com.example.igorklimov.popularmoviesdemo.data.MovieContract;
+import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieEntry;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -114,6 +119,11 @@ public class Utility {
 
     private static String concat(String to, String concat) {
         return to.concat(to.length() == 0 ? concat : ", " + concat);
+    }
+
+
+    public static String getUrl(Cursor cursor) {
+        return cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_POSTER));
     }
 
 }
