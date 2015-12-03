@@ -3,20 +3,14 @@ package com.example.igorklimov.popularmoviesdemo.activities;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
-import com.bumptech.glide.util.Util;
-import com.example.igorklimov.popularmoviesdemo.data.MovieContract;
-import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieEntry;
-import com.example.igorklimov.popularmoviesdemo.fragments.MoviesGridFragment;
 import com.example.igorklimov.popularmoviesdemo.R;
+import com.example.igorklimov.popularmoviesdemo.data.MovieContract;
 import com.example.igorklimov.popularmoviesdemo.helpers.Utility;
 import com.example.igorklimov.popularmoviesdemo.sync.SyncAdapter;
 
@@ -51,8 +45,10 @@ public class SettingsActivity extends Activity {
                                 ? listPreference.getEntries()[index]
                                 : null);
                 if (!listPreference.getValue().equals(value)) {
-                    Utility.updateRowCountPreference(context);
-                    context.getContentResolver().delete(MovieEntry.CONTENT_URI, null, null);
+//                    Utility.updateRowCountPreference(context);
+//                    context.getContentResolver().delete(MovieContract.MovieByPopularity.CONTENT_URI, null, null);
+//                    context.getContentResolver().delete(MovieContract.MovieByReleaseDate.CONTENT_URI, null, null);
+//                    context.getContentResolver().delete(MovieContract.MovieByVotes.CONTENT_URI, null, null);
                     MainActivity.sortChanged = true;
                     SyncAdapter.syncImmediately(context);
                 }

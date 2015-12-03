@@ -9,7 +9,9 @@ import android.util.Log;
 
 import com.example.igorklimov.popularmoviesdemo.R;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract;
-import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieEntry;
+import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByPopularity;
+import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByReleaseDate;
+import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByVotes;
 import com.example.igorklimov.popularmoviesdemo.sync.SyncAdapter;
 
 import org.json.JSONArray;
@@ -130,44 +132,116 @@ public class Utility {
     }
 
     public static String getPoster(Cursor c) {
-        return c.getString(c.getColumnIndex(MovieEntry.COLUMN_POSTER));
+        return c.getString(c.getColumnIndex(MovieContract.COLUMN_POSTER));
     }
 
     public static String getGenres(Cursor c) {
-        return c.getString(c.getColumnIndex(MovieEntry.COLUMN_GENRES));
+        return c.getString(c.getColumnIndex(MovieContract.COLUMN_GENRES));
     }
 
     public static String getTitle(Cursor c) {
-        return c.getString(c.getColumnIndex(MovieEntry.COLUMN_TITLE));
+        return c.getString(c.getColumnIndex(MovieContract.COLUMN_TITLE));
     }
 
     public static String getReleaseDate(Cursor c) {
-        return c.getString(c.getColumnIndex(MovieEntry.COLUMN_RELEASE_DATE));
+        return c.getString(c.getColumnIndex(MovieContract.COLUMN_RELEASE_DATE));
     }
 
     public static String getVote(Cursor c) {
-        return c.getString(c.getColumnIndex(MovieEntry.COLUMN_AVERAGE_VOTE));
+        return c.getString(c.getColumnIndex(MovieContract.COLUMN_AVERAGE_VOTE));
     }
 
     public static String getPlot(Cursor c) {
-        return c.getString(c.getColumnIndex(MovieEntry.COLUMN_PLOT));
+        return c.getString(c.getColumnIndex(MovieContract.COLUMN_PLOT));
     }
 
     public static long getRowCountPreference(Context c) {
-        return PreferenceManager.getDefaultSharedPreferences(c).getLong(c.getString(R.string.row_count), 0);
+        String sortBy = getSortByPreference(c);
+        switch (sortBy) {
+            case "1":
+                return PreferenceManager.getDefaultSharedPreferences(c).getLong(c.getString(R.string.pop_row_count), 0);
+            case "2":
+                return PreferenceManager.getDefaultSharedPreferences(c).getLong(c.getString(R.string.release_row_count), 0);
+            default:
+                return PreferenceManager.getDefaultSharedPreferences(c).getLong(c.getString(R.string.votes_row_count), 0);
+        }
     }
 
     public static void updateRowCountPreference(Context c) {
-        Cursor query = c.getContentResolver().query(MovieEntry.CONTENT_URI, null, null, null, null);
+        Cursor query = c.getContentResolver().query(MovieByPopularity.CONTENT_URI, null, null, null, null);
         if (query != null) {
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
-            prefs.edit().putLong(c.getString(R.string.row_count),
-                    (Utility.getRowCountPreference(c) + query.getCount())).apply();
-            SyncAdapter.page = 1;
+            prefs.edit().putLong(c.getString(R.string.pop_row_count), (
+                    PreferenceManager.getDefaultSharedPreferences(c).getLong(c.getString(R.string.pop_row_count), 0)
+                            + query.getCount())).apply();
+            query.close();
+        }
+        query = c.getContentResolver().query(MovieByReleaseDate.CONTENT_URI, null, null, null, null);
+        if (query != null) {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
+            prefs.edit().putLong(c.getString(R.string.release_row_count), (
+                    PreferenceManager.getDefaultSharedPreferences(c).getLong(c.getString(R.string.release_row_count), 0)
+                            + query.getCount())).apply();
+            query.close();
+        }
+        query = c.getContentResolver().query(MovieByVotes.CONTENT_URI, null, null, null, null);
+        if (query != null) {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
+            prefs.edit().putLong(c.getString(R.string.votes_row_count), (
+                    PreferenceManager.getDefaultSharedPreferences(c).getLong(c.getString(R.string.votes_row_count), 0)
+                            + query.getCount())).apply();
             query.close();
         }
     }
 
+    public static String getSortByPreference(Context c) {
+        return PreferenceManager.getDefaultSharedPreferences(c).getString(c.getString(R.string.key_sort_types), "0");
+    }
+
+    public static Uri getContentUri(Context c) {
+        Uri contentUri;
+        switch (getSortByPreference(c)) {
+            case "1":
+                contentUri = MovieByPopularity.CONTENT_URI;
+                break;
+            case "2":
+                contentUri = MovieByReleaseDate.CONTENT_URI;
+                break;
+            case "3":
+                contentUri = MovieByVotes.CONTENT_URI;
+                break;
+            default:
+                throw new UnsupportedOperationException();
+        }
+
+        return contentUri;
+    }
+
+    public static int getPagePreference(Context c) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
+        switch (getSortByPreference(c)) {
+            case "1":
+                return prefs.getInt(c.getString(R.string.pop_page), 1);
+            case "2":
+                return prefs.getInt(c.getString(R.string.release_page), 1);
+            default:
+                return prefs.getInt(c.getString(R.string.votes_page), 1);
+        }
+    }
+
+    public static void incrementPage(Context c) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
+        switch (getSortByPreference(c)) {
+            case "1":
+                prefs.edit().putInt(c.getString(R.string.pop_page), (getPagePreference(c) + 1)).apply();
+                break;
+            case "2":
+                prefs.edit().putInt(c.getString(R.string.release_page), (getPagePreference(c) + 1)).apply();
+                break;
+            default:
+                prefs.edit().putInt(c.getString(R.string.votes_page), (getPagePreference(c) + 1)).apply();
+        }
+    }
 }
 
 

@@ -37,6 +37,7 @@ public class ScrollListener extends RecyclerView.OnScrollListener {
             }
         }
         if (!loading && (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)) {
+            Utility.incrementPage(context);
             Log.d("TAG", "onScrolled: RUNNING syncImmediately");
             SyncAdapter.syncImmediately(context);
             loading = true;

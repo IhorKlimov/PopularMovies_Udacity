@@ -15,6 +15,9 @@ import android.widget.ProgressBar;
 import com.example.igorklimov.popularmoviesdemo.R;
 import com.example.igorklimov.popularmoviesdemo.activities.MainActivity;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract;
+import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByPopularity;
+import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByReleaseDate;
+import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByVotes;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -84,7 +87,17 @@ public class CustomAdapter extends CursorRecyclerViewAdapter<CustomAdapter.ViewH
         public void onClick(View v) {
             MainActivity mainActivity = (MainActivity) CustomAdapter.context;
             long extra = Utility.getRowCountPreference(context);
-            Uri movieUri = MovieContract.MovieEntry.buildMovieUri(getAdapterPosition() + 1 + extra);
+            Uri movieUri;
+            switch (Utility.getSortByPreference(context)) {
+                case "1":
+                    movieUri = MovieByPopularity.buildMovieUri(getAdapterPosition() + 1 + extra);
+                    break;
+                case "2":
+                    movieUri = MovieByReleaseDate.buildMovieUri(getAdapterPosition() + 1 + extra);
+                    break;
+                default:
+                    movieUri = MovieByVotes.buildMovieUri(getAdapterPosition() + 1 + extra);
+            }
             Log.d("TAG", "onClick: " + movieUri);
             mainActivity.onItemClick(movieUri);
         }

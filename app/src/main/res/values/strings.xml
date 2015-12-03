@@ -5,7 +5,14 @@
     <string name="acc_sync_type">igorklimov.example.com</string>
     <string name="content_authority">com.example.igorklimov.popularmoviesdemo</string>
     <string name="last_update">last update</string>
-    <string name="row_count">row count</string>
+
+    <string name="pop_row_count">popular movies row count</string>
+    <string name="release_row_count">release movies row count</string>
+    <string name="votes_row_count">votes movies row count</string>
+
+    <string name="pop_page">popular movies page</string>
+    <string name="release_page">release movies page</string>
+    <string name="votes_page">votes movies page</string>
 
     <!-- Strings related to Settings -->
     <string name="action_settings">Settings</string>

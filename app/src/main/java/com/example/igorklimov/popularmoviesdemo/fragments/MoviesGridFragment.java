@@ -3,16 +3,15 @@ package com.example.igorklimov.popularmoviesdemo.fragments;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -46,16 +45,15 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
     }
 
     public void sortChanged() {
-
         getLoaderManager().restartLoader(LOADER, null, this);
         if (mainActivity.twoPane) selectFirstItem();
         listener.refresh();
+        recyclerView.smoothScrollToPosition(0);
     }
 
     private void selectFirstItem() {
 //            recyclerView.setItemChecked(0, true);
-        recyclerView.smoothScrollToPosition(0);
-        mainActivity.onItemClick(MovieContract.MovieEntry
+        mainActivity.onItemClick(MovieContract.MovieByPopularity
                 .buildMovieUri(Utility.getRowCountPreference(getActivity()) + 1));
     }
 
@@ -71,12 +69,12 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
                         .getConfiguration()
                         .orientation) == Configuration.ORIENTATION_PORTRAIT ? 2 : 3
         ));
-        Cursor cursor = getContext().getContentResolver()
-                .query(MovieContract.MovieEntry.CONTENT_URI, null, null, null, null);
-        if (cursor.getCount() == 0) {
+//        Cursor cursor = getContext().getContentResolver()
+//                .query(MovieContract.MovieByPopularity.CONTENT_URI, null, null, null, null);
+//        if (cursor.getCount() == 0) {
             SyncAdapter.syncImmediately(getActivity());
-        }
-        cursor.close();
+//        }
+//        cursor.close();
 
         listener = new ScrollListener(getActivity());
         recyclerView.addOnScrollListener(listener);
@@ -109,8 +107,8 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        return new CursorLoader(getActivity(),
-                MovieContract.MovieEntry.CONTENT_URI, null, null, null, null);
+        Uri contentUri = Utility.getContentUri(getContext());
+        return new CursorLoader(getActivity(), contentUri, null, null, null, null);
     }
 
     @Override
