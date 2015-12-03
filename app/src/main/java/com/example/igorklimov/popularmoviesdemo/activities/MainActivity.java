@@ -18,7 +18,6 @@ import com.example.igorklimov.popularmoviesdemo.sync.SyncAdapter;
 
 public class MainActivity extends AppCompatActivity {
     private static final String DETAILFRAGMENT_TAG = "DETAIL_FRAGMENT";
-//    public  boolean twoPane;
     public static boolean sortChanged = false;
 
     @Override

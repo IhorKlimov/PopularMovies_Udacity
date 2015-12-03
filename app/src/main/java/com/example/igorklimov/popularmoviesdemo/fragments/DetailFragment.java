@@ -45,7 +45,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private TextView voteView;
     private TextView plotView;
     private TextView genresView;
-
     //todo Add director, cast
     public DetailFragment() {
     }
@@ -70,9 +69,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 @Override
                 public void onScrollChanged() {
                     Log.d("TAG", "onScrollChanged: " + scroll.getY() + " " + scroll.getScrollY());
-                    if (scroll.getScrollY() >= heightPixels/8) {
+                    if (scroll.getScrollY() >= heightPixels / 8) {
                         actionBar.hide();
-                    }else if (scroll.getScrollY() < heightPixels/8) {
+                    } else if (scroll.getScrollY() < heightPixels / 8) {
                         actionBar.show();
                     }
                 }
@@ -86,6 +85,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 if (!fab.isActivated()) {
                     fab.setImageResource(android.R.drawable.btn_star_big_on);
                     fab.setActivated(true);
+                    // todo Add to Favorites
                 } else {
                     fab.setImageResource(android.R.drawable.btn_star_big_off);
                     fab.setActivated(false);
