@@ -14,12 +14,14 @@
     <string name="release_page">release movies page</string>
     <string name="votes_page">votes movies page</string>
 
+    <string name="is_two_pane">is two pane</string>
+
     <!-- Strings related to Settings -->
     <string name="action_settings">Settings</string>
     <string name="key_sort_types">key_sort_types</string>
 
     <!-- Titles-->
-    <string name="title_activity_detail">Details</string>
+    <string name="title_activity_detail"></string>
     <string name="title_activity_settings">Settings</string>
 
     <!-- Formatting-->

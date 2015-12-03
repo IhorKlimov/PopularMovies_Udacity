@@ -59,23 +59,23 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="64dp"
-                    android:paddingRight="16dp"
                     android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:paddingRight="16dp">
 
                     <TextView
                         android:id="@+id/genres"
+                        style="@style/TextCondensed34"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        style="@style/TextCondensed34" />
+                        android:layout_marginTop="16dp" />
 
                     <TextView
                         android:id="@+id/release_date"
+                        style="@style/TextCondensed34"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        style="@style/TextCondensed34" />
+                        android:layout_marginTop="8dp" />
 
                     <TextView
                         android:id="@+id/vote"
@@ -97,21 +97,22 @@
                     android:id="@+id/plot"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingLeft="16dp"
-                    android:paddingBottom="100dp"
                     android:fontFamily="sans-serif-light"
+                    android:paddingBottom="100dp"
+                    android:paddingLeft="16dp"
                     android:textSize="24sp" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>
 
     <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:layout_marginRight="16dp"
         android:layout_marginBottom="16dp"
+        android:layout_marginRight="16dp"
         android:src="@android:drawable/btn_star_big_off"
         app:elevation="4dp"
         app:fabSize="normal" />

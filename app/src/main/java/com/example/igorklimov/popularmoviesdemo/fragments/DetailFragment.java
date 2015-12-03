@@ -3,18 +3,25 @@ package com.example.igorklimov.popularmoviesdemo.fragments;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.example.igorklimov.popularmoviesdemo.R;
+import com.example.igorklimov.popularmoviesdemo.activities.MainActivity;
 import com.example.igorklimov.popularmoviesdemo.helpers.Utility;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
@@ -54,7 +61,37 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         voteView = (TextView) rootView.findViewById(R.id.vote);
         plotView = (TextView) rootView.findViewById(R.id.plot);
         genresView = (TextView) rootView.findViewById(R.id.genres);
+        final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
 
+        final ScrollView scroll = (ScrollView) rootView.findViewById(R.id.scrollView);
+        final int heightPixels = getContext().getResources().getDisplayMetrics().heightPixels;
+        if (actionBar != null && !Utility.isTwoPanePreference(getContext())) {
+            scroll.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
+                @Override
+                public void onScrollChanged() {
+                    Log.d("TAG", "onScrollChanged: " + scroll.getY() + " " + scroll.getScrollY());
+                    if (scroll.getScrollY() >= heightPixels/8) {
+                        actionBar.hide();
+                    }else if (scroll.getScrollY() < heightPixels/8) {
+                        actionBar.show();
+                    }
+                }
+            });
+        }
+
+        final FloatingActionButton fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!fab.isActivated()) {
+                    fab.setImageResource(android.R.drawable.btn_star_big_on);
+                    fab.setActivated(true);
+                } else {
+                    fab.setImageResource(android.R.drawable.btn_star_big_off);
+                    fab.setActivated(false);
+                }
+            }
+        });
         return rootView;
     }
 

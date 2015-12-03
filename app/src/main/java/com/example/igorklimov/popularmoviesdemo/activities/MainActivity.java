@@ -8,18 +8,17 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 
 import com.example.igorklimov.popularmoviesdemo.R;
-import com.example.igorklimov.popularmoviesdemo.data.MovieContract;
 import com.example.igorklimov.popularmoviesdemo.fragments.DetailFragment;
 import com.example.igorklimov.popularmoviesdemo.fragments.MoviesGridFragment;
+import com.example.igorklimov.popularmoviesdemo.helpers.Utility;
 import com.example.igorklimov.popularmoviesdemo.sync.SyncAdapter;
 
 public class MainActivity extends AppCompatActivity {
     private static final String DETAILFRAGMENT_TAG = "DETAIL_FRAGMENT";
-    public  boolean twoPane;
+//    public  boolean twoPane;
     public static boolean sortChanged = false;
 
     @Override
@@ -28,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         PreferenceManager.setDefaultValues(getApplication(), R.xml.pref_general, false);
         SyncAdapter.initializeSyncAdapter(this);
-        twoPane = findViewById(R.id.details_fragment) != null;
+        Utility.setIsTwoPanePreference(this, findViewById(R.id.details_fragment) != null);
     }
 
     @Override
@@ -53,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onItemClick(Uri movieUri) {
-        if (twoPane) {
+        if (Utility.isTwoPanePreference(this)) {
             int height = findViewById(R.id.details_fragment).getHeight();
             DetailFragment fragment = new DetailFragment();
             Bundle bundle = new Bundle();

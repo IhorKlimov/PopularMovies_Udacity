@@ -46,7 +46,7 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
 
     public void sortChanged() {
         getLoaderManager().restartLoader(LOADER, null, this);
-        if (mainActivity.twoPane) selectFirstItem();
+        if (Utility.isTwoPanePreference(getContext())) selectFirstItem();
         listener.refresh();
         recyclerView.smoothScrollToPosition(0);
     }
@@ -114,7 +114,7 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         customAdapter.swapCursor(cursor);
-        if (mainActivity.twoPane) {
+        if (Utility.isTwoPanePreference(getContext())) {
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {

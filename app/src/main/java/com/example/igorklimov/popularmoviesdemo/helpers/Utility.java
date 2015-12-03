@@ -8,6 +8,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.example.igorklimov.popularmoviesdemo.R;
+import com.example.igorklimov.popularmoviesdemo.activities.MainActivity;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByPopularity;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByReleaseDate;
@@ -242,6 +243,15 @@ public class Utility {
                 prefs.edit().putInt(c.getString(R.string.votes_page), (getPagePreference(c) + 1)).apply();
         }
     }
+
+    public static void setIsTwoPanePreference(Context c, boolean b) {
+        PreferenceManager.getDefaultSharedPreferences(c).edit().putBoolean(c.getString(R.string.is_two_pane), b).apply();
+    }
+
+    public static boolean isTwoPanePreference(Context c) {
+        return PreferenceManager.getDefaultSharedPreferences(c).getBoolean(c.getString(R.string.is_two_pane), false);
+    }
+
 }
 
 
