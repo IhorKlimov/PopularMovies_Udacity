@@ -1,6 +1,5 @@
 package com.example.igorklimov.popularmoviesdemo.fragments;
 
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
@@ -13,15 +12,11 @@ import android.support.v4.content.Loader;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.igorklimov.popularmoviesdemo.R;
 import com.example.igorklimov.popularmoviesdemo.activities.MainActivity;
-import com.example.igorklimov.popularmoviesdemo.activities.SettingsActivity;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract;
 import com.example.igorklimov.popularmoviesdemo.helpers.CustomAdapter;
 import com.example.igorklimov.popularmoviesdemo.helpers.ScrollListener;
@@ -41,7 +36,6 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
     }
 
     public void sortChanged() {
@@ -87,22 +81,6 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
         super.onActivityCreated(savedInstanceState);
         getLoaderManager().initLoader(LOADER, null, this);
         mainActivity = (MainActivity) getContext();
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.fragment_menu, menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.settings) {
-            Intent settings = new Intent(getActivity(), SettingsActivity.class);
-            startActivity(settings);
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override

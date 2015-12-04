@@ -118,7 +118,7 @@
         android:layout_alignParentRight="true"
         android:layout_marginBottom="16dp"
         android:layout_marginRight="16dp"
-        android:src="@android:drawable/btn_star_big_off"
+        android:src="@drawable/grade_24dp"
         app:elevation="4dp"
         app:fabSize="normal" />
 

@@ -1,5 +1,6 @@
 package com.example.igorklimov.popularmoviesdemo.helpers;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -8,12 +9,11 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.example.igorklimov.popularmoviesdemo.R;
-import com.example.igorklimov.popularmoviesdemo.activities.MainActivity;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract;
+import com.example.igorklimov.popularmoviesdemo.data.MovieContract.FavoriteMovie;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByPopularity;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByReleaseDate;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByVotes;
-import com.example.igorklimov.popularmoviesdemo.sync.SyncAdapter;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -23,21 +23,6 @@ import org.json.JSONObject;
  * Created by Igor Klimov on 11/27/2015.
  */
 public class Utility {
-
-    public static int[] getGenres(JSONObject jsonMovie) {
-        int[] genres = null;
-        try {
-            JSONArray jsonArray = jsonMovie.getJSONArray("genre_ids");
-            int length = jsonArray.length();
-            genres = new int[length];
-            for (int i = 0; i < length; i++) {
-                genres[i] = jsonArray.getInt(i);
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return genres;
-    }
 
     public static JSONObject[] getJsonMovies(String jsonResponse) {
         JSONObject[] jsonObjects = null;
@@ -55,6 +40,21 @@ public class Utility {
         }
 
         return jsonObjects;
+    }
+
+    public static int[] getGenres(JSONObject jsonMovie) {
+        int[] genres = null;
+        try {
+            JSONArray jsonArray = jsonMovie.getJSONArray("genre_ids");
+            int length = jsonArray.length();
+            genres = new int[length];
+            for (int i = 0; i < length; i++) {
+                genres[i] = jsonArray.getInt(i);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return genres;
     }
 
     public static String formatGenres(int[] genres) {
@@ -252,6 +252,30 @@ public class Utility {
         return PreferenceManager.getDefaultSharedPreferences(c).getBoolean(c.getString(R.string.is_two_pane), false);
     }
 
+    public static boolean isFavorite(Cursor cursor, Context context) {
+        String title = getTitle(cursor);
+        Log.d("TestDb", "isFavorite: " + title);
+        Cursor query = context.getContentResolver().query(FavoriteMovie.CONTENT_URI, null
+                , MovieContract.COLUMN_TITLE + "=?", new String[]{title}, null);
+        return query.getCount() != 0;
+    }
+
+    public static Uri addToFavorite(Cursor cursor, Context context) {
+        ContentValues values = new ContentValues();
+        values.put(MovieContract.COLUMN_TITLE, Utility.getTitle(cursor));
+        values.put(MovieContract.COLUMN_RELEASE_DATE, Utility.getReleaseDate(cursor));
+        values.put(MovieContract.COLUMN_POSTER, Utility.getPoster(cursor));
+        values.put(MovieContract.COLUMN_GENRES, Utility.getGenres(cursor));
+        values.put(MovieContract.COLUMN_AVERAGE_VOTE, Utility.getVote(cursor));
+        values.put(MovieContract.COLUMN_PLOT, Utility.getPlot(cursor));
+
+        return context.getContentResolver().insert(FavoriteMovie.CONTENT_URI, values);
+    }
+
+    public static int removeFromFavorite(Cursor cursor, Context context) {
+        return context.getContentResolver().delete(FavoriteMovie.CONTENT_URI,
+                MovieContract.COLUMN_TITLE + "=?", new String[]{getTitle(cursor)});
+    }
 }
 
 

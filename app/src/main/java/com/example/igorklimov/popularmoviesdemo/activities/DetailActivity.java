@@ -29,7 +29,6 @@ public class DetailActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
 
         }
-        Log.d(TAG, "onCreate: ");
     }
 
     @Override

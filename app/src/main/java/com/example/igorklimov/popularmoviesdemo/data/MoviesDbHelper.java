@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.example.igorklimov.popularmoviesdemo.data.MovieContract.FavoriteMovie;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByPopularity;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByReleaseDate;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByVotes;
@@ -14,7 +15,7 @@ import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByVotes;
  */
 public class MoviesDbHelper extends SQLiteOpenHelper {
 
-    public static final int DATABASE_VERSION = 3;
+    public static final int DATABASE_VERSION = 4;
     public static final String DATABASE_NAME = "Movies.db";
 
     public MoviesDbHelper(Context context) {
@@ -27,6 +28,7 @@ public class MoviesDbHelper extends SQLiteOpenHelper {
         db.execSQL(MovieByPopularity.SQL_CREATE_ENTRIES);
         db.execSQL(MovieByReleaseDate.SQL_CREATE_ENTRIES);
         db.execSQL(MovieByVotes.SQL_CREATE_ENTRIES);
+        db.execSQL(FavoriteMovie.SQL_CREATE_ENTRIES);
     }
 
     @Override
@@ -34,6 +36,7 @@ public class MoviesDbHelper extends SQLiteOpenHelper {
         db.execSQL(MovieByPopularity.SQL_DELETE_ENTRIES);
         db.execSQL(MovieByReleaseDate.SQL_DELETE_ENTRIES);
         db.execSQL(MovieByVotes.SQL_DELETE_ENTRIES);
+        db.execSQL(FavoriteMovie.SQL_DELETE_ENTRIES);
         onCreate(db);
     }
 

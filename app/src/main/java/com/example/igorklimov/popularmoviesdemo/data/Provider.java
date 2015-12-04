@@ -11,11 +11,13 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.example.igorklimov.popularmoviesdemo.data.MovieContract.FavoriteMovie;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByPopularity;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByReleaseDate;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByVotes;
 
 import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.CONTENT_AUTHORITY;
+import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.PATH_FAVORITE_MOVIE;
 import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.PATH_MOVIE_BY_POPULARITY;
 import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.PATH_MOVIE_BY_RELEASE_DATE;
 import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.PATH_MOVIE_BY_VOTES;
@@ -36,6 +38,9 @@ public class Provider extends ContentProvider {
     private static final int MOVIE_BY_RELEASE_DATE_WITH_ID = 201;
     private static final int MOVIE_BY_VOTES = 300;
     private static final int MOVIE_BY_VOTES_WITH_ID = 301;
+    private static final int FAVORITE_MOVIE = 400;
+    private static final int FAVORITE_MOVIE_WITH_ID = 401;
+
 
 //    static {
 //        queryBuilder = new SQLiteQueryBuilder();
@@ -80,18 +85,27 @@ public class Provider extends ContentProvider {
                         projection, selection, selectionArgs, null, null, sortOrder);
                 break;
             case MOVIE_BY_RELEASE_DATE_WITH_ID:
-                id = MovieByPopularity.getIdFromUri(uri);
+                id = MovieByReleaseDate.getIdFromUri(uri);
                 cursor = db.query(MovieByReleaseDate.TABLE_NAME, projection,
-                        MovieByPopularity._ID + "=?", new String[]{id}, null, null, sortOrder);
+                        MovieByReleaseDate._ID + "=?", new String[]{id}, null, null, sortOrder);
                 break;
             case MOVIE_BY_VOTES:
                 cursor = db.query(MovieByVotes.TABLE_NAME,
                         projection, selection, selectionArgs, null, null, sortOrder);
                 break;
             case MOVIE_BY_VOTES_WITH_ID:
-                id = MovieByPopularity.getIdFromUri(uri);
+                id = MovieByVotes.getIdFromUri(uri);
                 cursor = db.query(MovieByVotes.TABLE_NAME, projection,
-                        MovieByPopularity._ID + "=?", new String[]{id}, null, null, sortOrder);
+                        MovieByVotes._ID + "=?", new String[]{id}, null, null, sortOrder);
+                break;
+            case FAVORITE_MOVIE:
+                cursor = db.query(FavoriteMovie.TABLE_NAME,
+                        projection, selection, selectionArgs, null, null, sortOrder);
+                break;
+            case FAVORITE_MOVIE_WITH_ID:
+                id = FavoriteMovie.getIdFromUri(uri);
+                cursor = db.query(FavoriteMovie.TABLE_NAME, projection,
+                        FavoriteMovie._ID + "=?", new String[]{id}, null, null, sortOrder);
                 break;
             default:
                 throw new UnsupportedOperationException();
@@ -118,6 +132,10 @@ public class Provider extends ContentProvider {
             case MOVIE_BY_VOTES:
                 insert = db.insert(MovieByVotes.TABLE_NAME, null, values);
                 result = MovieByVotes.buildMovieUri(insert);
+                break;
+            case FAVORITE_MOVIE:
+                insert = db.insert(FavoriteMovie.TABLE_NAME, null, values);
+                result = FavoriteMovie.buildMovieUri(insert);
                 break;
             default:
                 throw new UnsupportedOperationException();
@@ -167,6 +185,18 @@ public class Provider extends ContentProvider {
                     db.endTransaction();
                 }
                 break;
+            case FAVORITE_MOVIE:
+                db.beginTransaction();
+                try {
+                    for (ContentValues value : values) {
+                        long insert = db.insert(FavoriteMovie.TABLE_NAME, null, value);
+                        if (insert != -1) inserted++;
+                    }
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                }
+                break;
             default:
                 throw new UnsupportedOperationException();
         }
@@ -192,15 +222,22 @@ public class Provider extends ContentProvider {
                 deleted = db.delete(MovieByReleaseDate.TABLE_NAME, selection, selectionArgs);
                 break;
             case MOVIE_BY_RELEASE_DATE_WITH_ID:
-                id = MovieByPopularity.getIdFromUri(uri);
-                deleted = db.delete(MovieByReleaseDate.TABLE_NAME, MovieByPopularity._ID + "=?", new String[]{id});
+                id = MovieByReleaseDate.getIdFromUri(uri);
+                deleted = db.delete(MovieByReleaseDate.TABLE_NAME, MovieByReleaseDate._ID + "=?", new String[]{id});
                 break;
             case MOVIE_BY_VOTES:
                 deleted = db.delete(MovieByVotes.TABLE_NAME, selection, selectionArgs);
                 break;
             case MOVIE_BY_VOTES_WITH_ID:
-                id = MovieByPopularity.getIdFromUri(uri);
-                deleted = db.delete(MovieByVotes.TABLE_NAME, MovieByPopularity._ID + "=?", new String[]{id});
+                id = MovieByVotes.getIdFromUri(uri);
+                deleted = db.delete(MovieByVotes.TABLE_NAME, MovieByVotes._ID + "=?", new String[]{id});
+                break;
+            case FAVORITE_MOVIE:
+                deleted = db.delete(FavoriteMovie.TABLE_NAME, selection, selectionArgs);
+                break;
+            case FAVORITE_MOVIE_WITH_ID:
+                id = FavoriteMovie.getIdFromUri(uri);
+                deleted = db.delete(FavoriteMovie.TABLE_NAME, FavoriteMovie._ID + "=?", new String[]{id});
                 break;
             default:
                 throw new UnsupportedOperationException();
@@ -222,6 +259,8 @@ public class Provider extends ContentProvider {
         uriMatcher.addURI(CONTENT_AUTHORITY, PATH_MOVIE_BY_RELEASE_DATE + "/#", MOVIE_BY_RELEASE_DATE_WITH_ID);
         uriMatcher.addURI(CONTENT_AUTHORITY, PATH_MOVIE_BY_VOTES, MOVIE_BY_VOTES);
         uriMatcher.addURI(CONTENT_AUTHORITY, PATH_MOVIE_BY_VOTES + "/#", MOVIE_BY_VOTES_WITH_ID);
+        uriMatcher.addURI(CONTENT_AUTHORITY, PATH_FAVORITE_MOVIE, FAVORITE_MOVIE);
+        uriMatcher.addURI(CONTENT_AUTHORITY, PATH_FAVORITE_MOVIE + "/#", FAVORITE_MOVIE_WITH_ID);
 
         return uriMatcher;
     }

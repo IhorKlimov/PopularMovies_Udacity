@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:adnroid="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/tools">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/action_discover"
+            android:checked="true"
+            android:icon="@drawable/ic_movie_24dp"
+            android:title="@string/action_discover" />
+        <item
+            android:id="@+id/action_favorites"
+            android:icon="@drawable/grade_24dp"
+            android:title="@string/action_favorites" />
+    </group>
+
+    <item android:title="@string/general">
+        <menu>
+            <item
+                android:id="@+id/settings"
+                android:icon="@drawable/ic_settings_24dp"
+                android:title="@string/action_settings" />
+        </menu>
+    </item>
+
+</menu>

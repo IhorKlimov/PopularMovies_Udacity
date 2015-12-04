@@ -14,6 +14,7 @@ public final class MovieContract {
     public static final String PATH_MOVIE_BY_POPULARITY ="movie_by_popularity";
     public static final String PATH_MOVIE_BY_RELEASE_DATE = "movie_by_release_date";
     public static final String PATH_MOVIE_BY_VOTES = "movie_by_votes";
+    public static final String PATH_FAVORITE_MOVIE = "favorite_movie";
 
     public static final String COLUMN_TITLE = "title";
     public static final String COLUMN_POSTER = "poster";
@@ -103,6 +104,34 @@ public final class MovieContract {
 
         public static final Uri CONTENT_URI =
                 BASE_CONTENT_URI.buildUpon().appendPath(PATH_MOVIE_BY_VOTES).build();
+
+        public static Uri buildMovieUri(long id) {
+            return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
+
+        public static String getIdFromUri(Uri uri) {
+            return uri.getPathSegments().get(1);
+        }
+    }
+
+    public static abstract class FavoriteMovie implements BaseColumns {
+        public static final String TABLE_NAME = "favorite_movie";
+
+        public static final String SQL_CREATE_ENTRIES =
+                "CREATE TABLE " + TABLE_NAME + " ("
+                        + FavoriteMovie._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                        + COLUMN_TITLE + TEXT_TYPE + NOT_NULL + COMA_SEP
+                        + COLUMN_POSTER + TEXT_TYPE + NOT_NULL + COMA_SEP
+                        + COLUMN_RELEASE_DATE + TEXT_TYPE + COMA_SEP
+                        + COLUMN_GENRES + TEXT_TYPE + COMA_SEP
+                        + COLUMN_AVERAGE_VOTE + TEXT_TYPE + COMA_SEP
+                        + COLUMN_PLOT + TEXT_TYPE + ");";
+
+        public static final String SQL_DELETE_ENTRIES =
+                "DROP TABLE IF EXISTS " + TABLE_NAME + ";";
+
+        public static final Uri CONTENT_URI =
+                BASE_CONTENT_URI.buildUpon().appendPath(PATH_FAVORITE_MOVIE).build();
 
         public static Uri buildMovieUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);

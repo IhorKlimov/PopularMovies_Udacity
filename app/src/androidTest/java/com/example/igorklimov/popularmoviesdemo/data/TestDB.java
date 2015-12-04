@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
+import com.example.igorklimov.popularmoviesdemo.data.MovieContract.FavoriteMovie;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByPopularity;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByReleaseDate;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByVotes;
@@ -152,7 +153,7 @@ public class TestDB extends AndroidTestCase {
 //    }
 
     public void testBulkInsert() {
-//        mContext.deleteDatabase(MoviesDbHelper.DATABASE_NAME);
+        mContext.deleteDatabase(MoviesDbHelper.DATABASE_NAME);
         ContentResolver contentResolver = mContext.getContentResolver();
 //        ArrayList<ContentValues> values = new ArrayList<>();
 
@@ -168,25 +169,43 @@ public class TestDB extends AndroidTestCase {
         Cursor cursor = contentResolver.query(MovieByPopularity.CONTENT_URI, null, null, null, null);
         assertTrue(cursor != null);
         assertTrue(cursor.getCount() > 0);
-        Log.d(LOG_TAG, "testBulkInsert: " + insert);
-        Log.d(LOG_TAG, "testBulkInsert: MovieByPopularity cursor count: " + cursor.getCount());
+//        Log.d(LOG_TAG, "testBulkInsert: " + insert);
+//        Log.d(LOG_TAG, "testBulkInsert: MovieByPopularity cursor count: " + cursor.getCount());
         cursor.close();
 
         Uri insert2 = contentResolver.insert(MovieByReleaseDate.CONTENT_URI, value1);
         Cursor cursor2 = contentResolver.query(MovieByReleaseDate.CONTENT_URI, null, null, null, null);
         assertTrue(cursor2 != null);
         assertTrue(cursor2.getCount() > 0);
-        Log.d(LOG_TAG, "testBulkInsert: " + insert2);
-        Log.d(LOG_TAG, "testBulkInsert: MovieByReleaseDate cursor count: " + cursor2.getCount());
+//        Log.d(LOG_TAG, "testBulkInsert: " + insert2);
+//        Log.d(LOG_TAG, "testBulkInsert: MovieByReleaseDate cursor count: " + cursor2.getCount());
         cursor2.close();
 
         Uri insert3 = contentResolver.insert(MovieByVotes.CONTENT_URI, value1);
         Cursor cursor3 = contentResolver.query(MovieByVotes.CONTENT_URI, null, null, null, null);
         assertTrue(cursor3 != null);
+        assertTrue(cursor3.moveToFirst());
         assertTrue(cursor3.getCount() > 0);
-        Log.d(LOG_TAG, "testBulkInsert: " + insert3);
-        Log.d(LOG_TAG, "testBulkInsert: MovieByVotes cursor count: " + cursor3.getCount());
-        cursor3.close();
+        assertTrue(!Utility.isFavorite(cursor3, mContext));
+//        Log.d(LOG_TAG, "testBulkInsert: " + insert3);
+//        Log.d(LOG_TAG, "testBulkInsert: MovieByVotes cursor count: " + cursor3.getCount());
+
+        Uri insert1 = contentResolver.insert(FavoriteMovie.CONTENT_URI, value1);
+        Log.d(LOG_TAG, "testBulkInsert: " + insert1);
+        Cursor query = contentResolver.query(FavoriteMovie.CONTENT_URI, null, null, null, null);
+        assertTrue(query != null);
+        assertTrue(query.moveToFirst());
+        Log.d(LOG_TAG, "testBulkInsert: count: " + query.getCount());
+        query.close();
+
+//        Cursor query1 = contentResolver.query(FavoriteMovie.CONTENT_URI, null, MovieContract.COLUMN_TITLE + "=?",
+//                new String[]{Utility.getTitle(cursor3)}, null);
+//        assertTrue(query1 !=null);
+//        assertTrue(query1.moveToFirst());
+//        Log.d(LOG_TAG, "testBulkInsert: " + query1.getCount());
+//        query1.close();
+
+        assertTrue(Utility.isFavorite(cursor3,mContext));
     }
 
 }

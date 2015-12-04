@@ -9,7 +9,6 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,9 +18,9 @@ import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.igorklimov.popularmoviesdemo.R;
-import com.example.igorklimov.popularmoviesdemo.activities.MainActivity;
 import com.example.igorklimov.popularmoviesdemo.helpers.Utility;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
@@ -32,19 +31,22 @@ import java.util.Locale;
 
 public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
+    private Cursor cursor;
     private View rootView;
     private static int fragmentHeight;
 
     private static final SimpleDateFormat initialFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
     private static final SimpleDateFormat monthYearFormat = new SimpleDateFormat("MMMM, yyyy", Locale.US);
-    private static final int DETAIL_LOADER = 300;
 
+    private static final int DETAIL_LOADER = 300;
     private ImageView posterView;
     private TextView titleView;
     private TextView releaseDateView;
     private TextView voteView;
     private TextView plotView;
+
     private TextView genresView;
+    private FloatingActionButton fab;
 
     //todo Add director, cast
     public DetailFragment() {
@@ -70,23 +72,29 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 @Override
                 public void onScrollChanged() {
                     Log.d("TAG", "onScrollChanged: " + scroll.getY() + " " + scroll.getScrollY());
-                    if (scroll.getScrollY() >= heightPixels/8) {
+                    if (scroll.getScrollY() >= heightPixels / 14) {
                         actionBar.hide();
-                    }else if (scroll.getScrollY() < heightPixels/8) {
+                    } else if (scroll.getScrollY() < heightPixels / 14) {
                         actionBar.show();
                     }
                 }
             });
         }
 
-        final FloatingActionButton fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
+        fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!fab.isActivated()) {
                     fab.setImageResource(android.R.drawable.btn_star_big_on);
+                    Uri insert = Utility.addToFavorite(cursor, getContext());
+                    Toast.makeText(getActivity(), "Added to Favorites", Toast.LENGTH_SHORT).show();
+                    Log.d("TAG", "onClick: inserted " + insert);
                     fab.setActivated(true);
                 } else {
+                    int delete = Utility.removeFromFavorite(cursor, getContext());
+                    Log.d("TAG", "onClick: delete " + delete);
+                    Toast.makeText(getActivity(), "Removed from Favorites", Toast.LENGTH_SHORT).show();
                     fab.setImageResource(android.R.drawable.btn_star_big_off);
                     fab.setActivated(false);
                 }
@@ -99,18 +107,15 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         getLoaderManager().initLoader(DETAIL_LOADER, null, this);
-        Log.d("TAG", "onActivityCreated: INIT LOADER");
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Uri movieUri = getActivity().getIntent().getData();
         if (movieUri != null) {
-            Log.d("TAG", "onCreateLoader: ------------------");
             fragmentHeight = this.getResources().getDisplayMetrics().heightPixels;
             return new CursorLoader(getActivity(), movieUri, null, null, null, null);
         } else {
-            Log.d("TAG", "onCreateLoader: ------------------");
             Bundle arguments = getArguments();
             movieUri = arguments.getParcelable("movie");
             fragmentHeight = arguments.getInt("fragmentHeight");
@@ -121,14 +126,18 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         int minHeight = fragmentHeight / 3;
-        int minWidth = (int) (((double) minHeight / 513) * 342);
+        int minWidth = (int) (((double) minHeight / 278) * 185);
 
         posterView.setMinimumWidth(minWidth);
         posterView.setMinimumHeight(minHeight);
         if (data.moveToFirst()) {
-            Log.d("TAG", "onLoadFinished: ");
+            cursor = data;
+            if (Utility.isFavorite(data, getContext())) {
+                fab.setImageResource(android.R.drawable.btn_star_big_on);
+                fab.setActivated(true);
+            }
             Picasso.with(getActivity())
-                    .load(Utility.getPoster(data).replace("w185", "w342"))
+                    .load(Utility.getPoster(data))
                     .resize(minWidth, minHeight)
                     .into(posterView, new Callback() {
                         @Override
