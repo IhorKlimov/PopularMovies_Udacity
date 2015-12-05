@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:adnroid="http://schemas.android.com/apk/res-auto"
-    xmlns:app="http://schemas.android.com/tools">
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/action_discover"
+            android:id="@+id/by_popularity"
             android:checked="true"
-            android:icon="@drawable/ic_movie_24dp"
-            android:title="@string/action_discover" />
+            android:title="@string/by_popularity"
+            android:icon="@drawable/ic_thumb_up_24dp"/>
+
+        <item
+            android:id="@+id/by_release_date"
+            android:title="@string/by_release_date"
+            android:icon="@drawable/ic_today_24dp"/>
+
+        <item
+            android:id="@+id/by_votes"
+            android:title="@string/by_votes"
+            android:icon="@drawable/ic_assessment_24dp"/>
+
         <item
             android:id="@+id/action_favorites"
-            android:icon="@drawable/grade_24dp"
+            android:icon="@drawable/star_on"
             android:title="@string/action_favorites" />
     </group>
-
-    <item android:title="@string/general">
-        <menu>
-            <item
-                android:id="@+id/settings"
-                android:icon="@drawable/ic_settings_24dp"
-                android:title="@string/action_settings" />
-        </menu>
-    </item>
 
 </menu>

@@ -156,15 +156,14 @@ public class Utility {
         return c.getString(c.getColumnIndex(MovieContract.COLUMN_PLOT));
     }
 
-    public static long getRowCountPreference(Context c) {
-        String sortBy = getSortByPreference(c);
-        switch (sortBy) {
-            case "1":
-                return PreferenceManager.getDefaultSharedPreferences(c).getLong(c.getString(R.string.pop_row_count), 0);
-            case "2":
-                return PreferenceManager.getDefaultSharedPreferences(c).getLong(c.getString(R.string.release_row_count), 0);
+    public static int getRowCountPreference(Context c) {
+        switch (getSortByPreference(c)) {
+            case 1:
+                return PreferenceManager.getDefaultSharedPreferences(c).getInt(c.getString(R.string.pop_row_count), 0);
+            case 2:
+                return PreferenceManager.getDefaultSharedPreferences(c).getInt(c.getString(R.string.release_row_count), 0);
             default:
-                return PreferenceManager.getDefaultSharedPreferences(c).getLong(c.getString(R.string.votes_row_count), 0);
+                return PreferenceManager.getDefaultSharedPreferences(c).getInt(c.getString(R.string.votes_row_count), 0);
         }
     }
 
@@ -172,44 +171,66 @@ public class Utility {
         Cursor query = c.getContentResolver().query(MovieByPopularity.CONTENT_URI, null, null, null, null);
         if (query != null) {
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
-            prefs.edit().putLong(c.getString(R.string.pop_row_count), (
-                    PreferenceManager.getDefaultSharedPreferences(c).getLong(c.getString(R.string.pop_row_count), 0)
+            prefs.edit().putInt(c.getString(R.string.pop_row_count), (
+                    PreferenceManager.getDefaultSharedPreferences(c).getInt(c.getString(R.string.pop_row_count), 0)
                             + query.getCount())).apply();
             query.close();
         }
         query = c.getContentResolver().query(MovieByReleaseDate.CONTENT_URI, null, null, null, null);
         if (query != null) {
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
-            prefs.edit().putLong(c.getString(R.string.release_row_count), (
-                    PreferenceManager.getDefaultSharedPreferences(c).getLong(c.getString(R.string.release_row_count), 0)
+            prefs.edit().putInt(c.getString(R.string.release_row_count), (
+                    PreferenceManager.getDefaultSharedPreferences(c).getInt(c.getString(R.string.release_row_count), 0)
                             + query.getCount())).apply();
             query.close();
         }
         query = c.getContentResolver().query(MovieByVotes.CONTENT_URI, null, null, null, null);
         if (query != null) {
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
-            prefs.edit().putLong(c.getString(R.string.votes_row_count), (
-                    PreferenceManager.getDefaultSharedPreferences(c).getLong(c.getString(R.string.votes_row_count), 0)
+            prefs.edit().putInt(c.getString(R.string.votes_row_count), (
+                    PreferenceManager.getDefaultSharedPreferences(c).getInt(c.getString(R.string.votes_row_count), 0)
                             + query.getCount())).apply();
             query.close();
         }
     }
 
-    public static String getSortByPreference(Context c) {
-        return PreferenceManager.getDefaultSharedPreferences(c).getString(c.getString(R.string.key_sort_types), "0");
+    public static void setFavoritesRowCountPreference(Context c, int value) {
+        Cursor query = c.getContentResolver().query(FavoriteMovie.CONTENT_URI, null, null, null, null);
+        if (query != null) {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
+            prefs.edit().putInt(c.getString(R.string.favorite_row_count), (
+                    PreferenceManager.getDefaultSharedPreferences(c).getInt(c.getString(R.string.favorite_row_count), 0)
+                            + value)).apply();
+            query.close();
+        }
+    }
+
+    public static int getFavoritesRowCountPreference(Context c) {
+        return PreferenceManager.getDefaultSharedPreferences(c).getInt(c.getString(R.string.favorite_row_count), 0);
+    }
+
+    public static int getSortByPreference(Context c) {
+        return PreferenceManager.getDefaultSharedPreferences(c).getInt(c.getString(R.string.key_sort_types), 1);
+    }
+
+    public static void setSortByPreference(Context c, int value) {
+        PreferenceManager.getDefaultSharedPreferences(c).edit().putInt(c.getString(R.string.key_sort_types), value).apply();
     }
 
     public static Uri getContentUri(Context c) {
         Uri contentUri;
         switch (getSortByPreference(c)) {
-            case "1":
+            case 1:
                 contentUri = MovieByPopularity.CONTENT_URI;
                 break;
-            case "2":
+            case 2:
                 contentUri = MovieByReleaseDate.CONTENT_URI;
                 break;
-            case "3":
+            case 3:
                 contentUri = MovieByVotes.CONTENT_URI;
+                break;
+            case 4:
+                contentUri = FavoriteMovie.CONTENT_URI;
                 break;
             default:
                 throw new UnsupportedOperationException();
@@ -221,9 +242,9 @@ public class Utility {
     public static int getPagePreference(Context c) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
         switch (getSortByPreference(c)) {
-            case "1":
+            case 1:
                 return prefs.getInt(c.getString(R.string.pop_page), 1);
-            case "2":
+            case 2:
                 return prefs.getInt(c.getString(R.string.release_page), 1);
             default:
                 return prefs.getInt(c.getString(R.string.votes_page), 1);
@@ -233,10 +254,10 @@ public class Utility {
     public static void incrementPage(Context c) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
         switch (getSortByPreference(c)) {
-            case "1":
+            case 1:
                 prefs.edit().putInt(c.getString(R.string.pop_page), (getPagePreference(c) + 1)).apply();
                 break;
-            case "2":
+            case 2:
                 prefs.edit().putInt(c.getString(R.string.release_page), (getPagePreference(c) + 1)).apply();
                 break;
             default:
@@ -262,6 +283,8 @@ public class Utility {
 
     public static Uri addToFavorite(Cursor cursor, Context context) {
         ContentValues values = new ContentValues();
+        setFavoritesRowCountPreference(context, 1);
+        values.put(FavoriteMovie._ID, getFavoritesRowCountPreference(context));
         values.put(MovieContract.COLUMN_TITLE, Utility.getTitle(cursor));
         values.put(MovieContract.COLUMN_RELEASE_DATE, Utility.getReleaseDate(cursor));
         values.put(MovieContract.COLUMN_POSTER, Utility.getPoster(cursor));
@@ -273,9 +296,11 @@ public class Utility {
     }
 
     public static int removeFromFavorite(Cursor cursor, Context context) {
+        setFavoritesRowCountPreference(context, -1);
         return context.getContentResolver().delete(FavoriteMovie.CONTENT_URI,
                 MovieContract.COLUMN_TITLE + "=?", new String[]{getTitle(cursor)});
     }
+
 }
 
 

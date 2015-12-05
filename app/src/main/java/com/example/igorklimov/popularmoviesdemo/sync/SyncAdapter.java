@@ -63,7 +63,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private final static String RELEASE_DATE_DESC = "release_date.desc&vote_count.gte=10&vote_average.gte=7&release_date.lte=";
     private final static String VOTE_AVG_DESC = "vote_average.desc&vote_count.gte=1000";
 
-//    public static int page = 1;
+    //    public static int page = 1;
     private Context context;
     private String JsonResponse;
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd", Locale.US);
@@ -127,106 +127,109 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private void getData() {
+        int sortByPreference = Utility.getSortByPreference(context);
         HttpURLConnection connection = null;
         InputStream input = null;
         BufferedReader reader = null;
         Uri contentUri = null;
 
-        String sortType = Utility.getSortByPreference(context);
-        switch (sortType) {
-            case "1":
-                sortType = POPULARITY_DESC;
-                contentUri = MovieContract.MovieByPopularity.CONTENT_URI;
-                break;
-            case "2":
-                String twoWeeksAhead = DATE_FORMAT
-                        .format(new Date(System.currentTimeMillis() + 1_296_000_000));
-                sortType = RELEASE_DATE_DESC + twoWeeksAhead;
-                contentUri = MovieContract.MovieByReleaseDate.CONTENT_URI;
-                break;
-            case "3":
-                sortType = VOTE_AVG_DESC;
-                contentUri = MovieContract.MovieByVotes.CONTENT_URI;
-                break;
-        }
+        if (sortByPreference != 4) {
+            String sortType = null;
+            switch (sortByPreference) {
+                case 1:
+                    sortType = POPULARITY_DESC;
+                    contentUri = MovieContract.MovieByPopularity.CONTENT_URI;
+                    break;
+                case 2:
+                    String twoWeeksAhead = DATE_FORMAT
+                            .format(new Date(System.currentTimeMillis() + 1_296_000_000));
+                    sortType = RELEASE_DATE_DESC + twoWeeksAhead;
+                    contentUri = MovieContract.MovieByReleaseDate.CONTENT_URI;
+                    break;
+                case 3:
+                    sortType = VOTE_AVG_DESC;
+                    contentUri = MovieContract.MovieByVotes.CONTENT_URI;
+                    break;
+            }
 
-        Cursor cursor = mContentResolver.query(contentUri, null, null, null, null);
+            Cursor cursor = mContentResolver.query(contentUri, null, null, null, null);
 //        if (!(cursor.getCount() < page * 20)) page = cursor.getCount() / 20 + 1;
-        int page = Utility.getPagePreference(context);
-        Log.d("TAG", "onPerformSync: cursorCount " + cursor.getCount() + " page: " + page);
-        if (cursor.getCount() < page * 20) {
-            try {
-                URL url = new URL(DISCOVER_MOVIES + SORT_BY + sortType + PAGE + page + API_KEY);
-                Log.d("TAG", "Getting more data from server");
-                Log.d("TAG", url.toString());
-                connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestMethod("GET");
-                connection.connect();
-                input = connection.getInputStream();
-                StringBuilder builder = new StringBuilder();
+            int page = Utility.getPagePreference(context);
+            Log.d("TAG", "onPerformSync: cursorCount " + cursor.getCount() + " page: " + page);
+            if (cursor.getCount() < page * 20) {
+                try {
+                    URL url = new URL(DISCOVER_MOVIES + SORT_BY + sortType + PAGE + page + API_KEY);
+                    Log.d("TAG", "Getting more data from server");
+                    Log.d("TAG", url.toString());
+                    connection = (HttpURLConnection) url.openConnection();
+                    connection.setRequestMethod("GET");
+                    connection.connect();
+                    input = connection.getInputStream();
+                    StringBuilder builder = new StringBuilder();
 
-                if (input != null) {
-                    reader = new BufferedReader(new InputStreamReader(input));
-                    String line;
+                    if (input != null) {
+                        reader = new BufferedReader(new InputStreamReader(input));
+                        String line;
 
-                    while ((line = reader.readLine()) != null) {
-                        builder.append(line).append("\n");
+                        while ((line = reader.readLine()) != null) {
+                            builder.append(line).append("\n");
+                        }
+                        JsonResponse = builder.toString();
                     }
-                    JsonResponse = builder.toString();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                if (connection != null) {
-                    connection.disconnect();
-                }
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    if (connection != null) {
+                        connection.disconnect();
+                    }
+                    if (reader != null) {
+                        try {
+                            reader.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    if (input != null) {
+                        try {
+                            input.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
-                if (input != null) {
-                    try {
-                        input.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+
+                try {
+                    JSONObject[] JsonMovies = getJsonMovies(JsonResponse);
+                    Log.d("TAG", "INSERTING EXTRA DATA");
+                    //                Utility.incrementPage(context);
+                    ArrayList<ContentValues> arrayOfValues = new ArrayList<>();
+                    for (JSONObject jsonMovie : JsonMovies) {
+                        String poster = IMAGE_BASE + W_185 + jsonMovie.getString("poster_path");
+                        String title = jsonMovie.getString("title");
+                        String releaseDate = jsonMovie.getString("release_date");
+                        String vote = jsonMovie.getString("vote_average");
+                        String plot = jsonMovie.getString("overview");
+                        String genres = Utility.formatGenres(getGenres(jsonMovie));
+
+                        ContentValues values = new ContentValues();
+                        values.put(COLUMN_TITLE, title);
+                        values.put(COLUMN_POSTER, poster);
+                        values.put(COLUMN_RELEASE_DATE, releaseDate);
+                        values.put(COLUMN_GENRES, genres);
+                        values.put(COLUMN_AVERAGE_VOTE, vote);
+                        values.put(COLUMN_PLOT, plot);
+
+                        arrayOfValues.add(values);
                     }
+                    ContentValues[] contentValues = arrayOfValues.toArray(new ContentValues[arrayOfValues.size()]);
+                    int bulkInsert = mContentResolver.bulkInsert(contentUri, contentValues);
+                    Log.d("TAG", "onPerformSync: bulkInsert " + bulkInsert);
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
             }
-
-            try {
-                JSONObject[] JsonMovies = getJsonMovies(JsonResponse);
-                Log.d("TAG", "INSERTING EXTRA DATA");
-//                Utility.incrementPage(context);
-                ArrayList<ContentValues> arrayOfValues = new ArrayList<>();
-                for (JSONObject jsonMovie : JsonMovies) {
-                    String poster = IMAGE_BASE + W_185 + jsonMovie.getString("poster_path");
-                    String title = jsonMovie.getString("title");
-                    String releaseDate = jsonMovie.getString("release_date");
-                    String vote = jsonMovie.getString("vote_average");
-                    String plot = jsonMovie.getString("overview");
-                    String genres = Utility.formatGenres(getGenres(jsonMovie));
-
-                    ContentValues values = new ContentValues();
-                    values.put(COLUMN_TITLE, title);
-                    values.put(COLUMN_POSTER, poster);
-                    values.put(COLUMN_RELEASE_DATE, releaseDate);
-                    values.put(COLUMN_GENRES, genres);
-                    values.put(COLUMN_AVERAGE_VOTE, vote);
-                    values.put(COLUMN_PLOT, plot);
-
-                    arrayOfValues.add(values);
-                }
-                ContentValues[] contentValues = arrayOfValues.toArray(new ContentValues[arrayOfValues.size()]);
-                int bulkInsert = mContentResolver.bulkInsert(contentUri, contentValues);
-                Log.d("TAG", "onPerformSync: bulkInsert " + bulkInsert);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            cursor.close();
         }
-        cursor.close();
     }
 
     /**

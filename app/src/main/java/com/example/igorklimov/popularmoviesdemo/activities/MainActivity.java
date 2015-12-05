@@ -11,6 +11,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 
 import com.example.igorklimov.popularmoviesdemo.R;
@@ -32,7 +33,7 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        PreferenceManager.setDefaultValues(getApplication(), R.xml.pref_general, false);
+        Utility.setSortByPreference(this, 1);
         SyncAdapter.initializeSyncAdapter(this);
         Utility.setIsTwoPanePreference(this, findViewById(R.id.details_fragment) != null);
 
@@ -45,22 +46,27 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setItemIconTintList(null);
+        navigationView.setItemTextColor(null);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         if (sortChanged) {
-            MoviesGridFragment ff = (MoviesGridFragment) getSupportFragmentManager().findFragmentById(R.id.movies_view);
-            if (null != ff) {
-                ff.sortChanged();
-            }
-            DetailFragment df = (DetailFragment) getSupportFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG);
-            if (null != df) {
-                df.sortChanged();
-            }
-            sortChanged = false;
+            reload();
         }
+    }
+
+    private void reload() {
+        MoviesGridFragment mf = (MoviesGridFragment) getSupportFragmentManager().findFragmentById(R.id.movies_view);
+        if (null != mf) {
+            mf.sortChanged();
+        }
+        DetailFragment df = (DetailFragment) getSupportFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG);
+        if (null != df) {
+            df.sortChanged();
+        }
+        sortChanged = false;
     }
 
     public void onItemClick(Uri movieUri) {
@@ -90,32 +96,29 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        getMenuInflater().inflate(R.menu.main_menu, menu);
-//        return true;
-//    }
-//
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        int id = item.getItemId();
-//        if (id == R.id.settings) {
-//            Intent settings = new Intent(this, SettingsActivity.class);
-//            startActivity(settings);
-//            return true;
-//        }
-//        return super.onOptionsItemSelected(item);
-//    }
-
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        if (id == R.id.settings) {
-            Intent settings = new Intent(this, SettingsActivity.class);
-            startActivity(settings);
-            return true;
+        switch (item.getItemId()) {
+            case R.id.by_popularity:
+                Utility.setSortByPreference(this, 1);
+                SyncAdapter.syncImmediately(this);
+                reload();
+                break;
+            case R.id.by_release_date:
+                Utility.setSortByPreference(this, 2);
+                SyncAdapter.syncImmediately(this);
+                reload();
+                break;
+            case R.id.by_votes:
+                Utility.setSortByPreference(this, 3);
+                SyncAdapter.syncImmediately(this);
+                reload();
+                break;
+            case R.id.action_favorites:
+                Utility.setSortByPreference(this, 4);
+                SyncAdapter.syncImmediately(this);
+                reload();
+                break;
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

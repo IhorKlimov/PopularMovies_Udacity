@@ -119,7 +119,7 @@ public final class MovieContract {
 
         public static final String SQL_CREATE_ENTRIES =
                 "CREATE TABLE " + TABLE_NAME + " ("
-                        + FavoriteMovie._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                        + FavoriteMovie._ID + " INTEGER PRIMARY KEY, "
                         + COLUMN_TITLE + TEXT_TYPE + NOT_NULL + COMA_SEP
                         + COLUMN_POSTER + TEXT_TYPE + NOT_NULL + COMA_SEP
                         + COLUMN_RELEASE_DATE + TEXT_TYPE + COMA_SEP

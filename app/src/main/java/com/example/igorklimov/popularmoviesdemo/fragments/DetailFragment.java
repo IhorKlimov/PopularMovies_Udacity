@@ -86,16 +86,14 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             @Override
             public void onClick(View v) {
                 if (!fab.isActivated()) {
-                    fab.setImageResource(android.R.drawable.btn_star_big_on);
-                    Uri insert = Utility.addToFavorite(cursor, getContext());
                     Toast.makeText(getActivity(), "Added to Favorites", Toast.LENGTH_SHORT).show();
-                    Log.d("TAG", "onClick: inserted " + insert);
+                    fab.setImageResource(R.drawable.star_on);
+                    Utility.addToFavorite(cursor, getContext());
                     fab.setActivated(true);
                 } else {
-                    int delete = Utility.removeFromFavorite(cursor, getContext());
-                    Log.d("TAG", "onClick: delete " + delete);
                     Toast.makeText(getActivity(), "Removed from Favorites", Toast.LENGTH_SHORT).show();
-                    fab.setImageResource(android.R.drawable.btn_star_big_off);
+                    Utility.removeFromFavorite(cursor, getContext());
+                    fab.setImageResource(R.drawable.star_off);
                     fab.setActivated(false);
                 }
             }
@@ -133,7 +131,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         if (data.moveToFirst()) {
             cursor = data;
             if (Utility.isFavorite(data, getContext())) {
-                fab.setImageResource(android.R.drawable.btn_star_big_on);
+                fab.setImageResource(R.drawable.star_on);
                 fab.setActivated(true);
             }
             Picasso.with(getActivity())

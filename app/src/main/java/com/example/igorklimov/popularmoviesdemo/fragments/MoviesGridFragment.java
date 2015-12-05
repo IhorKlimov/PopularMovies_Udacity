@@ -29,6 +29,7 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
     private ScrollListener listener;
     private static final int LOADER = 1;
     private MainActivity mainActivity;
+    private View rootView;
 
     public MoviesGridFragment() {
     }
@@ -53,7 +54,7 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.movies_grid, container, false);
+        rootView = inflater.inflate(R.layout.movies_grid, container, false);
         recyclerView = (RecyclerView) rootView.findViewById(R.id.movies_grid);
         customAdapter = new CustomAdapter(getActivity(), null, recyclerView);
         recyclerView.setAdapter(customAdapter);
@@ -92,6 +93,11 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         customAdapter.swapCursor(cursor);
+        if (Utility.getSortByPreference(getContext()) == 4 && cursor.getCount() == 0) {
+            rootView.findViewById(R.id.message).setVisibility(View.VISIBLE);
+        } else {
+            rootView.findViewById(R.id.message).setVisibility(View.GONE);
+        }
         if (Utility.isTwoPanePreference(getContext())) {
             new Handler().postDelayed(new Runnable() {
                 @Override
