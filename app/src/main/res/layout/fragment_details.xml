@@ -82,6 +82,24 @@
                         android:textSize="24sp" />
 
                     <TextView
+                        android:id="@+id/length"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:fontFamily="sans-serif-condensed"
+                        android:text="Length: "
+                        android:textSize="20sp" />
+
+                    <TextView
+                        android:id="@+id/budget"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:fontFamily="sans-serif-condensed"
+                        android:text="Budget: "
+                        android:textSize="20sp" />
+
+                    <TextView
                         android:id="@+id/vote"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -98,6 +116,16 @@
                 android:orientation="vertical">
 
                 <TextView
+                    android:id="@+id/trailer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-light"
+                    android:paddingLeft="16dp"
+                    android:text="Trailer"
+                    android:paddingRight="16dp"
+                    android:textSize="18sp" />
+
+                <TextView
                     android:id="@+id/plot"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -106,6 +134,9 @@
                     android:paddingLeft="16dp"
                     android:paddingRight="16dp"
                     android:textSize="18sp" />
+
+
+
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

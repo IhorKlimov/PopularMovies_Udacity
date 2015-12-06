@@ -25,24 +25,22 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
 import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.COLUMN_AVERAGE_VOTE;
 import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.COLUMN_GENRES;
+import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.COLUMN_MOVIE_ID;
 import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.COLUMN_PLOT;
 import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.COLUMN_POSTER;
 import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.COLUMN_RELEASE_DATE;
 import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.COLUMN_TITLE;
 import static com.example.igorklimov.popularmoviesdemo.helpers.Utility.getGenres;
 import static com.example.igorklimov.popularmoviesdemo.helpers.Utility.getJsonMovies;
+import static com.example.igorklimov.popularmoviesdemo.helpers.Utility.getJsonResponse;
 
 /**
  * Handle the transfer of data between a server and an
@@ -63,11 +61,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private final static String RELEASE_DATE_DESC = "release_date.desc&vote_count.gte=10&vote_average.gte=7&release_date.lte=";
     private final static String VOTE_AVG_DESC = "vote_average.desc&vote_count.gte=1000";
 
-    //    public static int page = 1;
     private Context context;
     private String JsonResponse;
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd", Locale.US);
     private ContentResolver mContentResolver;
+    private ContentValues[] contentValues = new ContentValues[20];
 
     /**
      * Set up the sync adapter
@@ -115,11 +113,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         long lastUpdate = prefs.getLong(context.getString(R.string.last_update), System.currentTimeMillis());
         Log.d("TAG", "onPerformSync: IF " + (System.currentTimeMillis() - lastUpdate));
         if (System.currentTimeMillis() - lastUpdate >= DAY_IN_MILLISECONDS) {
-            Utility.updateRowCountPreference(context);
             int delete = mContentResolver.delete(MovieContract.MovieByPopularity.CONTENT_URI, null, null);
             prefs.edit().putLong(context.getString(R.string.last_update), System.currentTimeMillis()).apply();
             Log.d("TAG", "onPerformSync: ERASE THE DATABASE -------" + delete);
-//            page = 1;
             syncImmediately(context);
         } else {
             getData();
@@ -128,9 +124,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     private void getData() {
         int sortByPreference = Utility.getSortByPreference(context);
-        HttpURLConnection connection = null;
-        InputStream input = null;
-        BufferedReader reader = null;
         Uri contentUri = null;
 
         if (sortByPreference != 4) {
@@ -153,56 +146,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             }
 
             Cursor cursor = mContentResolver.query(contentUri, null, null, null, null);
-//        if (!(cursor.getCount() < page * 20)) page = cursor.getCount() / 20 + 1;
             int page = Utility.getPagePreference(context);
             Log.d("TAG", "onPerformSync: cursorCount " + cursor.getCount() + " page: " + page);
             if (cursor.getCount() < page * 20) {
-                try {
-                    URL url = new URL(DISCOVER_MOVIES + SORT_BY + sortType + PAGE + page + API_KEY);
-                    Log.d("TAG", "Getting more data from server");
-                    Log.d("TAG", url.toString());
-                    connection = (HttpURLConnection) url.openConnection();
-                    connection.setRequestMethod("GET");
-                    connection.connect();
-                    input = connection.getInputStream();
-                    StringBuilder builder = new StringBuilder();
-
-                    if (input != null) {
-                        reader = new BufferedReader(new InputStreamReader(input));
-                        String line;
-
-                        while ((line = reader.readLine()) != null) {
-                            builder.append(line).append("\n");
-                        }
-                        JsonResponse = builder.toString();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } finally {
-                    if (connection != null) {
-                        connection.disconnect();
-                    }
-                    if (reader != null) {
-                        try {
-                            reader.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    if (input != null) {
-                        try {
-                            input.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
+                JsonResponse = getJsonResponse(DISCOVER_MOVIES + SORT_BY + sortType + PAGE + page + API_KEY);
 
                 try {
                     JSONObject[] JsonMovies = getJsonMovies(JsonResponse);
                     Log.d("TAG", "INSERTING EXTRA DATA");
-                    //                Utility.incrementPage(context);
-                    ArrayList<ContentValues> arrayOfValues = new ArrayList<>();
+                    int i = 0;
                     for (JSONObject jsonMovie : JsonMovies) {
                         String poster = IMAGE_BASE + W_185 + jsonMovie.getString("poster_path");
                         String title = jsonMovie.getString("title");
@@ -210,25 +162,26 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         String vote = jsonMovie.getString("vote_average");
                         String plot = jsonMovie.getString("overview");
                         String genres = Utility.formatGenres(getGenres(jsonMovie));
+                        String id = jsonMovie.getString("id");
 
                         ContentValues values = new ContentValues();
                         values.put(COLUMN_TITLE, title);
                         values.put(COLUMN_POSTER, poster);
                         values.put(COLUMN_RELEASE_DATE, releaseDate);
                         values.put(COLUMN_GENRES, genres);
+                        values.put(COLUMN_MOVIE_ID, id);
                         values.put(COLUMN_AVERAGE_VOTE, vote);
                         values.put(COLUMN_PLOT, plot);
 
-                        arrayOfValues.add(values);
+                        contentValues[i++] = values;
                     }
-                    ContentValues[] contentValues = arrayOfValues.toArray(new ContentValues[arrayOfValues.size()]);
                     int bulkInsert = mContentResolver.bulkInsert(contentUri, contentValues);
                     Log.d("TAG", "onPerformSync: bulkInsert " + bulkInsert);
+                    cursor.close();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
-            cursor.close();
         }
     }
 
@@ -261,7 +214,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         preferences.edit().putLong(context.getString(R.string.last_update), System.currentTimeMillis()).apply();
-        Utility.updateRowCountPreference(context);
 
         SyncAdapter.syncImmediately(context);
     }
@@ -277,8 +229,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     setExtras(new Bundle()).build();
             ContentResolver.requestSync(request);
         } else {
-            ContentResolver.addPeriodicSync(account,
-                    authority, new Bundle(), syncInterval);
+            ContentResolver.addPeriodicSync(account, authority, new Bundle(), syncInterval);
         }
     }
 

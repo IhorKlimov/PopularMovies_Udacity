@@ -1,7 +1,9 @@
 package com.example.igorklimov.popularmoviesdemo.fragments;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -21,32 +23,43 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.igorklimov.popularmoviesdemo.R;
+import com.example.igorklimov.popularmoviesdemo.activities.MainActivity;
+import com.example.igorklimov.popularmoviesdemo.data.MovieContract;
 import com.example.igorklimov.popularmoviesdemo.helpers.Utility;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
+import static com.example.igorklimov.popularmoviesdemo.helpers.Utility.getJsonResponse;
+
 public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
+    private Uri trailerUri;
     private Cursor cursor;
-    private View rootView;
-    private static int fragmentHeight;
 
     private static final SimpleDateFormat initialFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
     private static final SimpleDateFormat monthYearFormat = new SimpleDateFormat("MMMM, yyyy", Locale.US);
-
+    private static int fragmentHeight;
     private static final int DETAIL_LOADER = 300;
+
     private ImageView posterView;
     private TextView titleView;
     private TextView releaseDateView;
     private TextView voteView;
     private TextView plotView;
-
+    private View rootView;
     private TextView genresView;
     private FloatingActionButton fab;
+    private TextView length;
+    private TextView budget;
+    private TextView trailer;
 
     //todo Add director, cast
     public DetailFragment() {
@@ -63,6 +76,17 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         voteView = (TextView) rootView.findViewById(R.id.vote);
         plotView = (TextView) rootView.findViewById(R.id.plot);
         genresView = (TextView) rootView.findViewById(R.id.genres);
+        length = (TextView) rootView.findViewById(R.id.length);
+        budget = (TextView) rootView.findViewById(R.id.budget);
+        trailer = (TextView) rootView.findViewById(R.id.trailer);
+
+        trailer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(Intent.ACTION_VIEW, trailerUri));
+            }
+        });
+
         final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
 
         final ScrollView scroll = (ScrollView) rootView.findViewById(R.id.scrollView);
@@ -92,6 +116,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                     fab.setActivated(true);
                 } else {
                     Toast.makeText(getActivity(), "Removed from Favorites", Toast.LENGTH_SHORT).show();
+                    if (Utility.getSortByPreference(getContext()) == 4) {
+                        MainActivity activity = (MainActivity) getActivity();
+                        activity.showDetails(MovieContract.FavoriteMovie.buildMovieUri(MoviesGridFragment.id));
+                    }
                     Utility.removeFromFavorite(cursor, getContext());
                     fab.setImageResource(R.drawable.star_off);
                     fab.setActivated(false);
@@ -130,6 +158,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         posterView.setMinimumHeight(minHeight);
         if (data.moveToFirst()) {
             cursor = data;
+            new Task().execute(cursor.getString(7));
             if (Utility.isFavorite(data, getContext())) {
                 fab.setImageResource(R.drawable.star_on);
                 fab.setActivated(true);
@@ -163,10 +192,60 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-
     }
 
     public void sortChanged() {
         getLoaderManager().restartLoader(DETAIL_LOADER, null, this);
     }
+
+
+    private class Task extends AsyncTask<String, Void, String[]> {
+
+        @Override
+        protected String[] doInBackground(String... params) {
+            String id = params[0];
+            String JsonResponse;
+            String[] strings = new String[3];
+
+            JsonResponse = getJsonResponse("http://api.themoviedb.org/3/movie/" + id + "?api_key=daa8e62fb35a4e6821d58725b5abb88f");
+
+            try {
+                JSONObject jsonObject = new JSONObject(JsonResponse);
+                strings[0] = jsonObject.getString("runtime");
+                strings[1] = jsonObject.getString("budget");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            JsonResponse = getJsonResponse("http://api.themoviedb.org/3/movie/" + id + "/videos?api_key=daa8e62fb35a4e6821d58725b5abb88f");
+
+            try {
+                JSONObject jsonObject = new JSONObject(JsonResponse);
+                JSONArray results = jsonObject.getJSONArray("results");
+                if (results.length() > 1) {
+                    for (int i = 0; i < results.length(); i++) {
+                        if (results.getJSONObject(i).getString("type").contains("Trailer")) {
+                            strings[2] = results.getJSONObject(i).getString("key");
+                            break;
+                        }
+                    }
+                } else {
+                    strings[2] = results.getJSONObject(0).getString("key");
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            return strings;
+        }
+
+        @Override
+        protected void onPostExecute(String[] s) {
+            super.onPostExecute(s);
+            length.append(s[0] + " min");
+            budget.append("$" + s[1]);
+            trailerUri = Uri.parse("https://www.youtube.com/watch?v=" + s[2]);
+        }
+    }
+
 }

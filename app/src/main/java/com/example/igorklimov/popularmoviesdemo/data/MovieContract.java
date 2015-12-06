@@ -11,7 +11,7 @@ public final class MovieContract {
 
     public static final String CONTENT_AUTHORITY = "com.example.igorklimov.popularmoviesdemo";
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
-    public static final String PATH_MOVIE_BY_POPULARITY ="movie_by_popularity";
+    public static final String PATH_MOVIE_BY_POPULARITY = "movie_by_popularity";
     public static final String PATH_MOVIE_BY_RELEASE_DATE = "movie_by_release_date";
     public static final String PATH_MOVIE_BY_VOTES = "movie_by_votes";
     public static final String PATH_FAVORITE_MOVIE = "favorite_movie";
@@ -21,6 +21,9 @@ public final class MovieContract {
     public static final String COLUMN_RELEASE_DATE = "release_date";
     public static final String COLUMN_GENRES = "genres";
     public static final String COLUMN_AVERAGE_VOTE = "average_vote";
+    public static final String COLUMN_LENGTH = "length";
+    public static final String COLUMN_BUDGET = "budget";
+    public static final String COLUMN_MOVIE_ID = "movie_id";
     public static final String COLUMN_PLOT = "plot";
     private static final String TEXT_TYPE = " TEXT";
     private static final String NOT_NULL = " NOT NULL";
@@ -41,7 +44,11 @@ public final class MovieContract {
                         + COLUMN_RELEASE_DATE + TEXT_TYPE + COMA_SEP
                         + COLUMN_GENRES + TEXT_TYPE + COMA_SEP
                         + COLUMN_AVERAGE_VOTE + TEXT_TYPE + COMA_SEP
-                        + COLUMN_PLOT + TEXT_TYPE + ");";
+                        + COLUMN_PLOT + TEXT_TYPE + COMA_SEP
+                        + COLUMN_MOVIE_ID + TEXT_TYPE + COMA_SEP
+                        + COLUMN_BUDGET + TEXT_TYPE + COMA_SEP
+                        + COLUMN_LENGTH + TEXT_TYPE + ");";
+
 
         public static final String SQL_DELETE_ENTRIES =
                 "DROP TABLE IF EXISTS " + TABLE_NAME + ";";
@@ -119,7 +126,7 @@ public final class MovieContract {
 
         public static final String SQL_CREATE_ENTRIES =
                 "CREATE TABLE " + TABLE_NAME + " ("
-                        + FavoriteMovie._ID + " INTEGER PRIMARY KEY, "
+                        + FavoriteMovie._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                         + COLUMN_TITLE + TEXT_TYPE + NOT_NULL + COMA_SEP
                         + COLUMN_POSTER + TEXT_TYPE + NOT_NULL + COMA_SEP
                         + COLUMN_RELEASE_DATE + TEXT_TYPE + COMA_SEP

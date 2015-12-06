@@ -19,10 +19,65 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 /**
  * Created by Igor Klimov on 11/27/2015.
  */
 public class Utility {
+
+    public static String getJsonResponse(String s) {
+        HttpURLConnection connection = null;
+        InputStream input = null;
+        BufferedReader reader = null;
+        String JsonResponse = null;
+
+        try {
+            URL url = new URL(s);
+            Log.d("TAG", url.toString());
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.connect();
+            input = connection.getInputStream();
+            StringBuilder builder = new StringBuilder();
+
+            if (input != null) {
+                reader = new BufferedReader(new InputStreamReader(input));
+                String line;
+
+                while ((line = reader.readLine()) != null) {
+                    builder.append(line).append("\n");
+                }
+                JsonResponse = builder.toString();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (input != null) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return JsonResponse;
+    }
 
     public static JSONObject[] getJsonMovies(String jsonResponse) {
         JSONObject[] jsonObjects = null;
@@ -156,59 +211,6 @@ public class Utility {
         return c.getString(c.getColumnIndex(MovieContract.COLUMN_PLOT));
     }
 
-    public static int getRowCountPreference(Context c) {
-        switch (getSortByPreference(c)) {
-            case 1:
-                return PreferenceManager.getDefaultSharedPreferences(c).getInt(c.getString(R.string.pop_row_count), 0);
-            case 2:
-                return PreferenceManager.getDefaultSharedPreferences(c).getInt(c.getString(R.string.release_row_count), 0);
-            default:
-                return PreferenceManager.getDefaultSharedPreferences(c).getInt(c.getString(R.string.votes_row_count), 0);
-        }
-    }
-
-    public static void updateRowCountPreference(Context c) {
-        Cursor query = c.getContentResolver().query(MovieByPopularity.CONTENT_URI, null, null, null, null);
-        if (query != null) {
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
-            prefs.edit().putInt(c.getString(R.string.pop_row_count), (
-                    PreferenceManager.getDefaultSharedPreferences(c).getInt(c.getString(R.string.pop_row_count), 0)
-                            + query.getCount())).apply();
-            query.close();
-        }
-        query = c.getContentResolver().query(MovieByReleaseDate.CONTENT_URI, null, null, null, null);
-        if (query != null) {
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
-            prefs.edit().putInt(c.getString(R.string.release_row_count), (
-                    PreferenceManager.getDefaultSharedPreferences(c).getInt(c.getString(R.string.release_row_count), 0)
-                            + query.getCount())).apply();
-            query.close();
-        }
-        query = c.getContentResolver().query(MovieByVotes.CONTENT_URI, null, null, null, null);
-        if (query != null) {
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
-            prefs.edit().putInt(c.getString(R.string.votes_row_count), (
-                    PreferenceManager.getDefaultSharedPreferences(c).getInt(c.getString(R.string.votes_row_count), 0)
-                            + query.getCount())).apply();
-            query.close();
-        }
-    }
-
-    public static void setFavoritesRowCountPreference(Context c, int value) {
-        Cursor query = c.getContentResolver().query(FavoriteMovie.CONTENT_URI, null, null, null, null);
-        if (query != null) {
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
-            prefs.edit().putInt(c.getString(R.string.favorite_row_count), (
-                    PreferenceManager.getDefaultSharedPreferences(c).getInt(c.getString(R.string.favorite_row_count), 0)
-                            + value)).apply();
-            query.close();
-        }
-    }
-
-    public static int getFavoritesRowCountPreference(Context c) {
-        return PreferenceManager.getDefaultSharedPreferences(c).getInt(c.getString(R.string.favorite_row_count), 0);
-    }
-
     public static int getSortByPreference(Context c) {
         return PreferenceManager.getDefaultSharedPreferences(c).getInt(c.getString(R.string.key_sort_types), 1);
     }
@@ -283,8 +285,8 @@ public class Utility {
 
     public static Uri addToFavorite(Cursor cursor, Context context) {
         ContentValues values = new ContentValues();
-        setFavoritesRowCountPreference(context, 1);
-        values.put(FavoriteMovie._ID, getFavoritesRowCountPreference(context));
+//        setFavoritesRowCountPreference(context, 1);
+//        values.put(FavoriteMovie._ID, getFavoritesRowCountPreference(context));
         values.put(MovieContract.COLUMN_TITLE, Utility.getTitle(cursor));
         values.put(MovieContract.COLUMN_RELEASE_DATE, Utility.getReleaseDate(cursor));
         values.put(MovieContract.COLUMN_POSTER, Utility.getPoster(cursor));
@@ -296,11 +298,21 @@ public class Utility {
     }
 
     public static int removeFromFavorite(Cursor cursor, Context context) {
-        setFavoritesRowCountPreference(context, -1);
+//        setFavoritesRowCountPreference(context, -1);
         return context.getContentResolver().delete(FavoriteMovie.CONTENT_URI,
                 MovieContract.COLUMN_TITLE + "=?", new String[]{getTitle(cursor)});
     }
 
+    public static int getId(Context context) {
+        Uri uri = getContentUri(context);
+        Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
+        int id = -1;
+        if (cursor != null) {
+            cursor.moveToFirst();
+            id = cursor.getInt(0);
+        }
+        return id;
+    }
 }
 
 

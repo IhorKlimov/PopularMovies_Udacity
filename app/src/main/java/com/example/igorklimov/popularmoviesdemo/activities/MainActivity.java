@@ -24,7 +24,6 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String DETAILFRAGMENT_TAG = "DETAIL_FRAGMENT";
-    public static boolean sortChanged = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,30 +48,37 @@ public class MainActivity extends AppCompatActivity
         navigationView.setItemTextColor(null);
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (sortChanged) {
-            reload();
-        }
-    }
-
     private void reload() {
         MoviesGridFragment mf = (MoviesGridFragment) getSupportFragmentManager().findFragmentById(R.id.movies_view);
         if (null != mf) {
+            MoviesGridFragment.id = 0;
             mf.sortChanged();
         }
         DetailFragment df = (DetailFragment) getSupportFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG);
         if (null != df) {
             df.sortChanged();
         }
-        sortChanged = false;
     }
 
     public void onItemClick(Uri movieUri) {
         if (Utility.isTwoPanePreference(this)) {
+            showDetails(movieUri);
+        } else {
+            Intent getDetails = new Intent(this, DetailActivity.class).setData(movieUri);
+            startActivity(getDetails);
+        }
+    }
+
+    public void showDetails(Uri movieUri) {
+        MoviesGridFragment.id = 0;
+        DetailFragment fragment;
+        if (movieUri == null) {
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.hide(getSupportFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG));
+            transaction.commit();
+        } else {
             int height = findViewById(R.id.details_fragment).getHeight();
-            DetailFragment fragment = new DetailFragment();
+            fragment = new DetailFragment();
             Bundle bundle = new Bundle();
             bundle.putParcelable("movie", movieUri);
             bundle.putInt("fragmentHeight", height);
@@ -80,9 +86,6 @@ public class MainActivity extends AppCompatActivity
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.details_fragment, fragment, DETAILFRAGMENT_TAG);
             transaction.commit();
-        } else {
-            Intent getDetails = new Intent(this, DetailActivity.class).setData(movieUri);
-            startActivity(getDetails);
         }
     }
 

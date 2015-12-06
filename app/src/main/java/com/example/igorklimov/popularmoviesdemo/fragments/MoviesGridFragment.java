@@ -30,6 +30,7 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
     private static final int LOADER = 1;
     private MainActivity mainActivity;
     private View rootView;
+    public static int id = 0;
 
     public MoviesGridFragment() {
     }
@@ -41,15 +42,26 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
 
     public void sortChanged() {
         getLoaderManager().restartLoader(LOADER, null, this);
-        if (Utility.isTwoPanePreference(getContext())) selectFirstItem();
+//        if (Utility.isTwoPanePreference(getContext())) selectFirstItem();
         listener.refresh();
         recyclerView.smoothScrollToPosition(0);
     }
 
     private void selectFirstItem() {
 //            recyclerView.setItemChecked(0, true);
-        mainActivity.onItemClick(MovieContract.MovieByPopularity
-                .buildMovieUri(Utility.getRowCountPreference(getActivity()) + 1));
+        int sortByPreference = Utility.getSortByPreference(getContext());
+        Uri movieUri;
+        if (sortByPreference == 1) {
+            movieUri = MovieContract.MovieByPopularity.buildMovieUri(id);
+        } else if (sortByPreference == 2) {
+            movieUri = MovieContract.MovieByReleaseDate.buildMovieUri(id);
+        } else if (sortByPreference == 3) {
+            movieUri = MovieContract.MovieByVotes.buildMovieUri(id);
+        } else {
+            movieUri = MovieContract.FavoriteMovie.buildMovieUri(id);
+        }
+
+        mainActivity.onItemClick(movieUri);
     }
 
     @Override
@@ -67,7 +79,7 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
 //        Cursor cursor = getContext().getContentResolver()
 //                .query(MovieContract.MovieByPopularity.CONTENT_URI, null, null, null, null);
 //        if (cursor.getCount() == 0) {
-            SyncAdapter.syncImmediately(getActivity());
+        SyncAdapter.syncImmediately(getActivity());
 //        }
 //        cursor.close();
 
@@ -91,8 +103,9 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
     }
 
     @Override
-    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+    public void onLoadFinished(Loader<Cursor> cursorLoader, final Cursor cursor) {
         customAdapter.swapCursor(cursor);
+
         if (Utility.getSortByPreference(getContext()) == 4 && cursor.getCount() == 0) {
             rootView.findViewById(R.id.message).setVisibility(View.VISIBLE);
         } else {
@@ -102,9 +115,16 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    selectFirstItem();
+                    if (id == 0) {
+                        if (cursor.getCount() == 0) {
+                            mainActivity.showDetails(null);
+                        } else {
+                            id = Utility.getId(getContext());
+                            selectFirstItem();
+                        }
+                    }
                 }
-            },300);
+            }, 300);
         }
     }
 

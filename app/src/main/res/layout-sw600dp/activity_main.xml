@@ -19,6 +19,11 @@
         android:layout_weight="1"
         tools:layout="@layout/movies_grid" />
 
+    <View
+        android:layout_width="2dp"
+        android:layout_height="match_parent"
+        android:background="#939393"/>
+
     <FrameLayout
         android:id="@+id/details_fragment"
         android:layout_width="0dp"

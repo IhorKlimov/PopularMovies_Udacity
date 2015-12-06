@@ -47,7 +47,7 @@ public class CustomAdapter extends CursorRecyclerViewAdapter<CustomAdapter.ViewH
                     / (orientation == Configuration.ORIENTATION_LANDSCAPE ? 3 : 2);
             minHeight = (int) (((double) minWidth / 185) * 278);
         }
-
+        Log.d("TAG", "onCreateViewHolder: ");
         posterImageView.setMinimumWidth(minWidth);
         posterImageView.setMinimumHeight(minHeight);
         return new ViewHolder(view);
@@ -56,6 +56,8 @@ public class CustomAdapter extends CursorRecyclerViewAdapter<CustomAdapter.ViewH
     @Override
     public void onBindViewHolder(final ViewHolder viewHolder, Cursor cursor) {
         viewHolder.progressBar.setVisibility(View.VISIBLE);
+        viewHolder.id = cursor.getInt(0);
+
         Picasso.with(context)
                 .load(Utility.getPoster(cursor))
                 .noFade()
@@ -70,11 +72,13 @@ public class CustomAdapter extends CursorRecyclerViewAdapter<CustomAdapter.ViewH
 
                     }
                 });
+
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         final ImageView imageView;
         final ProgressBar progressBar;
+        int id;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -86,20 +90,20 @@ public class CustomAdapter extends CursorRecyclerViewAdapter<CustomAdapter.ViewH
         @Override
         public void onClick(View v) {
             MainActivity mainActivity = (MainActivity) CustomAdapter.context;
-            int extra = Utility.getRowCountPreference(context);
+//            int extra = Utility.getRowCountPreference(context);
             Uri movieUri = null;
             switch (Utility.getSortByPreference(context)) {
                 case 1:
-                    movieUri = MovieByPopularity.buildMovieUri(getAdapterPosition() + 1 + extra);
+                    movieUri = MovieByPopularity.buildMovieUri(id);
                     break;
                 case 2:
-                    movieUri = MovieByReleaseDate.buildMovieUri(getAdapterPosition() + 1 + extra);
+                    movieUri = MovieByReleaseDate.buildMovieUri(id);
                     break;
                 case 3:
-                    movieUri = MovieByVotes.buildMovieUri(getAdapterPosition() + 1 + extra);
+                    movieUri = MovieByVotes.buildMovieUri(id);
                     break;
                 case 4:
-                    movieUri = MovieContract.FavoriteMovie.buildMovieUri(getAdapterPosition() + 1);
+                    movieUri = MovieContract.FavoriteMovie.buildMovieUri(id);
                     break;
             }
             Log.d("TAG", "onClick: " + movieUri);
