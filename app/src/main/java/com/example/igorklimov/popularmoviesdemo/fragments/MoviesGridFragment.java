@@ -11,6 +11,7 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,6 +52,7 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
 //            recyclerView.setItemChecked(0, true);
         int sortByPreference = Utility.getSortByPreference(getContext());
         Uri movieUri;
+        Log.d("TAG", "selectFirstItem: SORT PREFERENCE " + sortByPreference);
         if (sortByPreference == 1) {
             movieUri = MovieContract.MovieByPopularity.buildMovieUri(id);
         } else if (sortByPreference == 2) {
@@ -103,7 +105,7 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
     }
 
     @Override
-    public void onLoadFinished(Loader<Cursor> cursorLoader, final Cursor cursor) {
+    public void onLoadFinished(final Loader<Cursor> cursorLoader, final Cursor cursor) {
         customAdapter.swapCursor(cursor);
 
         if (Utility.getSortByPreference(getContext()) == 4 && cursor.getCount() == 0) {
@@ -116,9 +118,12 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
                 @Override
                 public void run() {
                     if (id == 0) {
+
                         if (cursor.getCount() == 0) {
+                            Log.d("TAG", "run: 1");
                             mainActivity.showDetails(null);
                         } else {
+                            Log.d("TAG", "run: 2");
                             id = Utility.getId(getContext());
                             selectFirstItem();
                         }

@@ -293,8 +293,23 @@ public class Utility {
         values.put(MovieContract.COLUMN_GENRES, Utility.getGenres(cursor));
         values.put(MovieContract.COLUMN_AVERAGE_VOTE, Utility.getVote(cursor));
         values.put(MovieContract.COLUMN_PLOT, Utility.getPlot(cursor));
+        values.put(MovieContract.COLUMN_MOVIE_ID, Utility.getMovieId(cursor));
+        values.put(MovieContract.COLUMN_BUDGET, Utility.getBudget(cursor));
+        values.put(MovieContract.COLUMN_LENGTH, Utility.getLength(cursor));
 
         return context.getContentResolver().insert(FavoriteMovie.CONTENT_URI, values);
+    }
+
+    private static String getLength(Cursor cursor) {
+        return cursor.getString(cursor.getColumnIndex(MovieContract.COLUMN_LENGTH));
+    }
+
+    private static String getBudget(Cursor cursor) {
+        return cursor.getString(cursor.getColumnIndex(MovieContract.COLUMN_BUDGET));
+    }
+
+    private static String getMovieId(Cursor cursor) {
+        return cursor.getString(cursor.getColumnIndex(MovieContract.COLUMN_MOVIE_ID));
     }
 
     public static int removeFromFavorite(Cursor cursor, Context context) {
@@ -311,6 +326,10 @@ public class Utility {
             cursor.moveToFirst();
             id = cursor.getInt(0);
         }
+        if (cursor != null) {
+            cursor.close();
+        }
+        Log.d("TAG", "getId: RETURNING =====================  " + id);
         return id;
     }
 }

@@ -38,6 +38,9 @@
     <string name="descr_app_icon">Application Icon</string>
     <string name="favorite_row_count">Favorite Movie row count</string>
     <string name="message">Favorite List is Empty</string>
+    <string name="trailer">Trailer</string>
+    <string name="budget">Budget:</string>
+    <string name="length">Length:</string>
 
 
 </resources>

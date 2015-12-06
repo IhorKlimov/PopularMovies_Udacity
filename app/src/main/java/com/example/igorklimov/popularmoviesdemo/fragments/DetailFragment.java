@@ -60,6 +60,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private TextView length;
     private TextView budget;
     private TextView trailer;
+    private boolean done = false;
 
     //todo Add director, cast
     public DetailFragment() {
@@ -79,7 +80,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         length = (TextView) rootView.findViewById(R.id.length);
         budget = (TextView) rootView.findViewById(R.id.budget);
         trailer = (TextView) rootView.findViewById(R.id.trailer);
-
+//
         trailer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -151,42 +152,47 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        int minHeight = fragmentHeight / 3;
-        int minWidth = (int) (((double) minHeight / 278) * 185);
+        if (!done) {
+            Log.d("TAG", "run: ------------------------------------------------------------------");
 
-        posterView.setMinimumWidth(minWidth);
-        posterView.setMinimumHeight(minHeight);
-        if (data.moveToFirst()) {
-            cursor = data;
-            new Task().execute(cursor.getString(7));
-            if (Utility.isFavorite(data, getContext())) {
-                fab.setImageResource(R.drawable.star_on);
-                fab.setActivated(true);
+            int minHeight = fragmentHeight / 3;
+            int minWidth = (int) (((double) minHeight / 278) * 185);
+
+            posterView.setMinimumWidth(minWidth);
+            posterView.setMinimumHeight(minHeight);
+            if (data.moveToFirst()) {
+                cursor = data;
+                new Task().execute(cursor.getString(7));
+                if (Utility.isFavorite(data, getContext())) {
+                    fab.setImageResource(R.drawable.star_on);
+                    fab.setActivated(true);
+                }
+                Picasso.with(getActivity())
+                        .load(Utility.getPoster(data))
+                        .resize(minWidth, minHeight)
+                        .into(posterView, new Callback() {
+                            @Override
+                            public void onSuccess() {
+                                rootView.findViewById(R.id.progressBar).setVisibility(View.INVISIBLE);
+                            }
+
+                            @Override
+                            public void onError() {
+
+                            }
+                        });
+                titleView.setText(Utility.getTitle(data));
+                try {
+                    releaseDateView.setText(monthYearFormat
+                            .format(initialFormat.parse(Utility.getReleaseDate(data))));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                genresView.setText(Utility.getGenres(data));
+                voteView.setText(String.format(getString(R.string.format_average_vote), Utility.getVote(data)));
+                plotView.setText(Utility.getPlot(data));
             }
-            Picasso.with(getActivity())
-                    .load(Utility.getPoster(data))
-                    .resize(minWidth, minHeight)
-                    .into(posterView, new Callback() {
-                        @Override
-                        public void onSuccess() {
-                            rootView.findViewById(R.id.progressBar).setVisibility(View.INVISIBLE);
-                        }
-
-                        @Override
-                        public void onError() {
-
-                        }
-                    });
-            titleView.setText(Utility.getTitle(data));
-            try {
-                releaseDateView.setText(monthYearFormat
-                        .format(initialFormat.parse(Utility.getReleaseDate(data))));
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-            genresView.setText(Utility.getGenres(data));
-            voteView.setText(String.format(getString(R.string.format_average_vote), Utility.getVote(data)));
-            plotView.setText(Utility.getPlot(data));
+            done = true;
         }
     }
 

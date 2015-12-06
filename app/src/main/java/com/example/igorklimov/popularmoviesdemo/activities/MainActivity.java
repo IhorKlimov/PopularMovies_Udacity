@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -70,12 +71,16 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void showDetails(Uri movieUri) {
-        MoviesGridFragment.id = 0;
+
+//        MoviesGridFragment.id = 0;
         DetailFragment fragment;
         if (movieUri == null) {
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.hide(getSupportFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG));
-            transaction.commit();
+            Fragment f = getSupportFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG);
+            if (f != null) {
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.hide(f);
+                transaction.commit();
+            }
         } else {
             int height = findViewById(R.id.details_fragment).getHeight();
             fragment = new DetailFragment();
