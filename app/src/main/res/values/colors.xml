@@ -2,8 +2,6 @@
 <resources>
     <color name="colorPrimary">#d20f19</color>
     <color name="colorPrimaryDark">#870209</color>
-    <color name="titleBackground">#0cb996</color>
     <color name="colorAccent">#d20f19</color>
-    <color name="endColor">#870209</color>
-    <color name="startColor">#d74768</color>
+    <color name="placeholder">#0f43c9</color>
 </resources>

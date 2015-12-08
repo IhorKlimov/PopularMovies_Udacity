@@ -19,6 +19,7 @@ public final class MovieContract {
 
     public static final String COLUMN_TITLE = "title";
     public static final String COLUMN_POSTER = "poster";
+    public static final String COLUMN_BACKDROP_PATH = "backdrop_path";
     public static final String COLUMN_RELEASE_DATE = "release_date";
     public static final String COLUMN_GENRES = "genres";
     public static final String COLUMN_AVERAGE_VOTE = "average_vote";
@@ -123,6 +124,7 @@ public final class MovieContract {
                 + COLUMN_AVERAGE_VOTE + TEXT_TYPE + COMA_SEP
                 + COLUMN_PLOT + TEXT_TYPE + COMA_SEP
                 + COLUMN_MOVIE_ID + TEXT_TYPE + COMA_SEP
+				+COLUMN_BACKDROP_PATH + TEXT_TYPE + COMA_SEP
                 + COLUMN_BUDGET + TEXT_TYPE + COMA_SEP
                 + COLUMN_LENGTH + TEXT_TYPE + ");";
     }

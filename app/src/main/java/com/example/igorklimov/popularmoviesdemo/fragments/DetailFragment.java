@@ -17,6 +17,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -39,7 +40,7 @@ import java.util.Locale;
 
 import static com.example.igorklimov.popularmoviesdemo.helpers.Utility.getJsonResponse;
 
-public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
 
     private Uri trailerUri;
     private Cursor cursor;
@@ -47,6 +48,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private static final SimpleDateFormat initialFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
     private static final SimpleDateFormat monthYearFormat = new SimpleDateFormat("MMMM, yyyy", Locale.US);
     private static int fragmentHeight;
+    private static int fragmentWidth;
     private static final int DETAIL_LOADER = 300;
 
     private ImageView posterView;
@@ -61,6 +63,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private TextView budget;
     private TextView trailer;
     private boolean done = false;
+    private ImageView back;
+    private View progressBar;
+    private ImageButton playButton;
+
 
     //todo Add director, cast
     public DetailFragment() {
@@ -80,7 +86,11 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         length = (TextView) rootView.findViewById(R.id.length);
         budget = (TextView) rootView.findViewById(R.id.budget);
         trailer = (TextView) rootView.findViewById(R.id.trailer);
-//
+
+        back = (ImageView) rootView.findViewById(R.id.backdrop);
+        progressBar = rootView.findViewById(R.id.progressBar);
+        playButton = (ImageButton) rootView.findViewById(R.id.play_button);
+
         trailer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -117,11 +127,14 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                     fab.setActivated(true);
                 } else {
                     Toast.makeText(getActivity(), "Removed from Favorites", Toast.LENGTH_SHORT).show();
+
+                    Utility.removeFromFavorite(cursor, getContext());
                     if (Utility.getSortByPreference(getContext()) == 4) {
                         MainActivity activity = (MainActivity) getActivity();
+                        MoviesGridFragment.id  = Utility.getId(getContext());
+
                         activity.showDetails(MovieContract.FavoriteMovie.buildMovieUri(MoviesGridFragment.id));
                     }
-                    Utility.removeFromFavorite(cursor, getContext());
                     fab.setImageResource(R.drawable.star_off);
                     fab.setActivated(false);
                 }
@@ -141,11 +154,13 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         Uri movieUri = getActivity().getIntent().getData();
         if (movieUri != null) {
             fragmentHeight = this.getResources().getDisplayMetrics().heightPixels;
+            fragmentWidth = this.getResources().getDisplayMetrics().widthPixels;
             return new CursorLoader(getActivity(), movieUri, null, null, null, null);
         } else {
             Bundle arguments = getArguments();
             movieUri = arguments.getParcelable("movie");
             fragmentHeight = arguments.getInt("fragmentHeight");
+            fragmentWidth = arguments.getInt("fragmentWidth");
             return new CursorLoader(getActivity(), movieUri, null, null, null, null);
         }
     }
@@ -157,9 +172,13 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
             int minHeight = fragmentHeight / 3;
             int minWidth = (int) (((double) minHeight / 278) * 185);
+            int backdropHeight = (int) (((double) fragmentWidth / 500) * 281);
 
             posterView.setMinimumWidth(minWidth);
             posterView.setMinimumHeight(minHeight);
+            back.setMinimumHeight(backdropHeight);
+            progressBar.setVisibility(View.VISIBLE);
+            playButton.setVisibility(View.VISIBLE);
             if (data.moveToFirst()) {
                 cursor = data;
                 new Task().execute(cursor.getString(7));
@@ -173,7 +192,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                         .into(posterView, new Callback() {
                             @Override
                             public void onSuccess() {
-                                rootView.findViewById(R.id.progressBar).setVisibility(View.INVISIBLE);
+                                progressBar.setVisibility(View.INVISIBLE);
                             }
 
                             @Override
@@ -181,6 +200,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
                             }
                         });
+                Picasso.with(getActivity())
+                        .load(Utility.getBackdrop(data))
+                        .resize(fragmentWidth,backdropHeight)
+                        .into(back);
                 titleView.setText(Utility.getTitle(data));
                 try {
                     releaseDateView.setText(monthYearFormat
@@ -205,7 +228,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
 
-    private class Task extends AsyncTask<String, Void, String[]> {
+
+    private class Task extends AsyncTask<String, Void, String[]>  {
 
         @Override
         protected String[] doInBackground(String... params) {
@@ -230,7 +254,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 JSONArray results = jsonObject.getJSONArray("results");
                 if (results.length() > 1) {
                     for (int i = 0; i < results.length(); i++) {
-                        if (results.getJSONObject(i).getString("type").contains("Trailer")) {
+                        if (!results.getJSONObject(i).getString("name").contains("Teaser")) {
                             strings[2] = results.getJSONObject(i).getString("key");
                             break;
                         }
@@ -255,3 +279,4 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
 }
+

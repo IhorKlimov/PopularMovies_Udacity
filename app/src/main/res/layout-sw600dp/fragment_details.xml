@@ -16,16 +16,27 @@
             android:baselineAligned="false"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/title"
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="150dp"
-                android:background="@color/titleBackground"
-                android:fontFamily="sans-serif-condensed"
-                android:gravity="center_vertical"
-                android:paddingLeft="32dp"
-                android:textColor="#FFFFFF"
-                android:textSize="56sp" />
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/backdrop"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/placeholder"
+                    android:contentDescription="@string/backdrop"
+                    android:scaleType="fitXY" />
+
+                <ImageButton
+                    android:id="@+id/play_button"
+                    android:layout_width="wrap_content"
+                    android:visibility="invisible"
+                    android:background="@drawable/button_86"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                   />
+            </FrameLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -33,7 +44,7 @@
                 android:layout_marginTop="8dp"
                 android:orientation="horizontal">
 
-                <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
                     android:id="@+id/container"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -50,10 +61,10 @@
                         android:id="@+id/progressBar"
                         style="?android:attr/progressBarStyleLarge"
                         android:layout_width="wrap_content"
+                        android:visibility="invisible"
                         android:layout_height="wrap_content"
-                        android:layout_centerHorizontal="true"
-                        android:layout_centerVertical="true" />
-                </RelativeLayout>
+                        android:layout_gravity="center"/>
+                </FrameLayout>
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -64,11 +75,19 @@
                     android:paddingRight="16dp">
 
                     <TextView
+                        android:id="@+id/title"
+                        android:layout_width="match_parent"
+                        android:layout_marginTop="16dp"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-condensed"
+                        style="@style/TextCondensed34" />
+
+                    <TextView
                         android:id="@+id/genres"
                         style="@style/TextCondensed34"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp" />
+                        android:layout_marginTop="8dp" />
 
                     <TextView
                         android:id="@+id/release_date"

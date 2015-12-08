@@ -72,21 +72,23 @@ public class MainActivity extends AppCompatActivity
 
     public void showDetails(Uri movieUri) {
 
-//        MoviesGridFragment.id = 0;
         DetailFragment fragment;
         if (movieUri == null) {
             Fragment f = getSupportFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG);
             if (f != null) {
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                 transaction.hide(f);
+                Log.d("TAG", "showDetails: ------------------------------------------*******************");
                 transaction.commit();
             }
         } else {
             int height = findViewById(R.id.details_fragment).getHeight();
+            int width = findViewById(R.id.details_fragment).getWidth();
             fragment = new DetailFragment();
             Bundle bundle = new Bundle();
             bundle.putParcelable("movie", movieUri);
             bundle.putInt("fragmentHeight", height);
+            bundle.putInt("fragmentWidth", width);
             fragment.setArguments(bundle);
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.details_fragment, fragment, DETAILFRAGMENT_TAG);

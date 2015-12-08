@@ -277,7 +277,6 @@ public class Utility {
 
     public static boolean isFavorite(Cursor cursor, Context context) {
         String title = getTitle(cursor);
-        Log.d("TestDb", "isFavorite: " + title);
         Cursor query = context.getContentResolver().query(FavoriteMovie.CONTENT_URI, null
                 , MovieContract.COLUMN_TITLE + "=?", new String[]{title}, null);
         return query.getCount() != 0;
@@ -285,8 +284,6 @@ public class Utility {
 
     public static Uri addToFavorite(Cursor cursor, Context context) {
         ContentValues values = new ContentValues();
-//        setFavoritesRowCountPreference(context, 1);
-//        values.put(FavoriteMovie._ID, getFavoritesRowCountPreference(context));
         values.put(MovieContract.COLUMN_TITLE, Utility.getTitle(cursor));
         values.put(MovieContract.COLUMN_RELEASE_DATE, Utility.getReleaseDate(cursor));
         values.put(MovieContract.COLUMN_POSTER, Utility.getPoster(cursor));
@@ -321,16 +318,16 @@ public class Utility {
     public static int getId(Context context) {
         Uri uri = getContentUri(context);
         Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
-        int id = -1;
-        if (cursor != null) {
-            cursor.moveToFirst();
+        int id = 0;
+        if ( cursor != null && cursor.moveToFirst()) {
             id = cursor.getInt(0);
-        }
-        if (cursor != null) {
             cursor.close();
         }
-        Log.d("TAG", "getId: RETURNING =====================  " + id);
         return id;
+    }
+
+    public static String getBackdrop(Cursor data) {
+        return data.getString(data.getColumnIndex(MovieContract.COLUMN_BACKDROP_PATH));
     }
 }
 

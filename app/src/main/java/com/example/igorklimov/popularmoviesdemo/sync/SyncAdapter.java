@@ -35,6 +35,7 @@ import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.COLUMN
 import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.COLUMN_POSTER;
 import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.COLUMN_RELEASE_DATE;
 import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.COLUMN_TITLE;
+import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.COLUMN_BACKDROP_PATH;
 import static com.example.igorklimov.popularmoviesdemo.helpers.Utility.getGenres;
 import static com.example.igorklimov.popularmoviesdemo.helpers.Utility.getJsonMovies;
 import static com.example.igorklimov.popularmoviesdemo.helpers.Utility.getJsonResponse;
@@ -154,6 +155,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     int i = 0;
                     for (JSONObject jsonMovie : JsonMovies) {
                         String poster = IMAGE_BASE + W_185 + jsonMovie.getString("poster_path");
+						String backdropPath = IMAGE_BASE + "/w500"+ jsonMovie.getString("backdrop_path");
                         String title = jsonMovie.getString("title");
                         String releaseDate = jsonMovie.getString("release_date");
                         String vote = jsonMovie.getString("vote_average");
@@ -167,6 +169,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         values.put(COLUMN_RELEASE_DATE, releaseDate);
                         values.put(COLUMN_GENRES, genres);
                         values.put(COLUMN_MOVIE_ID, id);
+                        values.put(COLUMN_BACKDROP_PATH, backdropPath);
                         values.put(COLUMN_AVERAGE_VOTE, vote);
                         values.put(COLUMN_PLOT, plot);
 

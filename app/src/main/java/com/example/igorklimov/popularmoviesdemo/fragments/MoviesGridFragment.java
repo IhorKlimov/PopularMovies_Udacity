@@ -118,18 +118,15 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
                 @Override
                 public void run() {
                     if (id == 0) {
-
                         if (cursor.getCount() == 0) {
-                            Log.d("TAG", "run: 1");
                             mainActivity.showDetails(null);
                         } else {
-                            Log.d("TAG", "run: 2");
                             id = Utility.getId(getContext());
                             selectFirstItem();
                         }
                     }
                 }
-            }, 300);
+            }, 0);
         }
     }
 
