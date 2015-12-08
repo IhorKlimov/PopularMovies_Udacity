@@ -167,7 +167,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         Uri movieUri = getActivity().getIntent().getData();
         if (movieUri != null) {
             fragmentHeight = this.getResources().getDisplayMetrics().heightPixels;
-            fragmentWidth = this.getResources().getDisplayMetrics().widthPixels;
             return new CursorLoader(getActivity(), movieUri, null, null, null, null);
         } else {
             Bundle arguments = getArguments();
@@ -181,11 +180,12 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         if (!done) {
+            fragmentWidth = this.getResources().getDisplayMetrics().widthPixels;
             Log.d("TAG", "run: ------------------------------------------------------------------");
-
             int minHeight = fragmentHeight / 3;
             int minWidth = (int) (((double) minHeight / 278) * 185);
             int backdropHeight = (int) (((double) fragmentWidth / 500) * 281);
+            Log.d("TAG", "onLoadFinished: " + backdropHeight);
 
             posterView.setMinimumWidth(minWidth);
             posterView.setMinimumHeight(minHeight);
