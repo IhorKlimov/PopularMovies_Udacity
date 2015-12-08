@@ -23,10 +23,12 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.igorklimov.popularmoviesdemo.BuildConfig;
 import com.example.igorklimov.popularmoviesdemo.R;
 import com.example.igorklimov.popularmoviesdemo.activities.MainActivity;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract;
 import com.example.igorklimov.popularmoviesdemo.helpers.Utility;
+import com.google.android.youtube.player.YouTubeStandalonePlayer;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -40,9 +42,9 @@ import java.util.Locale;
 
 import static com.example.igorklimov.popularmoviesdemo.helpers.Utility.getJsonResponse;
 
-public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
+public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private Uri trailerUri;
+    private String trailerUri;
     private Cursor cursor;
 
     private static final SimpleDateFormat initialFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
@@ -91,12 +93,12 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         progressBar = rootView.findViewById(R.id.progressBar);
         playButton = (ImageButton) rootView.findViewById(R.id.play_button);
 
-        trailer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(Intent.ACTION_VIEW, trailerUri));
-            }
-        });
+//        trailer.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                startActivity(new Intent(Intent.ACTION_VIEW, trailerUri));
+//            }
+//        });
 
         final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
 
@@ -131,12 +133,23 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                     Utility.removeFromFavorite(cursor, getContext());
                     if (Utility.getSortByPreference(getContext()) == 4) {
                         MainActivity activity = (MainActivity) getActivity();
-                        MoviesGridFragment.id  = Utility.getId(getContext());
+                        MoviesGridFragment.id = Utility.getId(getContext());
 
                         activity.showDetails(MovieContract.FavoriteMovie.buildMovieUri(MoviesGridFragment.id));
                     }
                     fab.setImageResource(R.drawable.star_off);
                     fab.setActivated(false);
+                }
+            }
+        });
+        playButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (trailerUri!=null) {
+                    Log.d("TAG", "onClick: " + trailerUri);
+                    Intent intent = YouTubeStandalonePlayer.createVideoIntent(getActivity(),
+                            BuildConfig.YOUTUBE_API_KEY, trailerUri);
+                    startActivity(intent);
                 }
             }
         });
@@ -202,7 +215,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                         });
                 Picasso.with(getActivity())
                         .load(Utility.getBackdrop(data))
-                        .resize(fragmentWidth,backdropHeight)
+                        .resize(fragmentWidth, backdropHeight)
                         .into(back);
                 titleView.setText(Utility.getTitle(data));
                 try {
@@ -228,8 +241,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
 
-
-    private class Task extends AsyncTask<String, Void, String[]>  {
+    private class Task extends AsyncTask<String, Void, String[]> {
 
         @Override
         protected String[] doInBackground(String... params) {
@@ -274,7 +286,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             super.onPostExecute(s);
             length.append(s[0] + " min");
             budget.append("$" + s[1]);
-            trailerUri = Uri.parse("https://www.youtube.com/watch?v=" + s[2]);
+            trailerUri = s[2];
         }
     }
 
