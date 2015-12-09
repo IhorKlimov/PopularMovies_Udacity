@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.example.igorklimov.popularmoviesdemo.R;
@@ -183,6 +184,20 @@ public class Utility {
         return result;
     }
 
+    @NonNull
+    public static String formatBudget(String format) {
+        String result = "";
+        for (int i = format.length() - 1; i >= 0; i--) {
+            result = result.concat(format.charAt(i) + "");
+            if (i % 3 == 0 && i != 0 && i != format.length() - 1) result = result.concat(",");
+        }
+        format = "";
+        for (int i = result.length() - 1; i >= 0; i--) {
+            format = format.concat(result.charAt(i) + "");
+        }
+        return format;
+    }
+
     private static String concat(String to, String concat) {
         return to.concat(to.length() == 0 ? concat : ", " + concat);
     }
@@ -203,8 +218,8 @@ public class Utility {
         return c.getString(c.getColumnIndex(MovieContract.COLUMN_RELEASE_DATE));
     }
 
-    public static String getVote(Cursor c) {
-        return c.getString(c.getColumnIndex(MovieContract.COLUMN_AVERAGE_VOTE));
+    public static double getVote(Cursor c) {
+        return Double.valueOf(c.getString(c.getColumnIndex(MovieContract.COLUMN_AVERAGE_VOTE)));
     }
 
     public static String getPlot(Cursor c) {
@@ -319,7 +334,7 @@ public class Utility {
         Uri uri = getContentUri(context);
         Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
         int id = 0;
-        if ( cursor != null && cursor.moveToFirst()) {
+        if (cursor != null && cursor.moveToFirst()) {
             id = cursor.getInt(0);
             cursor.close();
         }

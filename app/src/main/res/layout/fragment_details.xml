@@ -3,11 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+
     tools:context="com.example.igorklimov.popularmovies.DetailActivityFragment"
     tools:showIn="@layout/activity_detail">
 
     <ScrollView
         android:id="@+id/scrollView"
+        android:fillViewport="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -32,10 +34,10 @@
                 <ImageButton
                     android:id="@+id/play_button"
                     android:layout_width="wrap_content"
-                    android:visibility="invisible"
-                    android:background="@drawable/button_64"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center" />
+                    android:layout_gravity="center"
+                    android:background="@drawable/button_64"
+                    android:visibility="invisible" />
             </FrameLayout>
 
             <LinearLayout
@@ -61,9 +63,9 @@
                         android:id="@+id/progressBar"
                         style="?android:attr/progressBarStyleLarge"
                         android:layout_width="wrap_content"
-                        android:visibility="invisible"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center" />
+                        android:layout_gravity="center"
+                        android:visibility="invisible" />
                 </FrameLayout>
 
                 <LinearLayout
@@ -80,7 +82,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:fontFamily="sans-serif-condensed"
-                        android:textSize="24sp" />
+                        android:textSize="28sp" />
 
                     <TextView
                         android:id="@+id/genres"
@@ -88,7 +90,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:fontFamily="sans-serif-condensed"
-                        android:textSize="24sp" />
+                        android:textSize="20sp" />
 
                     <TextView
                         android:id="@+id/release_date"
@@ -96,24 +98,6 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:fontFamily="sans-serif-condensed"
-                        android:textSize="24sp" />
-
-                    <TextView
-                        android:id="@+id/length"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:fontFamily="sans-serif-condensed"
-                        android:text="Length: "
-                        android:textSize="20sp" />
-
-                    <TextView
-                        android:id="@+id/budget"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:fontFamily="sans-serif-condensed"
-                        android:text="Budget: "
                         android:textSize="20sp" />
 
                     <TextView
@@ -127,30 +111,44 @@
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp">
 
                 <TextView
-                    android:id="@+id/trailer"
-                    android:layout_width="match_parent"
+                    android:id="@+id/budget"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-light"
-                    android:paddingLeft="16dp"
-                    android:paddingRight="16dp"
-                    android:text="Trailer"
-                    android:textSize="18sp" />
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="sans-serif-condensed"
+                    android:text="Budget: "
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/length"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="sans-serif-condensed"
+                    android:text="Length: "
+                    android:textSize="20sp" />
 
                 <TextView
                     android:id="@+id/plot"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
                     android:fontFamily="sans-serif-light"
-                    android:paddingBottom="100dp"
-                    android:paddingLeft="16dp"
-                    android:paddingRight="16dp"
                     android:textSize="18sp" />
+
+                <ExpandableListView
+                    android:id="@+id/reviews"
+                    android:groupIndicator="@null"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
 
             </LinearLayout>
         </LinearLayout>

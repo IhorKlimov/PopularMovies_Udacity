@@ -27,7 +27,7 @@
     <string name="title_activity_settings">Settings</string>
 
     <!-- Formatting-->
-    <string name="format_average_vote">%1$s/10</string>
+    <string name="format_average_vote">%1$.1f/10</string>
     <string name="title_activity_main2">Main2Activity</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>

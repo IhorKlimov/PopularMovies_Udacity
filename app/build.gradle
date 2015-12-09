@@ -21,6 +21,7 @@ android {
     }
     buildTypes.each {
         it.buildConfigField 'String', 'YOUTUBE_API_KEY', '"AIzaSyBhBFiwTZpQmX5C1uTfIg3OOw3UqHZrFFU"'
+        it.buildConfigField 'String', 'TBDB_API_KEY', '"daa8e62fb35a4e6821d58725b5abb88f"'
     }
 }
 

@@ -78,7 +78,6 @@ public class MainActivity extends AppCompatActivity
             if (f != null) {
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                 transaction.hide(f);
-                Log.d("TAG", "showDetails: ------------------------------------------*******************");
                 transaction.commit();
             }
         } else {
