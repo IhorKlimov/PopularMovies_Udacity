@@ -5,7 +5,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -22,7 +21,6 @@ import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
@@ -54,12 +52,10 @@ import static com.example.igorklimov.popularmoviesdemo.helpers.Utility.getJsonRe
 public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private String trailerUri;
-    private Cursor cursor;
+    public Cursor cursor;
 
     private static final SimpleDateFormat initialFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
     private static final SimpleDateFormat monthYearFormat = new SimpleDateFormat("MMMM, yyyy", Locale.US);
-    private static int fragmentHeight;
-    private static int fragmentWidth;
     private static final int DETAIL_LOADER = 300;
 
     private ImageView posterView;
@@ -69,15 +65,16 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private TextView plotView;
     private View rootView;
     private TextView genresView;
-    private FloatingActionButton fab;
+    public FloatingActionButton fab;
     private TextView length;
     private TextView budget;
     private boolean done = false;
+    public boolean toRemove = false;
+    private boolean inserted = false;
     private ImageView back;
     private View progressBar;
     private ImageButton playButton;
     private int defaultHeight;
-    private ExpandableListView reviews;
     private List<Map<String, String>> childGroupForFirstGroupRow;
 
 
@@ -98,18 +95,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         genresView = (TextView) rootView.findViewById(R.id.genres);
         length = (TextView) rootView.findViewById(R.id.length);
         budget = (TextView) rootView.findViewById(R.id.budget);
-        reviews = (ExpandableListView) rootView.findViewById(R.id.reviews);
-
-        reviews.setDividerHeight(0);
-        reviews.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
-
-            @Override
-            public boolean onGroupClick(ExpandableListView parent, View v,
-                                        int groupPosition, long id) {
-                setListViewHeight(parent, groupPosition);
-                return false;
-            }
-        });
+        ExpandableListView reviews = (ExpandableListView) rootView.findViewById(R.id.reviews);
 
 
         back = (ImageView) rootView.findViewById(R.id.backdrop);
@@ -143,11 +129,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
         final ScrollView scroll = (ScrollView) rootView.findViewById(R.id.scrollView);
         final int heightPixels = getContext().getResources().getDisplayMetrics().heightPixels;
-        if (actionBar != null && !Utility.isTwoPanePreference(getContext())) {
+        if (actionBar != null && !Utility.isTabletPreference(getContext())) {
             scroll.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
                 @Override
                 public void onScrollChanged() {
-                    Log.d("TAG", "onScrollChanged: " + scroll.getY() + " " + scroll.getScrollY());
                     if (scroll.getScrollY() >= heightPixels / 14) {
                         actionBar.hide();
                     } else if (scroll.getScrollY() < heightPixels / 14) {
@@ -157,27 +142,64 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             });
         }
 
+        reviews.setDividerHeight(0);
+        reviews.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
+
+            @Override
+            public boolean onGroupClick(ExpandableListView parent, View v,
+                                        int groupPosition, long id) {
+                setListViewHeight(parent, groupPosition);
+                if (parent.getLayoutParams().height > defaultHeight) {
+                    final int x = scroll.getScrollX();
+                    final int y = scroll.getScrollY() + heightPixels / 4;
+                    Log.d("TAG", "onGroupClick: " + x + " " + y);
+                    scroll.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            scroll.smoothScrollTo(x, y);
+                        }
+                    });
+                }
+                return false;
+            }
+        });
+
         fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!fab.isActivated()) {
-                    Toast.makeText(getActivity(), "Added to Favorites", Toast.LENGTH_SHORT).show();
-                    fab.setImageResource(R.drawable.star_on);
-                    Utility.addToFavorite(cursor, getContext());
-                    fab.setActivated(true);
-                } else {
-                    Toast.makeText(getActivity(), "Removed from Favorites", Toast.LENGTH_SHORT).show();
-
-                    Utility.removeFromFavorite(cursor, getContext());
-                    if (Utility.getSortByPreference(getContext()) == 4) {
-                        MainActivity activity = (MainActivity) getActivity();
-                        MoviesGridFragment.id = Utility.getId(getContext());
-
-                        activity.showDetails(MovieContract.FavoriteMovie.buildMovieUri(MoviesGridFragment.id));
+                    if (!inserted) {
+                        Toast.makeText(getActivity(), "Added to Favorites", Toast.LENGTH_SHORT).show();
+                        fab.setImageResource(R.drawable.star_on);
+                        if (Utility.isTabletPreference(getContext())
+                                || Utility.getSortByPreference(getContext()) != 4) {
+                            Utility.addToFavorite(cursor, getContext());
+                        } else {
+                            toRemove = false;
+                        }
+                        fab.setActivated(true);
+                        inserted = true;
                     }
-                    fab.setImageResource(R.drawable.star_off);
-                    fab.setActivated(false);
+                } else {
+                    if (inserted) {
+                        Toast.makeText(getActivity(), "Removed from Favorites", Toast.LENGTH_SHORT).show();
+                        fab.setImageResource(R.drawable.star_off);
+                        fab.setActivated(false);
+
+                        if (Utility.isTabletPreference(getContext()) || Utility.getSortByPreference(getContext()) != 4) {
+                            Utility.removeFromFavorite(cursor, getContext());
+                            MoviesGridFragment.id = Utility.getId(getContext());
+                            if (Utility.isTabletPreference(getContext())
+                                    && Utility.getSortByPreference(getContext()) == 4) {
+                                MainActivity activity = (MainActivity) getActivity();
+                                activity.showDetails(MovieContract.FavoriteMovie.buildMovieUri(MoviesGridFragment.id));
+                            }
+                        } else {
+                            toRemove = true;
+                        }
+                        inserted = false;
+                    }
                 }
             }
         });
@@ -205,14 +227,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Uri movieUri = getActivity().getIntent().getData();
         if (movieUri != null) {
-//            fragmentHeight = this.getResources().getDisplayMetrics().heightPixels;
-//            fragmentWidth = this.getResources().getDisplayMetrics().widthPixels;
             return new CursorLoader(getActivity(), movieUri, null, null, null, null);
         } else {
             Bundle arguments = getArguments();
             movieUri = arguments.getParcelable("movie");
-//            fragmentHeight = arguments.getInt("fragmentHeight");
-//            fragmentWidth = arguments.getInt("fragmentWidth");
             return new CursorLoader(getActivity(), movieUri, null, null, null, null);
         }
     }
@@ -220,7 +238,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         if (!done) {
-            if (!Utility.isTwoPanePreference(getContext())) {
+            int fragmentWidth;
+            int fragmentHeight;
+            if (!Utility.isTabletPreference(getContext())) {
                 fragmentHeight = this.getResources().getDisplayMetrics().heightPixels;
                 fragmentWidth = this.getResources().getDisplayMetrics().widthPixels;
             } else {
@@ -228,13 +248,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 fragmentHeight = arguments.getInt("fragmentHeight");
                 fragmentWidth = arguments.getInt("fragmentWidth");
             }
-            Log.d("TAG", "run: fHeight "+ fragmentHeight);
             int minHeight = fragmentHeight / 3;
             int minWidth = (int) (((double) minHeight / 278) * 185);
             int backdropHeight = (int) (((double) fragmentWidth / 500) * 281);
-            Log.d("TAG", "onLoadFinished: " + backdropHeight);
 
-            Log.d("TAG", "run: fWidth "+ minHeight);
             posterView.setMinimumWidth(minWidth);
             posterView.setMinimumHeight(minHeight);
             back.setMinimumHeight(backdropHeight);
@@ -246,6 +263,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 if (Utility.isFavorite(data, getContext())) {
                     fab.setImageResource(R.drawable.star_on);
                     fab.setActivated(true);
+                    inserted = true;
                 }
                 Picasso.with(getActivity())
                         .load(Utility.getPoster(data))
@@ -349,7 +367,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         protected void onPostExecute(String[] s) {
             super.onPostExecute(s);
             length.append(s[0] + " min");
-            budget.append("$" + Utility.formatBudget(s[1]));
+            budget.append(" $" + Utility.formatBudget(s[1]));
             trailerUri = s[2];
         }
     }
@@ -365,6 +383,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             totalHeight += defaultHeight;
             if (((listView.isGroupExpanded(i)) && (i != group))
                     || ((!listView.isGroupExpanded(i)) && (i == group))) {
+                totalHeight *= 2;
                 for (int j = 0; j < listAdapter.getChildrenCount(i); j++) {
                     View listItem = listAdapter.getChildView(i, j, false, null, listView);
                     listItem.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);

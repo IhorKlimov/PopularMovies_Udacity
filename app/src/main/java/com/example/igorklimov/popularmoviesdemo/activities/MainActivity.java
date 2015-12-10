@@ -3,7 +3,6 @@ package com.example.igorklimov.popularmoviesdemo.activities;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.design.widget.NavigationView;
@@ -12,7 +11,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 
 import com.example.igorklimov.popularmoviesdemo.R;
@@ -35,7 +33,7 @@ public class MainActivity extends AppCompatActivity
 
         Utility.setSortByPreference(this, 1);
         SyncAdapter.initializeSyncAdapter(this);
-        Utility.setIsTwoPanePreference(this, findViewById(R.id.details_fragment) != null);
+        Utility.setIsTabletPreference(this, findViewById(R.id.details_fragment) != null);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -62,7 +60,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void onItemClick(Uri movieUri) {
-        if (Utility.isTwoPanePreference(this)) {
+        if (Utility.isTabletPreference(this)) {
             showDetails(movieUri);
         } else {
             Intent getDetails = new Intent(this, DetailActivity.class).setData(movieUri);

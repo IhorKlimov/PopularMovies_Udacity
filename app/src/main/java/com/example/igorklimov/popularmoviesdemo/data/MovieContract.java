@@ -124,7 +124,7 @@ public final class MovieContract {
                 + COLUMN_AVERAGE_VOTE + TEXT_TYPE + COMA_SEP
                 + COLUMN_PLOT + TEXT_TYPE + COMA_SEP
                 + COLUMN_MOVIE_ID + TEXT_TYPE + COMA_SEP
-				+COLUMN_BACKDROP_PATH + TEXT_TYPE + COMA_SEP
+                + COLUMN_BACKDROP_PATH + TEXT_TYPE + COMA_SEP
                 + COLUMN_BUDGET + TEXT_TYPE + COMA_SEP
                 + COLUMN_LENGTH + TEXT_TYPE + ");";
     }

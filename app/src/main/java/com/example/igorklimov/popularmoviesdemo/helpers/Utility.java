@@ -256,6 +256,14 @@ public class Utility {
         return contentUri;
     }
 
+    public static void initializePagePreference(Context c) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
+        prefs.edit().putInt(c.getString(R.string.pop_page), 1).apply();
+        prefs.edit().putInt(c.getString(R.string.release_page), 1).apply();
+        prefs.edit().putInt(c.getString(R.string.votes_page), 1).apply();
+    }
+
+
     public static int getPagePreference(Context c) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
         switch (getSortByPreference(c)) {
@@ -282,11 +290,11 @@ public class Utility {
         }
     }
 
-    public static void setIsTwoPanePreference(Context c, boolean b) {
+    public static void setIsTabletPreference(Context c, boolean b) {
         PreferenceManager.getDefaultSharedPreferences(c).edit().putBoolean(c.getString(R.string.is_two_pane), b).apply();
     }
 
-    public static boolean isTwoPanePreference(Context c) {
+    public static boolean isTabletPreference(Context c) {
         return PreferenceManager.getDefaultSharedPreferences(c).getBoolean(c.getString(R.string.is_two_pane), false);
     }
 
@@ -306,6 +314,7 @@ public class Utility {
         values.put(MovieContract.COLUMN_AVERAGE_VOTE, Utility.getVote(cursor));
         values.put(MovieContract.COLUMN_PLOT, Utility.getPlot(cursor));
         values.put(MovieContract.COLUMN_MOVIE_ID, Utility.getMovieId(cursor));
+        values.put(MovieContract.COLUMN_BACKDROP_PATH, Utility.getBackdrop(cursor));
         values.put(MovieContract.COLUMN_BUDGET, Utility.getBudget(cursor));
         values.put(MovieContract.COLUMN_LENGTH, Utility.getLength(cursor));
 
@@ -344,6 +353,7 @@ public class Utility {
     public static String getBackdrop(Cursor data) {
         return data.getString(data.getColumnIndex(MovieContract.COLUMN_BACKDROP_PATH));
     }
+
 }
 
 

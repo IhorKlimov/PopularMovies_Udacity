@@ -27,7 +27,7 @@ import com.example.igorklimov.popularmoviesdemo.sync.SyncAdapter;
 public class MoviesGridFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private RecyclerView recyclerView;
     private CustomAdapter customAdapter;
-    private ScrollListener listener;
+    public static ScrollListener listener;
     private static final int LOADER = 1;
     private MainActivity mainActivity;
     private View rootView;
@@ -43,7 +43,7 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
 
     public void sortChanged() {
         getLoaderManager().restartLoader(LOADER, null, this);
-//        if (Utility.isTwoPanePreference(getContext())) selectFirstItem();
+//        if (Utility.isTabletPreference(getContext())) selectFirstItem();
         listener.refresh();
         recyclerView.smoothScrollToPosition(0);
     }
@@ -113,7 +113,7 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
         } else {
             rootView.findViewById(R.id.message).setVisibility(View.GONE);
         }
-        if (Utility.isTwoPanePreference(getContext())) {
+        if (Utility.isTabletPreference(getContext())) {
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {

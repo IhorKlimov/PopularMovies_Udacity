@@ -12,13 +12,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dip"
-        style="@style/TextCondensed20"/>
+        style="@style/TextCondensed26"/>
 
     <TextView
         android:id="@+id/review_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="16sp"
+        android:textSize="22sp"
         android:fontFamily="sans-serif-light"/>
 
 </LinearLayout>

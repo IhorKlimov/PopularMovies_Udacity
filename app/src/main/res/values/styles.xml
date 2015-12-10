@@ -25,8 +25,28 @@
         <item name="android:shadowColor">@android:color/transparent</item>
     </style>
 
-    <style name="TextCondensed34">
-        <item name="android:textSize">34sp</item>
+    <style name="TextCondensed30">
+        <item name="android:textSize">30sp</item>
+        <item name="android:fontFamily">sans-serif-condensed</item>
+    </style>
+
+    <style name="TextCondensed38">
+        <item name="android:textSize">38sp</item>
+        <item name="android:fontFamily">sans-serif-condensed</item>
+    </style>
+
+    <style name="TextLight24">
+        <item name="android:textSize">24sp</item>
+        <item name="android:fontFamily">sans-serif-light</item>
+    </style>
+
+    <style name="TextCondensed26">
+        <item name="android:textSize">26sp</item>
+        <item name="android:fontFamily">sans-serif-condensed</item>
+    </style>
+
+    <style name="TextCondensed20">
+        <item name="android:textSize">20sp</item>
         <item name="android:fontFamily">sans-serif-condensed</item>
     </style>
 

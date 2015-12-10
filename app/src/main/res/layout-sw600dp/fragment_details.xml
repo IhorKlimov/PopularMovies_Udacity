@@ -1,4 +1,4 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,6 +7,7 @@
     tools:showIn="@layout/activity_detail">
 
     <ScrollView
+        android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -75,22 +76,21 @@
 
                     <TextView
                         android:id="@+id/title"
-                        style="@style/TextCondensed34"
+                        style="@style/TextCondensed38"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:fontFamily="sans-serif-condensed" />
+                        android:layout_marginTop="16dp" />
 
                     <TextView
                         android:id="@+id/genres"
-                        style="@style/TextCondensed34"
+                        style="@style/TextCondensed30"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp" />
 
                     <TextView
                         android:id="@+id/release_date"
-                        style="@style/TextCondensed34"
+                        style="@style/TextCondensed30"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp" />
@@ -118,33 +118,29 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:fontFamily="sans-serif-condensed"
                     android:text="@string/budget"
-                    android:textSize="20sp" />
+                    style="@style/TextCondensed30" />
 
                 <TextView
                     android:id="@+id/length"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:fontFamily="sans-serif-condensed"
                     android:text="@string/length"
-                    android:textSize="20sp" />
+                    style="@style/TextCondensed30"  />
 
                 <TextView
                     android:id="@+id/plot"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:fontFamily="sans-serif-light"
-                    android:textSize="24sp" />
+                    style="@style/TextLight24"  />
 
                 <ExpandableListView
                     android:id="@+id/reviews"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:groupIndicator="@null" />
-
 
             </LinearLayout>
         </LinearLayout>
@@ -154,12 +150,11 @@
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginBottom="16dp"
+       android:layout_gravity="bottom|end"
+        android:layout_marginBottom="10dp"
         android:layout_marginRight="16dp"
         android:src="@drawable/star_off"
         app:elevation="4dp"
         app:fabSize="normal" />
 
-</RelativeLayout>
+</FrameLayout>

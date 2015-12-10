@@ -1,17 +1,16 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-
     tools:context="com.example.igorklimov.popularmovies.DetailActivityFragment"
     tools:showIn="@layout/activity_detail">
 
     <ScrollView
         android:id="@+id/scrollView"
-        android:fillViewport="true"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -89,24 +88,21 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:fontFamily="sans-serif-condensed"
-                        android:textSize="20sp" />
+                        style="@style/TextCondensed20" />
 
                     <TextView
                         android:id="@+id/release_date"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:fontFamily="sans-serif-condensed"
-                        android:textSize="20sp" />
+                        style="@style/TextCondensed20" />
 
                     <TextView
                         android:id="@+id/vote"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:fontFamily="sans-serif-condensed"
-                        android:textSize="20sp" />
+                        style="@style/TextCondensed20"/>
                 </LinearLayout>
             </LinearLayout>
 
@@ -123,18 +119,16 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:fontFamily="sans-serif-condensed"
                     android:text="Budget: "
-                    android:textSize="20sp" />
+                    style="@style/TextCondensed20" />
 
                 <TextView
                     android:id="@+id/length"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:fontFamily="sans-serif-condensed"
                     android:text="Length: "
-                    android:textSize="20sp" />
+                    style="@style/TextCondensed20" />
 
                 <TextView
                     android:id="@+id/plot"
@@ -146,9 +140,10 @@
 
                 <ExpandableListView
                     android:id="@+id/reviews"
-                    android:groupIndicator="@null"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:groupIndicator="@null" />
 
             </LinearLayout>
         </LinearLayout>
@@ -158,12 +153,11 @@
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginBottom="16dp"
-        android:layout_marginRight="16dp"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="4dp"
+        android:layout_marginRight="8dp"
         android:src="@drawable/star_off"
         app:elevation="4dp"
         app:fabSize="normal" />
 
-</RelativeLayout>
+</FrameLayout>

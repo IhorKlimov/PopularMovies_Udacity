@@ -19,6 +19,10 @@ import android.util.Log;
 
 import com.example.igorklimov.popularmoviesdemo.R;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract;
+import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByPopularity;
+import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByReleaseDate;
+import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByVotes;
+import com.example.igorklimov.popularmoviesdemo.fragments.MoviesGridFragment;
 import com.example.igorklimov.popularmoviesdemo.helpers.Utility;
 
 import org.json.JSONException;
@@ -46,7 +50,7 @@ import static com.example.igorklimov.popularmoviesdemo.helpers.Utility.getJsonRe
  */
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private static final int DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
-    private static final int SYNC_INTERVAL = DAY_IN_MILLISECONDS;
+    private static final int SYNC_INTERVAL = 24 * 60 * 60;
     private static final int FLEX_TIME = SYNC_INTERVAL / 3;
 
     private final static String IMAGE_BASE = "http://image.tmdb.org/t/p";
@@ -111,9 +115,17 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         long lastUpdate = prefs.getLong(context.getString(R.string.last_update), System.currentTimeMillis());
         Log.d("TAG", "onPerformSync: IF " + (System.currentTimeMillis() - lastUpdate));
         if (System.currentTimeMillis() - lastUpdate >= DAY_IN_MILLISECONDS) {
-            int delete = mContentResolver.delete(MovieContract.MovieByPopularity.CONTENT_URI, null, null);
+            int delete1 = mContentResolver.delete(MovieByPopularity.CONTENT_URI, null, null);
+            int delete2 = mContentResolver.delete(MovieByReleaseDate.CONTENT_URI, null, null);
+            int delete3 = mContentResolver.delete(MovieByVotes.CONTENT_URI, null, null);
+            Log.d("TAG", "onPerformSync: ERASE THE DATABASE -------" + delete1);
+            Log.d("TAG", "onPerformSync: ERASE THE DATABASE -------" + delete2);
+            Log.d("TAG", "onPerformSync: ERASE THE DATABASE -------" + delete3);
             prefs.edit().putLong(context.getString(R.string.last_update), System.currentTimeMillis()).apply();
-            Log.d("TAG", "onPerformSync: ERASE THE DATABASE -------" + delete);
+            Utility.initializePagePreference(context);
+            if (MoviesGridFragment.listener != null) {
+                MoviesGridFragment.listener.refresh();
+            }
             syncImmediately(context);
         } else {
             getData();
@@ -129,17 +141,17 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             switch (sortByPreference) {
                 case 1:
                     sortType = POPULARITY_DESC;
-                    contentUri = MovieContract.MovieByPopularity.CONTENT_URI;
+                    contentUri = MovieByPopularity.CONTENT_URI;
                     break;
                 case 2:
                     String twoWeeksAhead = DATE_FORMAT
                             .format(new Date(System.currentTimeMillis() + 1_296_000_000));
                     sortType = RELEASE_DATE_DESC + twoWeeksAhead;
-                    contentUri = MovieContract.MovieByReleaseDate.CONTENT_URI;
+                    contentUri = MovieByReleaseDate.CONTENT_URI;
                     break;
                 case 3:
                     sortType = VOTE_AVG_DESC;
-                    contentUri = MovieContract.MovieByVotes.CONTENT_URI;
+                    contentUri = MovieByVotes.CONTENT_URI;
                     break;
             }
 
@@ -155,7 +167,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     int i = 0;
                     for (JSONObject jsonMovie : JsonMovies) {
                         String poster = IMAGE_BASE + W_185 + jsonMovie.getString("poster_path");
-						String backdropPath = IMAGE_BASE + "/w500"+ jsonMovie.getString("backdrop_path");
+                        String backdropPath = IMAGE_BASE + "/w500" + jsonMovie.getString("backdrop_path");
                         String title = jsonMovie.getString("title");
                         String releaseDate = jsonMovie.getString("release_date");
                         String vote = jsonMovie.getString("vote_average");
