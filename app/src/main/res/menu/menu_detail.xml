@@ -3,8 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.example.igorklimov.popularmovies.DetailActivity">
     <item
-        android:id="@+id/action_settings"
-        android:title="@string/action_settings"
-        android:orderInCategory="100"
-        app:showAsAction="never" />
+        android:id="@+id/action_share"
+        android:actionProviderClass="android.widget.ShareActionProvider"
+        android:title="@string/action_share"
+        app:showAsAction="ifRoom" />
 </menu>

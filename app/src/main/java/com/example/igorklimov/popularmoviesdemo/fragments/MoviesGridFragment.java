@@ -1,5 +1,6 @@
 package com.example.igorklimov.popularmoviesdemo.fragments;
 
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
@@ -78,18 +79,14 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
                         .getConfiguration()
                         .orientation) == Configuration.ORIENTATION_PORTRAIT ? 2 : 3
         ));
-//        Cursor cursor = getContext().getContentResolver()
-//                .query(MovieContract.MovieByPopularity.CONTENT_URI, null, null, null, null);
-//        if (cursor.getCount() == 0) {
         SyncAdapter.syncImmediately(getActivity());
-//        }
-//        cursor.close();
 
         listener = new ScrollListener(getActivity());
         recyclerView.addOnScrollListener(listener);
 
         return rootView;
     }
+
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {

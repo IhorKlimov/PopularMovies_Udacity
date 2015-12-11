@@ -1,19 +1,27 @@
 package com.example.igorklimov.popularmoviesdemo.fragments;
 
+import android.app.Fragment;
+import android.app.LoaderManager;
+import android.content.Context;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.ShareActionProvider;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -28,6 +36,7 @@ import android.widget.Toast;
 
 import com.example.igorklimov.popularmoviesdemo.BuildConfig;
 import com.example.igorklimov.popularmoviesdemo.R;
+import com.example.igorklimov.popularmoviesdemo.activities.DetailActivity;
 import com.example.igorklimov.popularmoviesdemo.activities.MainActivity;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract;
 import com.example.igorklimov.popularmoviesdemo.helpers.Utility;
@@ -47,6 +56,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import static android.widget.Toast.LENGTH_SHORT;
+import static com.example.igorklimov.popularmoviesdemo.BuildConfig.YOUTUBE_API_KEY;
+import static com.example.igorklimov.popularmoviesdemo.R.id.author;
+import static com.example.igorklimov.popularmoviesdemo.R.id.group_title;
+import static com.example.igorklimov.popularmoviesdemo.R.id.review_text;
+import static com.example.igorklimov.popularmoviesdemo.R.layout.child;
+import static com.example.igorklimov.popularmoviesdemo.R.layout.group;
 import static com.example.igorklimov.popularmoviesdemo.helpers.Utility.getJsonResponse;
 
 public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -63,7 +79,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private TextView releaseDateView;
     private TextView voteView;
     private TextView plotView;
-    private View rootView;
     private TextView genresView;
     public FloatingActionButton fab;
     private TextView length;
@@ -76,17 +91,51 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private ImageButton playButton;
     private int defaultHeight;
     private List<Map<String, String>> childGroupForFirstGroupRow;
-
+    private Context context;
+    private ShareActionProvider actionProvider;
 
     //todo Add director, cast
     public DetailFragment() {
     }
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_detail, menu);
+        MenuItem item = menu.findItem(R.id.action_share);
+        if (Utility.isTabletPreference(context)) {
+            actionProvider = new ShareActionProvider(getActivity()) {
+                @Override
+                public View onCreateActionView() {
+                    return null;
+                }
+            };
+            item.setIcon(R.drawable.ic_share_24dp);
+        } else {
+            actionProvider = new ShareActionProvider(getActivity());
+        }
+        MenuItemCompat.setActionProvider(item, actionProvider);
+        if (trailerUri != null) actionProvider.setShareIntent(createShareIntent());
+
+    }
+
+    private Intent createShareIntent() {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT, "#Popular Movies app https://www.youtube.com/watch?v=" + trailerUri);
+        return intent;
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
-        rootView = inflater.inflate(R.layout.fragment_details, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_details, container, false);
         posterView = (ImageView) rootView.findViewById(R.id.details_poster);
         titleView = (TextView) rootView.findViewById(R.id.title);
         releaseDateView = (TextView) rootView.findViewById(R.id.release_date);
@@ -96,7 +145,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         length = (TextView) rootView.findViewById(R.id.length);
         budget = (TextView) rootView.findViewById(R.id.budget);
         ExpandableListView reviews = (ExpandableListView) rootView.findViewById(R.id.reviews);
-
+        context = getActivity();
 
         back = (ImageView) rootView.findViewById(R.id.backdrop);
         progressBar = rootView.findViewById(R.id.progressBar);
@@ -113,23 +162,23 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
         listOfChildGroups.add(childGroupForFirstGroupRow);
         reviews.setAdapter(new SimpleExpandableListAdapter(
-                getContext(),
+                context,
                 groupData,
-                R.layout.group,
+                group,
                 new String[]{"ROOT_NAME"},
-                new int[]{R.id.group_title},
+                new int[]{group_title},
 
                 listOfChildGroups,
-                R.layout.child,
+                child,
                 new String[]{"CHILD_TITLE", "CHILD_TEXT"},
-                new int[]{R.id.author, R.id.review_text}
+                new int[]{author, review_text}
         ));
 
-        final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        final ActionBar actionBar = ((AppCompatActivity) context).getSupportActionBar();
 
         final ScrollView scroll = (ScrollView) rootView.findViewById(R.id.scrollView);
-        final int heightPixels = getContext().getResources().getDisplayMetrics().heightPixels;
-        if (actionBar != null && !Utility.isTabletPreference(getContext())) {
+        final int heightPixels = context.getResources().getDisplayMetrics().heightPixels;
+        if (actionBar != null && !Utility.isTabletPreference(context)) {
             scroll.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
                 @Override
                 public void onScrollChanged() {
@@ -170,11 +219,11 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             public void onClick(View v) {
                 if (!fab.isActivated()) {
                     if (!inserted) {
-                        Toast.makeText(getActivity(), "Added to Favorites", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "Added to Favorites", LENGTH_SHORT).show();
                         fab.setImageResource(R.drawable.star_on);
-                        if (Utility.isTabletPreference(getContext())
-                                || Utility.getSortByPreference(getContext()) != 4) {
-                            Utility.addToFavorite(cursor, getContext());
+                        if (Utility.isTabletPreference(context)
+                                || Utility.getSortByPreference(context) != 4) {
+                            Utility.addToFavorite(cursor, context);
                         } else {
                             toRemove = false;
                         }
@@ -183,16 +232,16 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                     }
                 } else {
                     if (inserted) {
-                        Toast.makeText(getActivity(), "Removed from Favorites", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "Removed from Favorites", LENGTH_SHORT).show();
                         fab.setImageResource(R.drawable.star_off);
                         fab.setActivated(false);
 
-                        if (Utility.isTabletPreference(getContext()) || Utility.getSortByPreference(getContext()) != 4) {
-                            Utility.removeFromFavorite(cursor, getContext());
-                            MoviesGridFragment.id = Utility.getId(getContext());
-                            if (Utility.isTabletPreference(getContext())
-                                    && Utility.getSortByPreference(getContext()) == 4) {
-                                MainActivity activity = (MainActivity) getActivity();
+                        if (Utility.isTabletPreference(context) || Utility.getSortByPreference(context) != 4) {
+                            Utility.removeFromFavorite(cursor, context);
+                            MoviesGridFragment.id = Utility.getId(context);
+                            if (Utility.isTabletPreference(context)
+                                    && Utility.getSortByPreference(context) == 4) {
+                                MainActivity activity = (MainActivity) context;
                                 activity.showDetails(MovieContract.FavoriteMovie.buildMovieUri(MoviesGridFragment.id));
                             }
                         } else {
@@ -209,7 +258,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 if (trailerUri != null) {
                     Log.d("TAG", "onClick: " + trailerUri);
                     Intent intent = YouTubeStandalonePlayer.createVideoIntent(getActivity(),
-                            BuildConfig.YOUTUBE_API_KEY, trailerUri);
+                            YOUTUBE_API_KEY, trailerUri);
                     startActivity(intent);
                 }
             }
@@ -220,6 +269,22 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        ConnectivityManager systemService = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = systemService.getActiveNetworkInfo();
+        if (activeNetworkInfo == null) {
+            NoInternet noInternet = new NoInternet();
+            noInternet.setTargetFragment(this, 2);
+            if (Utility.isTabletPreference(context)) {
+                noInternet.show(((MainActivity) context).getFragmentManager(), "2");
+            } else {
+                noInternet.show(((DetailActivity) context).getFragmentManager(), "2");
+            }
+        } else {
+            initLoader();
+        }
+    }
+
+    public void initLoader() {
         getLoaderManager().initLoader(DETAIL_LOADER, null, this);
     }
 
@@ -227,75 +292,78 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Uri movieUri = getActivity().getIntent().getData();
         if (movieUri != null) {
-            return new CursorLoader(getActivity(), movieUri, null, null, null, null);
+            return new CursorLoader(context, movieUri, null, null, null, null);
         } else {
             Bundle arguments = getArguments();
             movieUri = arguments.getParcelable("movie");
-            return new CursorLoader(getActivity(), movieUri, null, null, null, null);
+            return new CursorLoader(context, movieUri, null, null, null, null);
         }
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         if (!done) {
-            int fragmentWidth;
-            int fragmentHeight;
-            if (!Utility.isTabletPreference(getContext())) {
-                fragmentHeight = this.getResources().getDisplayMetrics().heightPixels;
-                fragmentWidth = this.getResources().getDisplayMetrics().widthPixels;
-            } else {
-                Bundle arguments = getArguments();
-                fragmentHeight = arguments.getInt("fragmentHeight");
-                fragmentWidth = arguments.getInt("fragmentWidth");
-            }
-            int minHeight = fragmentHeight / 3;
-            int minWidth = (int) (((double) minHeight / 278) * 185);
-            int backdropHeight = (int) (((double) fragmentWidth / 500) * 281);
-
-            posterView.setMinimumWidth(minWidth);
-            posterView.setMinimumHeight(minHeight);
-            back.setMinimumHeight(backdropHeight);
-            progressBar.setVisibility(View.VISIBLE);
-            playButton.setVisibility(View.VISIBLE);
-            if (data.moveToFirst()) {
-                cursor = data;
-                new Task().execute(cursor.getString(7));
-                if (Utility.isFavorite(data, getContext())) {
-                    fab.setImageResource(R.drawable.star_on);
-                    fab.setActivated(true);
-                    inserted = true;
-                }
-                Picasso.with(getActivity())
-                        .load(Utility.getPoster(data))
-                        .resize(minWidth, minHeight)
-                        .into(posterView, new Callback() {
-                            @Override
-                            public void onSuccess() {
-                                progressBar.setVisibility(View.INVISIBLE);
-                            }
-
-                            @Override
-                            public void onError() {
-
-                            }
-                        });
-                Picasso.with(getActivity())
-                        .load(Utility.getBackdrop(data))
-                        .resize(fragmentWidth, backdropHeight)
-                        .into(back);
-                titleView.setText(Utility.getTitle(data));
-                try {
-                    releaseDateView.setText(monthYearFormat
-                            .format(initialFormat.parse(Utility.getReleaseDate(data))));
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-                genresView.setText(Utility.getGenres(data));
-                voteView.setText(String.format(getString(R.string.format_average_vote), Utility.getVote(data)));
-                plotView.setText(Utility.getPlot(data));
-            }
-            done = true;
+            if (data.moveToFirst()) cursor = data;
+            load();
         }
+    }
+
+    public void load() {
+        int fragmentWidth;
+        int fragmentHeight;
+        if (!Utility.isTabletPreference(context)) {
+            fragmentHeight = this.getResources().getDisplayMetrics().heightPixels;
+            fragmentWidth = this.getResources().getDisplayMetrics().widthPixels;
+        } else {
+            Bundle arguments = getArguments();
+            fragmentHeight = arguments.getInt("fragmentHeight");
+            fragmentWidth = arguments.getInt("fragmentWidth");
+        }
+        int minHeight = fragmentHeight / 3;
+        int minWidth = (int) (((double) minHeight / 278) * 185);
+        int backdropHeight = (int) (((double) fragmentWidth / 500) * 281);
+
+        posterView.setMinimumWidth(minWidth);
+        posterView.setMinimumHeight(minHeight);
+        back.setMinimumHeight(backdropHeight);
+        progressBar.setVisibility(View.VISIBLE);
+        playButton.setVisibility(View.VISIBLE);
+
+        new Task().execute(cursor.getString(7));
+        if (Utility.isFavorite(cursor, context)) {
+            fab.setImageResource(R.drawable.star_on);
+            fab.setActivated(true);
+            inserted = true;
+        }
+        Picasso.with(context)
+                .load(Utility.getPoster(cursor))
+                .resize(minWidth, minHeight)
+                .into(posterView, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        progressBar.setVisibility(View.INVISIBLE);
+                    }
+
+                    @Override
+                    public void onError() {
+
+                    }
+                });
+        Picasso.with(context)
+                .load(Utility.getBackdrop(cursor))
+                .resize(fragmentWidth, backdropHeight)
+                .into(back);
+        titleView.setText(Utility.getTitle(cursor));
+        try {
+            releaseDateView.setText(monthYearFormat
+                    .format(initialFormat.parse(Utility.getReleaseDate(cursor))));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        genresView.setText(Utility.getGenres(cursor));
+        voteView.setText(String.format(getString(R.string.format_average_vote), Utility.getVote(cursor)));
+        plotView.setText(Utility.getPlot(cursor));
+        done = true;
     }
 
     @Override
@@ -369,7 +437,11 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             length.append(s[0] + " min");
             budget.append(" $" + Utility.formatBudget(s[1]));
             trailerUri = s[2];
+            if (actionProvider != null) {
+                actionProvider.setShareIntent(createShareIntent());
+            }
         }
+
     }
 
     private void setListViewHeight(ExpandableListView listView, int group) {

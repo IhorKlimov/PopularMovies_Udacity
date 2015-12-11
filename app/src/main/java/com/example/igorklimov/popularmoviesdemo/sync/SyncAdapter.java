@@ -11,6 +11,8 @@ import android.content.SharedPreferences;
 import android.content.SyncRequest;
 import android.content.SyncResult;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -18,10 +20,11 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.example.igorklimov.popularmoviesdemo.R;
-import com.example.igorklimov.popularmoviesdemo.data.MovieContract;
+import com.example.igorklimov.popularmoviesdemo.activities.MainActivity;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByPopularity;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByReleaseDate;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByVotes;
+import com.example.igorklimov.popularmoviesdemo.fragments.NoInternet;
 import com.example.igorklimov.popularmoviesdemo.fragments.MoviesGridFragment;
 import com.example.igorklimov.popularmoviesdemo.helpers.Utility;
 
@@ -64,7 +67,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private final static String VOTE_AVG_DESC = "vote_average.desc&vote_count.gte=1000";
 
     private Context context;
-    private String JsonResponse;
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd", Locale.US);
     private ContentResolver mContentResolver;
     private ContentValues[] contentValues = new ContentValues[20];
@@ -101,6 +103,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     public static void syncImmediately(Context context) {
         Log.d("TAG", "syncImmediately: ");
+        ConnectivityManager systemService = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = systemService.getActiveNetworkInfo();
+        if (activeNetworkInfo == null) {
+            new NoInternet().show(((MainActivity) context).getFragmentManager(), "1");
+        }
         Bundle bundle = new Bundle();
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
@@ -111,6 +118,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority,
                               ContentProviderClient provider, SyncResult syncResult) {
+
+
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         long lastUpdate = prefs.getLong(context.getString(R.string.last_update), System.currentTimeMillis());
         Log.d("TAG", "onPerformSync: IF " + (System.currentTimeMillis() - lastUpdate));
@@ -159,10 +168,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             int page = Utility.getPagePreference(context);
             Log.d("TAG", "onPerformSync: cursorCount " + cursor.getCount() + " page: " + page);
             if (cursor.getCount() < page * 20) {
-                JsonResponse = getJsonResponse(DISCOVER_MOVIES + SORT_BY + sortType + PAGE + page + API_KEY);
+                String jsonResponse = getJsonResponse(DISCOVER_MOVIES + SORT_BY + sortType + PAGE + page + API_KEY);
 
                 try {
-                    JSONObject[] JsonMovies = getJsonMovies(JsonResponse);
+                    JSONObject[] JsonMovies = getJsonMovies(jsonResponse);
                     Log.d("TAG", "INSERTING EXTRA DATA");
                     int i = 0;
                     for (JSONObject jsonMovie : JsonMovies) {
