@@ -1,12 +1,12 @@
 package com.example.igorklimov.popularmoviesdemo.fragments;
 
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -33,6 +33,7 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
     private MainActivity mainActivity;
     private View rootView;
     public static int id = 0;
+    private FragmentActivity activity;
 
     public MoviesGridFragment() {
     }
@@ -44,16 +45,13 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
 
     public void sortChanged() {
         getLoaderManager().restartLoader(LOADER, null, this);
-//        if (Utility.isTabletPreference(getContext())) selectFirstItem();
         listener.refresh();
         recyclerView.smoothScrollToPosition(0);
     }
 
     private void selectFirstItem() {
-//            recyclerView.setItemChecked(0, true);
-        int sortByPreference = Utility.getSortByPreference(getContext());
+        int sortByPreference = Utility.getSortByPreference(activity);
         Uri movieUri;
-        Log.d("TAG", "selectFirstItem: SORT PREFERENCE " + sortByPreference);
         if (sortByPreference == 1) {
             movieUri = MovieContract.MovieByPopularity.buildMovieUri(id);
         } else if (sortByPreference == 2) {
@@ -63,7 +61,7 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
         } else {
             movieUri = MovieContract.FavoriteMovie.buildMovieUri(id);
         }
-
+        CustomAdapter.previous = 0;
         mainActivity.onItemClick(movieUri);
     }
 
@@ -71,15 +69,22 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.movies_grid, container, false);
         recyclerView = (RecyclerView) rootView.findViewById(R.id.movies_grid);
-        customAdapter = new CustomAdapter(getActivity(), null, recyclerView);
+        activity = getActivity();
+        customAdapter = new CustomAdapter(activity, null, recyclerView);
         recyclerView.setAdapter(customAdapter);
-        recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), (
-                getActivity()
-                        .getResources()
-                        .getConfiguration()
-                        .orientation) == Configuration.ORIENTATION_PORTRAIT ? 2 : 3
-        ));
-        SyncAdapter.syncImmediately(getActivity());
+
+        int orientation = activity
+                .getResources()
+                .getConfiguration()
+                .orientation;
+        int spanCount;
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE || Utility.isTabletPreference(activity)) {
+            spanCount = 3;
+        } else {
+            spanCount = 2;
+        }
+        recyclerView.setLayoutManager(new GridLayoutManager(activity, spanCount));
+        SyncAdapter.syncImmediately(activity);
 
         listener = new ScrollListener(getActivity());
         recyclerView.addOnScrollListener(listener);
@@ -92,12 +97,12 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         getLoaderManager().initLoader(LOADER, null, this);
-        mainActivity = (MainActivity) getContext();
+        mainActivity = (MainActivity) activity;
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        Uri contentUri = Utility.getContentUri(getContext());
+        Uri contentUri = Utility.getContentUri(activity);
         return new CursorLoader(getActivity(), contentUri, null, null, null, null);
     }
 
@@ -105,12 +110,12 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
     public void onLoadFinished(final Loader<Cursor> cursorLoader, final Cursor cursor) {
         customAdapter.swapCursor(cursor);
 
-        if (Utility.getSortByPreference(getContext()) == 4 && cursor.getCount() == 0) {
-            rootView.findViewById(R.id.message).setVisibility(View.VISIBLE);
+        if (Utility.getSortByPreference(activity) == 4 && cursor.getCount() == 0) {
+            rootView.findViewById(R.id.list_empty).setVisibility(View.VISIBLE);
         } else {
-            rootView.findViewById(R.id.message).setVisibility(View.GONE);
+            rootView.findViewById(R.id.list_empty).setVisibility(View.GONE);
         }
-        if (Utility.isTabletPreference(getContext())) {
+        if (Utility.isTabletPreference(activity)) {
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -118,7 +123,7 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
                         if (cursor.getCount() == 0) {
                             mainActivity.showDetails(null);
                         } else {
-                            id = Utility.getId(getContext());
+                            id = Utility.getId(activity);
                             selectFirstItem();
                         }
                     }

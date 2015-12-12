@@ -30,11 +30,9 @@ public class ScrollListener extends RecyclerView.OnScrollListener {
         visibleItemCount = recyclerView.getChildCount();
         totalItemCount = helper.getItemCount();
         firstVisibleItem = helper.findFirstVisibleItemPosition();
-        if (loading) {
-            if (totalItemCount > previousTotal) {
+        if (loading && totalItemCount > previousTotal) {
                 loading = false;
                 previousTotal = totalItemCount;
-            }
         }
         if (!loading && (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)) {
             Utility.incrementPage(context);

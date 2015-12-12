@@ -30,6 +30,7 @@ public class CustomAdapter extends CursorRecyclerViewAdapter<CustomAdapter.ViewH
     private int minWidth = 0;
     private int minHeight = 0;
     private RecyclerView recyclerView;
+    public static int previous = -1;
 
     public CustomAdapter(Context context, Cursor c, RecyclerView recyclerView) {
         super(context, c);
@@ -44,7 +45,8 @@ public class CustomAdapter extends CursorRecyclerViewAdapter<CustomAdapter.ViewH
         ImageView posterImageView = (ImageView) view.findViewById(R.id.poster);
         if (minWidth == 0) {
             minWidth = recyclerView.getWidth()
-                    / (orientation == Configuration.ORIENTATION_LANDSCAPE ? 3 : 2);
+                    / (orientation == Configuration.ORIENTATION_LANDSCAPE
+                    || Utility.isTabletPreference(context) ? 3 : 2);
             minHeight = (int) (((double) minWidth / 185) * 278);
         }
         Log.d("TAG", "onCreateViewHolder: ");
@@ -89,25 +91,27 @@ public class CustomAdapter extends CursorRecyclerViewAdapter<CustomAdapter.ViewH
 
         @Override
         public void onClick(View v) {
-            MainActivity mainActivity = (MainActivity) CustomAdapter.context;
-//            int extra = Utility.getRowCountPreference(context);
-            Uri movieUri = null;
-            switch (Utility.getSortByPreference(context)) {
-                case 1:
-                    movieUri = MovieByPopularity.buildMovieUri(id);
-                    break;
-                case 2:
-                    movieUri = MovieByReleaseDate.buildMovieUri(id);
-                    break;
-                case 3:
-                    movieUri = MovieByVotes.buildMovieUri(id);
-                    break;
-                case 4:
-                    movieUri = MovieContract.FavoriteMovie.buildMovieUri(id);
-                    break;
+            if (getAdapterPosition() != previous) {
+                MainActivity mainActivity = (MainActivity) CustomAdapter.context;
+                Uri movieUri = null;
+                switch (Utility.getSortByPreference(context)) {
+                    case 1:
+                        movieUri = MovieByPopularity.buildMovieUri(id);
+                        break;
+                    case 2:
+                        movieUri = MovieByReleaseDate.buildMovieUri(id);
+                        break;
+                    case 3:
+                        movieUri = MovieByVotes.buildMovieUri(id);
+                        break;
+                    case 4:
+                        movieUri = MovieContract.FavoriteMovie.buildMovieUri(id);
+                        break;
+                }
+                Log.d("TAG", "onClick: " + movieUri);
+                mainActivity.onItemClick(movieUri);
+                previous = getAdapterPosition();
             }
-            Log.d("TAG", "onClick: " + movieUri);
-            mainActivity.onItemClick(movieUri);
         }
     }
 }

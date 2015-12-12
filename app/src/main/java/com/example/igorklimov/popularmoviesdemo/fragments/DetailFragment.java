@@ -1,5 +1,6 @@
 package com.example.igorklimov.popularmoviesdemo.fragments;
 
+import android.app.Dialog;
 import android.app.Fragment;
 import android.app.LoaderManager;
 import android.content.Context;
@@ -58,6 +59,7 @@ import java.util.Map;
 
 import static android.widget.Toast.LENGTH_SHORT;
 import static com.example.igorklimov.popularmoviesdemo.BuildConfig.YOUTUBE_API_KEY;
+import static com.example.igorklimov.popularmoviesdemo.R.id.action_bar;
 import static com.example.igorklimov.popularmoviesdemo.R.id.author;
 import static com.example.igorklimov.popularmoviesdemo.R.id.group_title;
 import static com.example.igorklimov.popularmoviesdemo.R.id.review_text;
@@ -93,6 +95,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private List<Map<String, String>> childGroupForFirstGroupRow;
     private Context context;
     private ShareActionProvider actionProvider;
+    private ActionBar actionBar;
+    private ScrollView scroll;
 
     //todo Add director, cast
     public DetailFragment() {
@@ -122,7 +126,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         }
         MenuItemCompat.setActionProvider(item, actionProvider);
         if (trailerUri != null) actionProvider.setShareIntent(createShareIntent());
-
     }
 
     private Intent createShareIntent() {
@@ -174,22 +177,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 new int[]{author, review_text}
         ));
 
-        final ActionBar actionBar = ((AppCompatActivity) context).getSupportActionBar();
-
-        final ScrollView scroll = (ScrollView) rootView.findViewById(R.id.scrollView);
+        actionBar = ((AppCompatActivity) context).getSupportActionBar();
+        scroll = (ScrollView) rootView.findViewById(R.id.scrollView);
         final int heightPixels = context.getResources().getDisplayMetrics().heightPixels;
-        if (actionBar != null && !Utility.isTabletPreference(context)) {
-            scroll.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
-                @Override
-                public void onScrollChanged() {
-                    if (scroll.getScrollY() >= heightPixels / 14) {
-                        actionBar.hide();
-                    } else if (scroll.getScrollY() < heightPixels / 14) {
-                        actionBar.show();
-                    }
-                }
-            });
-        }
+
 
         reviews.setDividerHeight(0);
         reviews.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
@@ -272,13 +263,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         ConnectivityManager systemService = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = systemService.getActiveNetworkInfo();
         if (activeNetworkInfo == null) {
-            NoInternet noInternet = new NoInternet();
-            noInternet.setTargetFragment(this, 2);
-            if (Utility.isTabletPreference(context)) {
-                noInternet.show(((MainActivity) context).getFragmentManager(), "2");
-            } else {
-                noInternet.show(((DetailActivity) context).getFragmentManager(), "2");
-            }
+           noInternet();
         } else {
             initLoader();
         }
@@ -303,8 +288,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         if (!done) {
-            if (data.moveToFirst()) cursor = data;
-            load();
+            if (data.moveToFirst()) {
+                cursor = data;
+                load();
+            }
         }
     }
 
@@ -321,13 +308,26 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         }
         int minHeight = fragmentHeight / 3;
         int minWidth = (int) (((double) minHeight / 278) * 185);
-        int backdropHeight = (int) (((double) fragmentWidth / 500) * 281);
+        final int backdropHeight = (int) (((double) fragmentWidth / 500) * 281);
 
         posterView.setMinimumWidth(minWidth);
         posterView.setMinimumHeight(minHeight);
         back.setMinimumHeight(backdropHeight);
         progressBar.setVisibility(View.VISIBLE);
         playButton.setVisibility(View.VISIBLE);
+        if (actionBar != null && !Utility.isTabletPreference(context)) {
+            final int height = backdropHeight - actionBar.getHeight();
+            scroll.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
+                @Override
+                public void onScrollChanged() {
+                    if (scroll.getScrollY() >= height) {
+                        actionBar.hide();
+                    } else if (scroll.getScrollY() < height) {
+                        actionBar.show();
+                    }
+                }
+            });
+        }
 
         new Task().execute(cursor.getString(7));
         if (Utility.isFavorite(cursor, context)) {
@@ -377,7 +377,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     private class Task extends AsyncTask<String, Void, String[]> {
 
-
         @Override
         protected String[] doInBackground(String... params) {
             String id = params[0];
@@ -390,8 +389,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 JSONObject jsonObject = new JSONObject(JsonResponse);
                 strings[0] = jsonObject.getString("runtime");
                 strings[1] = jsonObject.getString("budget");
-            } catch (JSONException e) {
+            } catch (JSONException|NullPointerException e) {
                 e.printStackTrace();
+                noInternet();
             }
 
             JsonResponse = getJsonResponse("http://api.themoviedb.org/3/movie/" + id + "/videos?api_key=" + BuildConfig.TBDB_API_KEY);
@@ -409,8 +409,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 } else {
                     strings[2] = results.getJSONObject(0).getString("key");
                 }
-            } catch (JSONException e) {
+            } catch (JSONException|NullPointerException e) {
                 e.printStackTrace();
+                noInternet();
             }
 
             JsonResponse = getJsonResponse("http://api.themoviedb.org/3/movie/" + id + "/reviews?api_key=" + BuildConfig.TBDB_API_KEY);
@@ -424,8 +425,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                     map.put("CHILD_TEXT", results.getJSONObject(i).getString("content"));
                     childGroupForFirstGroupRow.add(map);
                 }
-            } catch (JSONException e) {
+            } catch (JSONException|NullPointerException e) {
                 e.printStackTrace();
+                noInternet();
             }
 
             return strings;
@@ -442,6 +444,16 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             }
         }
 
+    }
+
+    private void noInternet() {
+        NoInternet noInternet = new NoInternet();
+        noInternet.setTargetFragment(this, 2);
+        if (Utility.isTabletPreference(context)) {
+            noInternet.show(((MainActivity) context).getFragmentManager(), "2");
+        } else {
+            noInternet.show(((DetailActivity) context).getFragmentManager(), "2");
+        }
     }
 
     private void setListViewHeight(ExpandableListView listView, int group) {
