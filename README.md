@@ -7,7 +7,7 @@ And Picasso Image Downloading and caching library for posters http://square.gith
 
 In order for you to use it you need to get an Apiary DB API key and put  in code
 
-![v1 0](https://cloud.githubusercontent.com/assets/13784275/11762084/77c4f8ee-a0db-11e5-873f-94bf001b3372.png)
+![v1 0](https://cloud.githubusercontent.com/assets/13784275/11762100/05f46c26-a0dc-11e5-852a-60c1c28634b0.png)
 
-![v1 02](https://cloud.githubusercontent.com/assets/13784275/11762085/8935bbea-a0db-11e5-950f-fa966ebeebd6.png)
+![v1 02](https://cloud.githubusercontent.com/assets/13784275/11762110/4a2d2680-a0dc-11e5-924f-130f7170578c.png)
 
