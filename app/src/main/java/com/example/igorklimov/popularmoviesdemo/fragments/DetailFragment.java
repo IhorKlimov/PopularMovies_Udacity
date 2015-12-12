@@ -251,7 +251,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 if (trailerUri != null) {
                     Log.d("TAG", "onClick: " + trailerUri);
                     Intent intent = YouTubeStandalonePlayer.createVideoIntent(getActivity(),
-                            YOUTUBE_API_KEY, trailerUri);
+                            YOUTUBE_API_KEY, trailerUri, 0, true, false);
                     startActivity(intent);
                 }
             }
@@ -440,9 +440,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 String actors = "";
                 int length = cast.length() > 6 ? 6 : cast.length();
                 for (int i = 0; i < length; i++) {
-                    actors = actors.concat(cast.getJSONObject(i).getString("name") + (i < (length-1) ? ", " : ""));
+                    actors = actors.concat(cast.getJSONObject(i).getString("name") + (i < (length - 1) ? ", " : ""));
                 }
-                Log.d("TAG", "doInBackground: " + actors);
                 strings[3] = actors;
                 JSONArray crew = jsonObject.getJSONArray("crew");
                 for (int i = 0; i < crew.length(); i++) {
