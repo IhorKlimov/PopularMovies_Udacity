@@ -91,7 +91,7 @@ public class CustomAdapter extends CursorRecyclerViewAdapter<CustomAdapter.ViewH
 
         @Override
         public void onClick(View v) {
-            if (getAdapterPosition() != previous) {
+            if (!Utility.isTabletPreference(context) || getAdapterPosition() != previous) {
                 MainActivity mainActivity = (MainActivity) CustomAdapter.context;
                 Uri movieUri = null;
                 switch (Utility.getSortByPreference(context)) {

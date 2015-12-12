@@ -383,14 +383,17 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         protected String[] doInBackground(String... params) {
             String id = params[0];
             String JsonResponse;
-            String[] strings = new String[5];
+            String[] strings = {"n/a", "n/a", "n/a", "n/a", "n/a"};
 
             JsonResponse = getJsonResponse("http://api.themoviedb.org/3/movie/" + id + "?api_key=" + BuildConfig.TBDB_API_KEY);
 
             try {
                 JSONObject jsonObject = new JSONObject(JsonResponse);
-                strings[0] = jsonObject.getString("runtime");
-                strings[1] = jsonObject.getString("budget");
+                String runtime = jsonObject.getString("runtime");
+                String budget = jsonObject.getString("budget");
+                if (runtime != null && !runtime.equals("0")) strings[0] = runtime + " min";
+                if (budget != null && !budget.equals("0"))
+                    strings[1] = " $" + Utility.formatBudget(budget);
             } catch (JSONException | NullPointerException e) {
                 e.printStackTrace();
                 noInternet();
@@ -404,12 +407,14 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 if (results.length() > 1) {
                     for (int i = 0; i < results.length(); i++) {
                         if (!results.getJSONObject(i).getString("name").contains("Teaser")) {
-                            strings[2] = results.getJSONObject(i).getString("key");
+                            String key = results.getJSONObject(i).getString("key");
+                            if (key != null) strings[2] = key;
                             break;
                         }
                     }
-                } else {
-                    strings[2] = results.getJSONObject(0).getString("key");
+                } else if (results.length() == 1) {
+                    String key = results.getJSONObject(0).getString("key");
+                    if (key != null) strings[2] = key;
                 }
             } catch (JSONException | NullPointerException e) {
                 e.printStackTrace();
@@ -423,8 +428,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 final JSONArray results = jsonObject.getJSONArray("results");
                 for (int i = 0; i < results.length(); i++) {
                     HashMap<String, String> map = new HashMap<>();
-                    map.put("CHILD_TITLE", results.getJSONObject(i).getString("author"));
-                    map.put("CHILD_TEXT", results.getJSONObject(i).getString("content"));
+                    String author = results.getJSONObject(i).getString("author");
+                    String content = results.getJSONObject(i).getString("content");
+                    if (author != null) map.put("CHILD_TITLE", author);
+                    if (content != null) map.put("CHILD_TEXT", content);
                     childGroupForFirstGroupRow.add(map);
                 }
             } catch (JSONException | NullPointerException e) {
@@ -447,7 +454,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 for (int i = 0; i < crew.length(); i++) {
                     JSONObject object = crew.getJSONObject(i);
                     if (object.getString("department").equals("Directing")) {
-                        strings[4] = object.getString("name");
+                        String name = object.getString("name");
+                        if (name != null) strings[4] = name;
                         break;
                     }
                 }
@@ -462,9 +470,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         @Override
         protected void onPostExecute(String[] s) {
             super.onPostExecute(s);
-            length.append(s[0] + " min");
-            budget.append(" $" + Utility.formatBudget(s[1]));
-            trailerUri = s[2];
+            length.append(s[0]);
+            budget.append(s[1]);
+            if (!s[2].equals("n/a")) trailerUri = s[2];
             actors.append(s[3]);
             director.append(s[4]);
             if (actionProvider != null) {

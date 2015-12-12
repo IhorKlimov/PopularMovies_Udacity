@@ -19,6 +19,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.example.igorklimov.popularmoviesdemo.BuildConfig;
 import com.example.igorklimov.popularmoviesdemo.R;
 import com.example.igorklimov.popularmoviesdemo.activities.MainActivity;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByPopularity;
@@ -32,6 +33,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
@@ -59,7 +61,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private final static String IMAGE_BASE = "http://image.tmdb.org/t/p";
     private final static String W_185 = "/w185/";
     private final static String DISCOVER_MOVIES = "http://api.themoviedb.org/3/discover/movie";
-    private final static String API_KEY = "&api_key=daa8e62fb35a4e6821d58725b5abb88f";
+    private final static String API_KEY = "&api_key=" + BuildConfig.TBDB_API_KEY;
     private final static String SORT_BY = "?sort_by=";
     private final static String PAGE = "&page=";
     private final static String POPULARITY_DESC = "popularity.desc";
@@ -67,7 +69,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private final static String VOTE_AVG_DESC = "vote_average.desc&vote_count.gte=1000";
 
     private Context context;
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd", Locale.US);
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
     private ContentResolver mContentResolver;
     private ContentValues[] contentValues = new ContentValues[20];
 
@@ -153,9 +155,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     contentUri = MovieByPopularity.CONTENT_URI;
                     break;
                 case 2:
-                    String twoWeeksAhead = DATE_FORMAT
-                            .format(new Date(System.currentTimeMillis() + 1_296_000_000));
-                    sortType = RELEASE_DATE_DESC + twoWeeksAhead;
+                    Calendar instance = Calendar.getInstance();
+                        instance.add(Calendar.YEAR, 1);
+//                    String twoWeeksAhead = DATE_FORMAT
+//                            .format(new Date(System.currentTimeMillis()));
+                    sortType = RELEASE_DATE_DESC + instance.get(Calendar.YEAR) + "-"
+                            + (instance.get(Calendar.MONTH)+ 1) + "-" + instance.get(Calendar.DAY_OF_MONTH);
                     contentUri = MovieByReleaseDate.CONTENT_URI;
                     break;
                 case 3:
