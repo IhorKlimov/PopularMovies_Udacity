@@ -377,7 +377,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-//        hello tt
+//        hello ttttff
         super.onSaveInstanceState(outState);
         if (strings != null) {
             ArrayList<String> author = new ArrayList<>();
