@@ -65,11 +65,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private final static String SORT_BY = "?sort_by=";
     private final static String PAGE = "&page=";
     private final static String POPULARITY_DESC = "popularity.desc";
-    private final static String RELEASE_DATE_DESC = "release_date.desc&vote_count.gte=10&vote_average.gte=7&release_date.lte=";
+    private final static String RELEASE_DATE_DESC = "release_date.desc&vote_count.gte25&vote_average.gte=7&release_date.lte=";
     private final static String VOTE_AVG_DESC = "vote_average.desc&vote_count.gte=1000";
 
     private Context context;
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
     private ContentResolver mContentResolver;
     private ContentValues[] contentValues = new ContentValues[20];
 
@@ -86,22 +85,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         this.context = context;
     }
 
-    /**
-     * Set up the sync adapter. This form of the
-     * constructor maintains compatibility with Android 3.0
-     * and later platform versions
-     */
-    public SyncAdapter(
-            Context context,
-            boolean autoInitialize,
-            boolean allowParallelSyncs) {
-        super(context, autoInitialize, allowParallelSyncs);
-        /*
-         * If your app uses a content resolver, get an instance of it
-         * from the incoming Context
-         */
-        mContentResolver = context.getContentResolver();
-    }
+
 
     public static void syncImmediately(Context context) {
         Log.d("TAG", "syncImmediately: ");
@@ -156,11 +140,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     break;
                 case 2:
                     Calendar instance = Calendar.getInstance();
-                        instance.add(Calendar.YEAR, 1);
+                    instance.add(Calendar.YEAR, 1);
 //                    String twoWeeksAhead = DATE_FORMAT
 //                            .format(new Date(System.currentTimeMillis()));
                     sortType = RELEASE_DATE_DESC + instance.get(Calendar.YEAR) + "-"
-                            + (instance.get(Calendar.MONTH)+ 1) + "-" + instance.get(Calendar.DAY_OF_MONTH);
+                            + (instance.get(Calendar.MONTH) + 1) + "-" + instance.get(Calendar.DAY_OF_MONTH);
                     contentUri = MovieByReleaseDate.CONTENT_URI;
                     break;
                 case 3:

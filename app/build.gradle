@@ -6,10 +6,10 @@ android {
 
     defaultConfig {
         applicationId "com.example.igorklimov.popularmoviesdemo"
-        minSdkVersion 15
+        minSdkVersion 11
         targetSdkVersion 23
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.1"
     }
     buildTypes {
         release {
@@ -20,8 +20,8 @@ android {
     productFlavors {
     }
     buildTypes.each {
-        it.buildConfigField 'String', 'YOUTUBE_API_KEY', '"AIzaSyBhBFiwTZpQmX5C1uTfIg3OOw3UqHZrFFU"'
-        it.buildConfigField 'String', 'TBDB_API_KEY', '"daa8e62fb35a4e6821d58725b5abb88f"'
+        it.buildConfigField 'String', 'YOUTUBE_API_KEY', '""'
+        it.buildConfigField 'String', 'TBDB_API_KEY', '""'
     }
 }
 
