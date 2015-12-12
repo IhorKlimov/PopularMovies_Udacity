@@ -394,7 +394,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
     }
-
+//todo
     public void sortChanged() {
         getLoaderManager().restartLoader(DETAIL_LOADER, null, this);
     }
@@ -410,7 +410,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             for (int i = 0; i < strings.length; i++) {
                 strings[i] = "n/a";
             }
-//sfsdfddsdfsdfdddfgdfg
             JsonResponse = getJsonResponse("http://api.themoviedb.org/3/movie/" + id + "?api_key=" + BuildConfig.TBDB_API_KEY);
             try {
                 JSONObject jsonObject = new JSONObject(JsonResponse);
