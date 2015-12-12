@@ -1,6 +1,5 @@
 package com.example.igorklimov.popularmoviesdemo.fragments;
 
-import android.app.Dialog;
 import android.app.Fragment;
 import android.app.LoaderManager;
 import android.content.Context;
@@ -59,7 +58,6 @@ import java.util.Map;
 
 import static android.widget.Toast.LENGTH_SHORT;
 import static com.example.igorklimov.popularmoviesdemo.BuildConfig.YOUTUBE_API_KEY;
-import static com.example.igorklimov.popularmoviesdemo.R.id.action_bar;
 import static com.example.igorklimov.popularmoviesdemo.R.id.author;
 import static com.example.igorklimov.popularmoviesdemo.R.id.group_title;
 import static com.example.igorklimov.popularmoviesdemo.R.id.review_text;
@@ -97,6 +95,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private ShareActionProvider actionProvider;
     private ActionBar actionBar;
     private ScrollView scroll;
+    private TextView director;
+    private TextView actors;
 
     //todo Add director, cast
     public DetailFragment() {
@@ -147,6 +147,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         genresView = (TextView) rootView.findViewById(R.id.genres);
         length = (TextView) rootView.findViewById(R.id.length);
         budget = (TextView) rootView.findViewById(R.id.budget);
+        actors = (TextView) rootView.findViewById(R.id.actors);
+        director = (TextView) rootView.findViewById(R.id.director);
         ExpandableListView reviews = (ExpandableListView) rootView.findViewById(R.id.reviews);
         context = getActivity();
 
@@ -263,7 +265,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         ConnectivityManager systemService = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = systemService.getActiveNetworkInfo();
         if (activeNetworkInfo == null) {
-           noInternet();
+            noInternet();
         } else {
             initLoader();
         }
@@ -381,7 +383,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         protected String[] doInBackground(String... params) {
             String id = params[0];
             String JsonResponse;
-            String[] strings = new String[3];
+            String[] strings = new String[5];
 
             JsonResponse = getJsonResponse("http://api.themoviedb.org/3/movie/" + id + "?api_key=" + BuildConfig.TBDB_API_KEY);
 
@@ -389,7 +391,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 JSONObject jsonObject = new JSONObject(JsonResponse);
                 strings[0] = jsonObject.getString("runtime");
                 strings[1] = jsonObject.getString("budget");
-            } catch (JSONException|NullPointerException e) {
+            } catch (JSONException | NullPointerException e) {
                 e.printStackTrace();
                 noInternet();
             }
@@ -409,7 +411,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 } else {
                     strings[2] = results.getJSONObject(0).getString("key");
                 }
-            } catch (JSONException|NullPointerException e) {
+            } catch (JSONException | NullPointerException e) {
                 e.printStackTrace();
                 noInternet();
             }
@@ -425,7 +427,32 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                     map.put("CHILD_TEXT", results.getJSONObject(i).getString("content"));
                     childGroupForFirstGroupRow.add(map);
                 }
-            } catch (JSONException|NullPointerException e) {
+            } catch (JSONException | NullPointerException e) {
+                e.printStackTrace();
+                noInternet();
+            }
+
+            JsonResponse = getJsonResponse("http://api.themoviedb.org/3/movie/" + id + "/credits?api_key=" + BuildConfig.TBDB_API_KEY);
+
+            try {
+                JSONObject jsonObject = new JSONObject(JsonResponse);
+                final JSONArray cast = jsonObject.getJSONArray("cast");
+                String actors = "";
+                int length = cast.length() > 6 ? 6 : cast.length();
+                for (int i = 0; i < length; i++) {
+                    actors = actors.concat(cast.getJSONObject(i).getString("name") + (i < (length-1) ? ", " : ""));
+                }
+                Log.d("TAG", "doInBackground: " + actors);
+                strings[3] = actors;
+                JSONArray crew = jsonObject.getJSONArray("crew");
+                for (int i = 0; i < crew.length(); i++) {
+                    JSONObject object = crew.getJSONObject(i);
+                    if (object.getString("department").equals("Directing")) {
+                        strings[4] = object.getString("name");
+                        break;
+                    }
+                }
+            } catch (JSONException | NullPointerException e) {
                 e.printStackTrace();
                 noInternet();
             }
@@ -439,6 +466,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             length.append(s[0] + " min");
             budget.append(" $" + Utility.formatBudget(s[1]));
             trailerUri = s[2];
+            actors.append(s[3]);
+            director.append(s[4]);
             if (actionProvider != null) {
                 actionProvider.setShareIntent(createShareIntent());
             }

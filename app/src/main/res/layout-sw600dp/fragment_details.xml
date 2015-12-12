@@ -130,6 +130,22 @@
                     style="@style/TextCondensed30"  />
 
                 <TextView
+                    android:id="@+id/director"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Director: "
+                    style="@style/TextCondensed30"  />
+
+                <TextView
+                    android:id="@+id/actors"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Cast: "
+                    style="@style/TextCondensed30"  />
+
+                <TextView
                     android:id="@+id/plot"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
