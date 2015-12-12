@@ -33,7 +33,7 @@ public class CustomAdapter extends CursorRecyclerViewAdapter<CustomAdapter.ViewH
     public static int previous = -1;
 
     public CustomAdapter(Context context, Cursor c, RecyclerView recyclerView) {
-        super(context, c);
+        super(c);
         CustomAdapter.context = context;
         orientation = context.getResources().getConfiguration().orientation;
         this.recyclerView = recyclerView;
@@ -74,7 +74,6 @@ public class CustomAdapter extends CursorRecyclerViewAdapter<CustomAdapter.ViewH
 
                     }
                 });
-
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

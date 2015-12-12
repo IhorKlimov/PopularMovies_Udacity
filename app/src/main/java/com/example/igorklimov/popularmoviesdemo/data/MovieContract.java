@@ -33,7 +33,6 @@ public final class MovieContract {
     private static final String COMA_SEP = ",";
 
     private MovieContract() {
-
     }
 
     public static abstract class MovieByPopularity implements BaseColumns {

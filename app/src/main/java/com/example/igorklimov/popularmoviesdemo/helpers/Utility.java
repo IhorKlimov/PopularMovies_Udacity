@@ -263,7 +263,6 @@ public class Utility {
         prefs.edit().putInt(c.getString(R.string.votes_page), 1).apply();
     }
 
-
     public static int getPagePreference(Context c) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
         switch (getSortByPreference(c)) {

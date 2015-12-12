@@ -88,7 +88,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void showDetails(Uri movieUri) {
-
         DetailFragment fragment;
         if (movieUri == null) {
             Fragment f = getFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG);
@@ -146,13 +145,8 @@ public class MainActivity extends AppCompatActivity
                 reload();
                 break;
         }
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-
-
-
-
 }

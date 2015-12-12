@@ -25,26 +25,23 @@ import com.example.igorklimov.popularmoviesdemo.activities.MainActivity;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByPopularity;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByReleaseDate;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByVotes;
-import com.example.igorklimov.popularmoviesdemo.fragments.NoInternet;
 import com.example.igorklimov.popularmoviesdemo.fragments.MoviesGridFragment;
+import com.example.igorklimov.popularmoviesdemo.fragments.NoInternet;
 import com.example.igorklimov.popularmoviesdemo.helpers.Utility;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
 
 import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.COLUMN_AVERAGE_VOTE;
+import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.COLUMN_BACKDROP_PATH;
 import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.COLUMN_GENRES;
 import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.COLUMN_MOVIE_ID;
 import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.COLUMN_PLOT;
 import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.COLUMN_POSTER;
 import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.COLUMN_RELEASE_DATE;
 import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.COLUMN_TITLE;
-import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.COLUMN_BACKDROP_PATH;
 import static com.example.igorklimov.popularmoviesdemo.helpers.Utility.getGenres;
 import static com.example.igorklimov.popularmoviesdemo.helpers.Utility.getJsonMovies;
 import static com.example.igorklimov.popularmoviesdemo.helpers.Utility.getJsonResponse;
@@ -54,8 +51,8 @@ import static com.example.igorklimov.popularmoviesdemo.helpers.Utility.getJsonRe
  * app, using the Android sync adapter framework.
  */
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
-    private static final int DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
-    private static final int SYNC_INTERVAL = 24 * 60 * 60;
+    private static final int TWO_DAYS_IN_MILLISECONDS = 2 * 24 * 60 * 60 * 1000;
+    private static final int SYNC_INTERVAL = 2 * 24 * 60 * 60;
     private static final int FLEX_TIME = SYNC_INTERVAL / 3;
 
     private final static String IMAGE_BASE = "http://image.tmdb.org/t/p";
@@ -86,7 +83,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
 
-
     public static void syncImmediately(Context context) {
         Log.d("TAG", "syncImmediately: ");
         ConnectivityManager systemService = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -104,12 +100,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority,
                               ContentProviderClient provider, SyncResult syncResult) {
-
-
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         long lastUpdate = prefs.getLong(context.getString(R.string.last_update), System.currentTimeMillis());
         Log.d("TAG", "onPerformSync: IF " + (System.currentTimeMillis() - lastUpdate));
-        if (System.currentTimeMillis() - lastUpdate >= DAY_IN_MILLISECONDS) {
+        if (System.currentTimeMillis() - lastUpdate >= TWO_DAYS_IN_MILLISECONDS) {
             int delete1 = mContentResolver.delete(MovieByPopularity.CONTENT_URI, null, null);
             int delete2 = mContentResolver.delete(MovieByReleaseDate.CONTENT_URI, null, null);
             int delete3 = mContentResolver.delete(MovieByVotes.CONTENT_URI, null, null);
@@ -118,9 +112,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             Log.d("TAG", "onPerformSync: ERASE THE DATABASE -------" + delete3);
             prefs.edit().putLong(context.getString(R.string.last_update), System.currentTimeMillis()).apply();
             Utility.initializePagePreference(context);
-            if (MoviesGridFragment.listener != null) {
-                MoviesGridFragment.listener.refresh();
-            }
+            if (MoviesGridFragment.listener != null) MoviesGridFragment.listener.refresh();
             syncImmediately(context);
         } else {
             getData();
@@ -141,8 +133,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 case 2:
                     Calendar instance = Calendar.getInstance();
                     instance.add(Calendar.YEAR, 1);
-//                    String twoWeeksAhead = DATE_FORMAT
-//                            .format(new Date(System.currentTimeMillis()));
                     sortType = RELEASE_DATE_DESC + instance.get(Calendar.YEAR) + "-"
                             + (instance.get(Calendar.MONTH) + 1) + "-" + instance.get(Calendar.DAY_OF_MONTH);
                     contentUri = MovieByReleaseDate.CONTENT_URI;
@@ -206,9 +196,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
 
         if (accountManager.getPassword(newAccount) == null) {
-            if (!accountManager.addAccountExplicitly(newAccount, "", null)) {
-                return null;
-            }
+            if (!accountManager.addAccountExplicitly(newAccount, "", null)) return null;
+
             onAccountCreated(newAccount, context);
         }
 

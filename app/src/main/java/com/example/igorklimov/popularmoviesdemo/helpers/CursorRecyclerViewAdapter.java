@@ -11,8 +11,6 @@ import android.support.v7.widget.RecyclerView;
 public abstract class CursorRecyclerViewAdapter<VH extends RecyclerView.ViewHolder>
         extends RecyclerView.Adapter<VH> {
 
-    private Context mContext;
-
     private Cursor mCursor;
 
     private boolean mDataValid;
@@ -21,8 +19,7 @@ public abstract class CursorRecyclerViewAdapter<VH extends RecyclerView.ViewHold
 
     private DataSetObserver mDataSetObserver;
 
-    public CursorRecyclerViewAdapter(Context context, Cursor cursor) {
-        mContext = context;
+    public CursorRecyclerViewAdapter(Cursor cursor) {
         mCursor = cursor;
         mDataValid = cursor != null;
         mRowIdColumn = mDataValid ? mCursor.getColumnIndex("_id") : -1;
@@ -30,10 +27,6 @@ public abstract class CursorRecyclerViewAdapter<VH extends RecyclerView.ViewHold
         if (mCursor != null) {
             mCursor.registerDataSetObserver(mDataSetObserver);
         }
-    }
-
-    public Cursor getCursor() {
-        return mCursor;
     }
 
     @Override
@@ -71,19 +64,7 @@ public abstract class CursorRecyclerViewAdapter<VH extends RecyclerView.ViewHold
     }
 
     /**
-     * Change the underlying cursor to a new cursor. If there is an existing cursor it will be
-     * closed.
-     */
-    public void changeCursor(Cursor cursor) {
-        Cursor old = swapCursor(cursor);
-        if (old != null) {
-            old.close();
-        }
-    }
-
-    /**
      * Swap in a new Cursor, returning the old Cursor.  Unlike
-     * {@link #changeCursor(Cursor)}, the returned old Cursor is <em>not</em>
      * closed.
      */
     public Cursor swapCursor(Cursor newCursor) {
@@ -106,7 +87,6 @@ public abstract class CursorRecyclerViewAdapter<VH extends RecyclerView.ViewHold
             mRowIdColumn = -1;
             mDataValid = false;
             notifyDataSetChanged();
-            //There is no notifyDataSetInvalidated() method in RecyclerView.Adapter
         }
         return oldCursor;
     }
@@ -124,7 +104,6 @@ public abstract class CursorRecyclerViewAdapter<VH extends RecyclerView.ViewHold
             super.onInvalidated();
             mDataValid = false;
             notifyDataSetChanged();
-            //There is no notifyDataSetInvalidated() method in RecyclerView.Adapter
         }
     }
 }

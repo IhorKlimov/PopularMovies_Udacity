@@ -97,8 +97,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private ScrollView scroll;
     private TextView director;
     private TextView actors;
+    private String[] strings;
 
-    //todo Add director, cast
     public DetailFragment() {
     }
 
@@ -164,8 +164,22 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         List<List<Map<String, String>>> listOfChildGroups = new ArrayList<>();
 
         childGroupForFirstGroupRow = new ArrayList<>();
-
         listOfChildGroups.add(childGroupForFirstGroupRow);
+
+        if (savedInstanceState != null && savedInstanceState.containsKey("strings")) {
+            strings = savedInstanceState.getStringArray("strings");
+            ArrayList<String> author = savedInstanceState.getStringArrayList("author");
+            ArrayList<String> review = savedInstanceState.getStringArrayList("review");
+
+            for (int i = 0; i < author.size(); i++) {
+                HashMap<String, String> map = new HashMap<>();
+                map.put("CHILD_TITLE", author.get(i));
+                map.put("CHILD_TEXT", review.get(i));
+                childGroupForFirstGroupRow.add(map);
+            }
+            setExtraData(strings);
+        }
+
         reviews.setAdapter(new SimpleExpandableListAdapter(
                 context,
                 groupData,
@@ -183,10 +197,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         scroll = (ScrollView) rootView.findViewById(R.id.scrollView);
         final int heightPixels = context.getResources().getDisplayMetrics().heightPixels;
 
-
         reviews.setDividerHeight(0);
         reviews.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
-
             @Override
             public boolean onGroupClick(ExpandableListView parent, View v,
                                         int groupPosition, long id) {
@@ -264,11 +276,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         super.onActivityCreated(savedInstanceState);
         ConnectivityManager systemService = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = systemService.getActiveNetworkInfo();
-        if (activeNetworkInfo == null) {
-            noInternet();
-        } else {
-            initLoader();
-        }
+        if (activeNetworkInfo == null) noInternet();
+        else initLoader();
     }
 
     public void initLoader() {
@@ -289,11 +298,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        if (!done) {
-            if (data.moveToFirst()) {
-                cursor = data;
-                load();
-            }
+        if (!done && data.moveToFirst()) {
+            cursor = data;
+            load();
         }
     }
 
@@ -331,7 +338,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             });
         }
 
-        new Task().execute(cursor.getString(7));
+        if (strings == null) new Task().execute(cursor.getString(7));
         if (Utility.isFavorite(cursor, context)) {
             fab.setImageResource(R.drawable.star_on);
             fab.setActivated(true);
@@ -369,6 +376,22 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (strings != null) {
+            ArrayList<String> author = new ArrayList<>();
+            ArrayList<String> review = new ArrayList<>();
+            for (int i = 0; i < childGroupForFirstGroupRow.size(); i++) {
+                author.add(childGroupForFirstGroupRow.get(i).get("CHILD_TITLE"));
+                review.add(childGroupForFirstGroupRow.get(i).get("CHILD_TEXT"));
+            }
+            outState.putStringArray("strings", strings);
+            outState.putStringArrayList("author", author);
+            outState.putStringArrayList("review", review);
+        }
+    }
+
+    @Override
     public void onLoaderReset(Loader<Cursor> loader) {
     }
 
@@ -383,10 +406,12 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         protected String[] doInBackground(String... params) {
             String id = params[0];
             String JsonResponse;
-            String[] strings = {"n/a", "n/a", "n/a", "n/a", "n/a"};
+            strings = new String[5];
+            for (int i = 0; i < strings.length; i++) {
+                strings[i] = "n/a";
+            }
 
             JsonResponse = getJsonResponse("http://api.themoviedb.org/3/movie/" + id + "?api_key=" + BuildConfig.TBDB_API_KEY);
-
             try {
                 JSONObject jsonObject = new JSONObject(JsonResponse);
                 String runtime = jsonObject.getString("runtime");
@@ -400,7 +425,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             }
 
             JsonResponse = getJsonResponse("http://api.themoviedb.org/3/movie/" + id + "/videos?api_key=" + BuildConfig.TBDB_API_KEY);
-
             try {
                 JSONObject jsonObject = new JSONObject(JsonResponse);
                 JSONArray results = jsonObject.getJSONArray("results");
@@ -422,7 +446,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             }
 
             JsonResponse = getJsonResponse("http://api.themoviedb.org/3/movie/" + id + "/reviews?api_key=" + BuildConfig.TBDB_API_KEY);
-
             try {
                 JSONObject jsonObject = new JSONObject(JsonResponse);
                 final JSONArray results = jsonObject.getJSONArray("results");
@@ -440,7 +463,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             }
 
             JsonResponse = getJsonResponse("http://api.themoviedb.org/3/movie/" + id + "/credits?api_key=" + BuildConfig.TBDB_API_KEY);
-
             try {
                 JSONObject jsonObject = new JSONObject(JsonResponse);
                 final JSONArray cast = jsonObject.getJSONArray("cast");
@@ -470,16 +492,17 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         @Override
         protected void onPostExecute(String[] s) {
             super.onPostExecute(s);
-            length.append(s[0]);
-            budget.append(s[1]);
-            if (!s[2].equals("n/a")) trailerUri = s[2];
-            actors.append(s[3]);
-            director.append(s[4]);
-            if (actionProvider != null) {
-                actionProvider.setShareIntent(createShareIntent());
-            }
+            setExtraData(s);
         }
+    }
 
+    private void setExtraData(String[] s) {
+        length.append(s[0]);
+        budget.append(s[1]);
+        if (!s[2].equals("n/a")) trailerUri = s[2];
+        actors.append(s[3]);
+        director.append(s[4]);
+        if (actionProvider != null) actionProvider.setShareIntent(createShareIntent());
     }
 
     private void noInternet() {

@@ -33,7 +33,6 @@ public class DetailActivity extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
         DetailFragment df = (DetailFragment) getFragmentManager().findFragmentById(R.id.details_fragment);
-        Log.d("TAG", "onBackPressed: " + df.fab.isActivated());
         if (!Utility.isTabletPreference(this) && Utility.getSortByPreference(this) == 4) {
             if (df.toRemove) Utility.removeFromFavorite(df.cursor, this);
         }

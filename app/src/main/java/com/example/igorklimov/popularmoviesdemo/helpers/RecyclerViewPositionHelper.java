@@ -42,42 +42,6 @@ public class RecyclerViewPositionHelper {
         return child == null ? RecyclerView.NO_POSITION : recyclerView.getChildAdapterPosition(child);
     }
 
-    /**
-     * Returns the adapter position of the first fully visible view. This position does not include
-     * adapter changes that were dispatched after the last layout pass.
-     *
-     * @return The adapter position of the first fully visible item or
-     * {@link RecyclerView#NO_POSITION} if there aren't any visible items.
-     */
-    public int findFirstCompletelyVisibleItemPosition() {
-        final View child = findOneVisibleChild(0, layoutManager.getChildCount(), true, false);
-        return child == null ? RecyclerView.NO_POSITION : recyclerView.getChildAdapterPosition(child);
-    }
-
-    /**
-     * Returns the adapter position of the last visible view. This position does not include
-     * adapter changes that were dispatched after the last layout pass.
-     *
-     * @return The adapter position of the last visible view or {@link RecyclerView#NO_POSITION} if
-     * there aren't any visible items
-     */
-    public int findLastVisibleItemPosition() {
-        final View child = findOneVisibleChild(layoutManager.getChildCount() - 1, -1, false, true);
-        return child == null ? RecyclerView.NO_POSITION : recyclerView.getChildAdapterPosition(child);
-    }
-
-    /**
-     * Returns the adapter position of the last fully visible view. This position does not include
-     * adapter changes that were dispatched after the last layout pass.
-     *
-     * @return The adapter position of the last fully visible view or
-     * {@link RecyclerView#NO_POSITION} if there aren't any visible items.
-     */
-    public int findLastCompletelyVisibleItemPosition() {
-        final View child = findOneVisibleChild(layoutManager.getChildCount() - 1, -1, true, false);
-        return child == null ? RecyclerView.NO_POSITION : recyclerView.getChildAdapterPosition(child);
-    }
-
     View findOneVisibleChild(int fromIndex, int toIndex, boolean completelyVisible,
                              boolean acceptPartiallyVisible) {
         OrientationHelper helper;
