@@ -113,7 +113,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_detail, menu);
         MenuItem item = menu.findItem(R.id.action_share);
-        if (Utility.isTabletPreference(context)) {
+        if (!Utility.isTabletPreference(context)) {
             actionProvider = new ShareActionProvider(getActivity()) {
                 @Override
                 public View onCreateActionView() {
