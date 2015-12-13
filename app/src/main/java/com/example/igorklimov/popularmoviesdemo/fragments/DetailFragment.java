@@ -394,11 +394,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
     }
-//todo
+
     public void sortChanged() {
         getLoaderManager().restartLoader(DETAIL_LOADER, null, this);
     }
-
 
     private class Task extends AsyncTask<String, Void, String[]> {
 

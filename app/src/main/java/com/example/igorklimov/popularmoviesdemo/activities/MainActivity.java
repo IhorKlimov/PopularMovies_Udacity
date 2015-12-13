@@ -11,6 +11,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 
 import com.example.igorklimov.popularmoviesdemo.R;
@@ -19,19 +20,19 @@ import com.example.igorklimov.popularmoviesdemo.fragments.MoviesGridFragment;
 import com.example.igorklimov.popularmoviesdemo.helpers.CustomAdapter;
 import com.example.igorklimov.popularmoviesdemo.helpers.Utility;
 import com.example.igorklimov.popularmoviesdemo.sync.SyncAdapter;
-import com.facebook.stetho.Stetho;
-import com.facebook.stetho.okhttp.StethoInterceptor;
-import com.squareup.okhttp.OkHttpClient;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String DETAILFRAGMENT_TAG = "DETAIL_FRAGMENT";
+    private DrawerLayout drawer;
+    private int height;
+    private int width;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Stetho.initializeWithDefaults(this);
+//        Stetho.initializeWithDefaults(this);
 //        OkHttpClient client = new OkHttpClient();
 //        client.networkInterceptors().add(new StethoInterceptor());
 //        Stetho.initialize(
@@ -40,25 +41,23 @@ public class MainActivity extends AppCompatActivity
 //                        .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this))
 //                        .build());
 
-        OkHttpClient client = new OkHttpClient();
-        client.networkInterceptors().add(new StethoInterceptor());
-
-
+//        OkHttpClient client = new OkHttpClient();
+//        client.networkInterceptors().add(new StethoInterceptor());
 
         setContentView(R.layout.drawer);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        Utility.setSortByPreference(this, 1);
+        if (savedInstanceState == null) Utility.setSortByPreference(this, 1);
+
         SyncAdapter.initializeSyncAdapter(this);
         Utility.setIsTabletPreference(this, findViewById(R.id.details_fragment) != null);
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
-
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setItemIconTintList(null);
@@ -73,9 +72,7 @@ public class MainActivity extends AppCompatActivity
             mf.sortChanged();
         }
         DetailFragment df = (DetailFragment) getFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG);
-        if (null != df) {
-            df.sortChanged();
-        }
+        if (null != df) df.sortChanged();
     }
 
     public void onItemClick(Uri movieUri) {
@@ -97,8 +94,10 @@ public class MainActivity extends AppCompatActivity
                 transaction.commit();
             }
         } else {
-            int height = findViewById(R.id.details_fragment).getHeight();
-            int width = findViewById(R.id.details_fragment).getWidth();
+            if (height == 0) {
+                height = findViewById(R.id.details_fragment).getHeight();
+                width = findViewById(R.id.details_fragment).getWidth();
+            }
             fragment = new DetailFragment();
             Bundle bundle = new Bundle();
             bundle.putParcelable("movie", movieUri);
@@ -113,12 +112,8 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
+        if (drawer.isDrawerOpen(GravityCompat.START)) drawer.closeDrawer(GravityCompat.START);
+        else super.onBackPressed();
     }
 
     @Override
@@ -145,7 +140,6 @@ public class MainActivity extends AppCompatActivity
                 reload();
                 break;
         }
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }

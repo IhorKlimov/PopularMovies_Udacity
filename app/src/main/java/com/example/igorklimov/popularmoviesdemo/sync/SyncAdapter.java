@@ -17,6 +17,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.example.igorklimov.popularmoviesdemo.BuildConfig;
@@ -131,10 +132,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     contentUri = MovieByPopularity.CONTENT_URI;
                     break;
                 case 2:
-                    Calendar instance = Calendar.getInstance();
-                    instance.add(Calendar.YEAR, 1);
-                    sortType = RELEASE_DATE_DESC + instance.get(Calendar.YEAR) + "-"
-                            + (instance.get(Calendar.MONTH) + 1) + "-" + instance.get(Calendar.DAY_OF_MONTH);
+                    sortType = formatDate();
                     contentUri = MovieByReleaseDate.CONTENT_URI;
                     break;
                 case 3:
@@ -183,6 +181,13 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 }
             }
         }
+    }
+
+    private String formatDate() {
+        Calendar date = Calendar.getInstance();
+        date.add(Calendar.YEAR, 1);
+        return RELEASE_DATE_DESC + date.get(Calendar.YEAR) + "-"
+                + (date.get(Calendar.MONTH) + 1) + "-" + date.get(Calendar.DAY_OF_MONTH);
     }
 
     /**

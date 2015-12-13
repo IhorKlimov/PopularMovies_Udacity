@@ -187,9 +187,10 @@ public class Utility {
     @NonNull
     public static String formatBudget(String format) {
         String result = "";
-        for (int i = format.length() - 1; i >= 0; i--) {
+        int j = format.length();
+        for (int i = j - 1; i >= 0; i--) {
             result = result.concat(format.charAt(i) + "");
-            if (i % 3 == 0 && i != 0 && i != format.length() - 1) result = result.concat(",");
+            if ((j - i) % 3 == 0 && i != 0 ) result = result.concat(",");
         }
         format = "";
         for (int i = result.length() - 1; i >= 0; i--) {
