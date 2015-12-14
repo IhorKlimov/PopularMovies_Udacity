@@ -469,7 +469,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 for (int i = 0; i < length; i++) {
                     actors = actors.concat(cast.getJSONObject(i).getString("name") + (i < (length - 1) ? ", " : ""));
                 }
-                strings[3] = actors;
+                if (actors.length() > 0) strings[3] = actors;
                 JSONArray crew = jsonObject.getJSONArray("crew");
                 for (int i = 0; i < crew.length(); i++) {
                     JSONObject object = crew.getJSONObject(i);

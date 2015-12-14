@@ -63,22 +63,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private final static String SORT_BY = "?sort_by=";
     private final static String PAGE = "&page=";
     private final static String POPULARITY_DESC = "popularity.desc";
-    private final static String RELEASE_DATE_DESC = "release_date.desc&vote_count.gte25&vote_average.gte=7&release_date.lte=";
+    private final static String RELEASE_DATE_DESC = "release_date.desc&vote_count.gte=10&vote_average.gte=7&release_date.lte=";
     private final static String VOTE_AVG_DESC = "vote_average.desc&vote_count.gte=1000";
 
     private Context context;
     private ContentResolver mContentResolver;
     private ContentValues[] contentValues = new ContentValues[20];
 
-    /**
-     * Set up the sync adapter
-     */
     public SyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
-        /*
-         * If your app uses a content resolver, get an instance of it
-         * from the incoming Context
-         */
         mContentResolver = context.getContentResolver();
         this.context = context;
     }

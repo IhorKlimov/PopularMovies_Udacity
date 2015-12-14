@@ -9,17 +9,20 @@ import com.example.igorklimov.popularmoviesdemo.data.MovieContract.FavoriteMovie
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByPopularity;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByReleaseDate;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByVotes;
+import com.example.igorklimov.popularmoviesdemo.helpers.Utility;
 
 /**
  * Created by Igor Klimov on 11/28/2015.
  */
 public class MoviesDbHelper extends SQLiteOpenHelper {
 
-    public static final int DATABASE_VERSION = 4;
+    public static final int DATABASE_VERSION = 7;
     public static final String DATABASE_NAME = "Movies.db";
+    private final Context context;
 
     public MoviesDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        this.context = context;
     }
 
     @Override
@@ -33,6 +36,8 @@ public class MoviesDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        Log.d("TAG", "UPDATING DB");
+        Utility.initializePagePreference(context);
         db.execSQL(MovieByPopularity.SQL_DELETE_ENTRIES);
         db.execSQL(MovieByReleaseDate.SQL_DELETE_ENTRIES);
         db.execSQL(MovieByVotes.SQL_DELETE_ENTRIES);
