@@ -26,19 +26,21 @@ public class ScrollListener extends RecyclerView.OnScrollListener {
     @Override
     public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
         super.onScrolled(recyclerView, dx, dy);
-        RecyclerViewPositionHelper helper = RecyclerViewPositionHelper.createHelper(recyclerView);
-        visibleItemCount = recyclerView.getChildCount();
-        totalItemCount = helper.getItemCount();
-        firstVisibleItem = helper.findFirstVisibleItemPosition();
-        if (loading && totalItemCount > previousTotal) {
-                loading = false;
-                previousTotal = totalItemCount;
-        }
-        if (!loading && (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)) {
-            Utility.incrementPage(context);
-            Log.d("TAG", "onScrolled: RUNNING syncImmediately");
-            SyncAdapter.syncImmediately(context);
-            loading = true;
+        if (Utility.getSortByPreference(context)!=4) {
+            RecyclerViewPositionHelper helper = RecyclerViewPositionHelper.createHelper(recyclerView);
+            visibleItemCount = recyclerView.getChildCount();
+            totalItemCount = helper.getItemCount();
+            firstVisibleItem = helper.findFirstVisibleItemPosition();
+            if (loading && totalItemCount > previousTotal) {
+                    loading = false;
+                    previousTotal = totalItemCount;
+            }
+            if (!loading && (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)) {
+                Utility.incrementPage(context);
+                Log.d("TAG", "onScrolled: RUNNING syncImmediately");
+                SyncAdapter.syncImmediately(context);
+                loading = true;
+            }
         }
     }
 

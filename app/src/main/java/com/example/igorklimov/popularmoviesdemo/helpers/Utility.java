@@ -285,7 +285,7 @@ public class Utility {
             case 2:
                 prefs.edit().putInt(c.getString(R.string.release_page), (getPagePreference(c) + 1)).apply();
                 break;
-            default:
+            case 3:
                 prefs.edit().putInt(c.getString(R.string.votes_page), (getPagePreference(c) + 1)).apply();
         }
     }
