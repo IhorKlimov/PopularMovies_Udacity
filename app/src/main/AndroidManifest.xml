@@ -20,14 +20,12 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".activities.DetailActivity"
-            android:label="@string/title_activity_detail"
-            android:theme="@style/DetailsActivityTheme" />
+            android:label="@string/title_activity_detail" />
 
         <service android:name=".sync.AuthenticatorService">
             <intent-filter>

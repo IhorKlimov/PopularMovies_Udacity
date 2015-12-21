@@ -1,11 +1,7 @@
 package com.example.igorklimov.popularmoviesdemo.fragments;
 
-import android.app.Fragment;
-import android.app.LoaderManager;
 import android.content.Context;
-import android.content.CursorLoader;
 import android.content.Intent;
-import android.content.Loader;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -13,10 +9,14 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.ShareActionProvider;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -24,9 +24,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ScrollView;
@@ -61,6 +61,7 @@ import static com.example.igorklimov.popularmoviesdemo.BuildConfig.YOUTUBE_API_K
 import static com.example.igorklimov.popularmoviesdemo.R.id.author;
 import static com.example.igorklimov.popularmoviesdemo.R.id.group_title;
 import static com.example.igorklimov.popularmoviesdemo.R.id.review_text;
+import static com.example.igorklimov.popularmoviesdemo.R.id.toolbar;
 import static com.example.igorklimov.popularmoviesdemo.R.layout.child;
 import static com.example.igorklimov.popularmoviesdemo.R.layout.group;
 import static com.example.igorklimov.popularmoviesdemo.helpers.Utility.getJsonResponse;
@@ -93,8 +94,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private List<Map<String, String>> childGroupForFirstGroupRow;
     private Context context;
     private ShareActionProvider actionProvider;
-    private ActionBar actionBar;
-    private ScrollView scroll;
+    private NestedScrollView scroll;
     private TextView director;
     private TextView actors;
     private String[] strings;
@@ -106,6 +106,15 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            getActivity().onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -151,7 +160,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         director = (TextView) rootView.findViewById(R.id.director);
         ExpandableListView reviews = (ExpandableListView) rootView.findViewById(R.id.reviews);
         context = getActivity();
-
         back = (ImageView) rootView.findViewById(R.id.backdrop);
         progressBar = rootView.findViewById(R.id.progressBar);
         playButton = (ImageButton) rootView.findViewById(R.id.play_button);
@@ -192,9 +200,13 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 new String[]{"CHILD_TITLE", "CHILD_TEXT"},
                 new int[]{author, review_text}
         ));
+        Toolbar bar = (Toolbar) rootView.findViewById(R.id.toolbar);
+        if(bar!=null) {
+            ((DetailActivity) context).setSupportActionBar(bar);
+            ((DetailActivity) context).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        actionBar = ((AppCompatActivity) context).getSupportActionBar();
-        scroll = (ScrollView) rootView.findViewById(R.id.scrollView);
+        }
+        scroll = (NestedScrollView) rootView.findViewById(R.id.scrollView);
         final int heightPixels = context.getResources().getDisplayMetrics().heightPixels;
 
         reviews.setDividerHeight(0);
@@ -324,20 +336,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         back.setMinimumHeight(backdropHeight);
         progressBar.setVisibility(View.VISIBLE);
         playButton.setVisibility(View.VISIBLE);
-        if (actionBar != null && !Utility.isTabletPreference(context)) {
-            final int height = backdropHeight - actionBar.getHeight();
-            scroll.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
-                @Override
-                public void onScrollChanged() {
-                    if (scroll.getScrollY() >= height) {
-                        actionBar.hide();
-                    } else if (scroll.getScrollY() < height) {
-                        actionBar.show();
-                    }
-                }
-            });
-        }
-
         if (strings == null) new Task().execute(cursor.getString(7));
         if (Utility.isFavorite(cursor, context)) {
             fab.setImageResource(R.drawable.star_on);
@@ -507,9 +505,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         NoInternet noInternet = new NoInternet();
         noInternet.setTargetFragment(this, 2);
         if (Utility.isTabletPreference(context)) {
-            noInternet.show(((MainActivity) context).getFragmentManager(), "2");
+            noInternet.show(((MainActivity) context).getSupportFragmentManager(), "2");
         } else {
-            noInternet.show(((DetailActivity) context).getFragmentManager(), "2");
+            noInternet.show(((DetailActivity) context).getSupportFragmentManager(), "2");
         }
     }
 

@@ -1,11 +1,11 @@
 package com.example.igorklimov.popularmoviesdemo.activities;
 
-import android.app.Fragment;
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity
             CustomAdapter.previous = -1;
             mf.sortChanged();
         }
-        DetailFragment df = (DetailFragment) getFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG);
+        DetailFragment df = (DetailFragment) getSupportFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG);
         if (null != df) df.sortChanged();
     }
 
@@ -87,9 +87,9 @@ public class MainActivity extends AppCompatActivity
     public void showDetails(Uri movieUri) {
         DetailFragment fragment;
         if (movieUri == null) {
-            Fragment f = getFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG);
+            Fragment f = getSupportFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG);
             if (f != null) {
-                FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                 transaction.hide(f);
                 transaction.commit();
             }
@@ -104,7 +104,7 @@ public class MainActivity extends AppCompatActivity
             bundle.putInt("fragmentHeight", height);
             bundle.putInt("fragmentWidth", width);
             fragment.setArguments(bundle);
-            FragmentTransaction transaction = getFragmentManager().beginTransaction();
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.details_fragment, fragment, DETAILFRAGMENT_TAG);
             transaction.commit();
         }

@@ -82,7 +82,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         ConnectivityManager systemService = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = systemService.getActiveNetworkInfo();
         if (activeNetworkInfo == null) {
-            new NoInternet().show(((MainActivity) context).getFragmentManager(), "1");
+            new NoInternet().show(((MainActivity) context).getSupportFragmentManager(), "1");
         }
         Bundle bundle = new Bundle();
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
