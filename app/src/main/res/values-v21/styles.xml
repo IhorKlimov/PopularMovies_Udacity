@@ -1,8 +1,17 @@
 <resources>>
 
-    <style name="AppTheme.NoActionBar" parent="AppTheme">
+    <style name="AppTheme.Main" parent="AppTheme">
         <item name="windowNoTitle">true</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
+
+        <item name="android:windowActivityTransitions">true</item>
     </style>
+
+    <style name="AppTheme.Detail" parent="AppTheme">
+        <item name="android:windowActivityTransitions">true</item>
+        <item name="android:windowEnterTransition">@transition/details_enter</item>
+        <item name="android:windowExitTransition">@transition/details_exit</item>
+    </style>
+
 </resources>
