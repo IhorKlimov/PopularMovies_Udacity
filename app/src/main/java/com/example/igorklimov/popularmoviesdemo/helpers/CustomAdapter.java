@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -30,13 +31,16 @@ public class CustomAdapter extends CursorRecyclerViewAdapter<CustomAdapter.ViewH
     private int minWidth = 0;
     private int minHeight = 0;
     private RecyclerView recyclerView;
+    private MoviesAdapterOnClickHandler handler;
     public static int previous = -1;
 
-    public CustomAdapter(Context context, Cursor c, RecyclerView recyclerView) {
+    public CustomAdapter(Context context, Cursor c, RecyclerView recyclerView,
+                         MoviesAdapterOnClickHandler handler) {
         super(c);
         CustomAdapter.context = context;
         orientation = context.getResources().getConfiguration().orientation;
         this.recyclerView = recyclerView;
+        this.handler = handler;
     }
 
     @Override
@@ -49,14 +53,13 @@ public class CustomAdapter extends CursorRecyclerViewAdapter<CustomAdapter.ViewH
                     || Utility.isTabletPreference(context) ? 3 : 2);
             minHeight = (int) (((double) minWidth / 185) * 278);
         }
-        Log.d("TAG", "onCreateViewHolder: ");
         posterImageView.setMinimumWidth(minWidth);
         posterImageView.setMinimumHeight(minHeight);
         return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder viewHolder, Cursor cursor) {
+    public void onBindViewHolder(final ViewHolder viewHolder, Cursor cursor, int position) {
         viewHolder.progressBar.setVisibility(View.VISIBLE);
         viewHolder.id = cursor.getInt(0);
 
@@ -74,10 +77,11 @@ public class CustomAdapter extends CursorRecyclerViewAdapter<CustomAdapter.ViewH
 
                     }
                 });
+        ViewCompat.setTransitionName(viewHolder.imageView, "iconView" + position);
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        final ImageView imageView;
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        public final ImageView imageView;
         final ProgressBar progressBar;
         int id;
 
@@ -91,7 +95,6 @@ public class CustomAdapter extends CursorRecyclerViewAdapter<CustomAdapter.ViewH
         @Override
         public void onClick(View v) {
             if (!Utility.isTabletPreference(context) || getAdapterPosition() != previous) {
-                MainActivity mainActivity = (MainActivity) CustomAdapter.context;
                 Uri movieUri = null;
                 switch (Utility.getSortByPreference(context)) {
                     case 1:
@@ -108,9 +111,14 @@ public class CustomAdapter extends CursorRecyclerViewAdapter<CustomAdapter.ViewH
                         break;
                 }
                 Log.d("TAG", "onClick: " + movieUri);
-                mainActivity.onItemClick(movieUri);
+                handler.onClick(movieUri, this);
                 previous = getAdapterPosition();
             }
         }
     }
+
+    public interface MoviesAdapterOnClickHandler {
+        void onClick(Uri uri, ViewHolder holder);
+    }
+
 }

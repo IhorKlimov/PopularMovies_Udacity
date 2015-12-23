@@ -190,7 +190,7 @@ public class Utility {
         int j = format.length();
         for (int i = j - 1; i >= 0; i--) {
             result = result.concat(format.charAt(i) + "");
-            if ((j - i) % 3 == 0 && i != 0 ) result = result.concat(",");
+            if ((j - i) % 3 == 0 && i != 0) result = result.concat(",");
         }
         format = "";
         for (int i = result.length() - 1; i >= 0; i--) {
@@ -271,9 +271,10 @@ public class Utility {
                 return prefs.getInt(c.getString(R.string.pop_page), 1);
             case 2:
                 return prefs.getInt(c.getString(R.string.release_page), 1);
-            default:
+            case 3:
                 return prefs.getInt(c.getString(R.string.votes_page), 1);
         }
+        return -1;
     }
 
     public static void incrementPage(Context c) {

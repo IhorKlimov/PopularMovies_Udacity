@@ -3,7 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="?android:attr/listPreferredItemHeight"
     android:gravity="center_vertical"
-    android:background="#fff3f3f3"
     android:paddingLeft="16dp"
     android:paddingRight="16dp"
     style="@style/TextCondensed20"/>

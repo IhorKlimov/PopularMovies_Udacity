@@ -2,12 +2,15 @@ package com.example.igorklimov.popularmoviesdemo.activities;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import com.example.igorklimov.popularmoviesdemo.R;
 import com.example.igorklimov.popularmoviesdemo.fragments.DetailFragment;
 import com.example.igorklimov.popularmoviesdemo.helpers.Utility;
 
 public class DetailActivity extends AppCompatActivity {
+
+    private static final String TAG = "TAG";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

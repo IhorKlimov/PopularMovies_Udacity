@@ -7,6 +7,7 @@
     android:layout_height="match_parent"
     tools:layout="@layout/movies_grid"
     android:id="@+id/movies_view"
+    app:sharedElementTransitions="true"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.example.igorklimov.popularmoviesdemo.activities.MainActivity"
     tools:showIn="@layout/app_bar" />

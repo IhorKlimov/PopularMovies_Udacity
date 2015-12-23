@@ -15,6 +15,7 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.NestedScrollView;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -94,10 +95,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private List<Map<String, String>> childGroupForFirstGroupRow;
     private Context context;
     private ShareActionProvider actionProvider;
-    private NestedScrollView scroll;
     private TextView director;
     private TextView actors;
     private String[] strings;
+    private CardView card;
 
     public DetailFragment() {
     }
@@ -163,7 +164,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         back = (ImageView) rootView.findViewById(R.id.backdrop);
         progressBar = rootView.findViewById(R.id.progressBar);
         playButton = (ImageButton) rootView.findViewById(R.id.play_button);
-
+        card = (CardView) rootView.findViewById(R.id.card_view);
         List<Map<String, String>> groupData = new ArrayList<Map<String, String>>() {{
             add(new HashMap<String, String>() {{
                 put("ROOT_NAME", "Reviews");
@@ -201,12 +202,11 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 new int[]{author, review_text}
         ));
         Toolbar bar = (Toolbar) rootView.findViewById(R.id.toolbar);
-        if(bar!=null) {
+        if (!Utility.isTabletPreference(context)) {
             ((DetailActivity) context).setSupportActionBar(bar);
             ((DetailActivity) context).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
         }
-        scroll = (NestedScrollView) rootView.findViewById(R.id.scrollView);
+        final NestedScrollView scroll = (NestedScrollView) rootView.findViewById(R.id.scrollView);
         final int heightPixels = context.getResources().getDisplayMetrics().heightPixels;
 
         reviews.setDividerHeight(0);
@@ -349,6 +349,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                     @Override
                     public void onSuccess() {
                         progressBar.setVisibility(View.INVISIBLE);
+                        card.setVisibility(View.VISIBLE);
                     }
 
                     @Override
@@ -370,6 +371,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         genresView.setText(Utility.getGenres(cursor));
         voteView.setText(String.format(getString(R.string.format_average_vote), Utility.getVote(cursor)));
         plotView.setText(Utility.getPlot(cursor));
+
         done = true;
     }
 
@@ -519,7 +521,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         int desiredWidth = View.MeasureSpec.makeMeasureSpec(listView.getWidth(),
                 View.MeasureSpec.EXACTLY);
         for (int i = 0; i < listAdapter.getGroupCount(); i++) {
-            totalHeight += defaultHeight;
+//            totalHeight += defaultHeight;
             if (((listView.isGroupExpanded(i)) && (i != group))
                     || ((!listView.isGroupExpanded(i)) && (i == group))) {
                 totalHeight *= 2;

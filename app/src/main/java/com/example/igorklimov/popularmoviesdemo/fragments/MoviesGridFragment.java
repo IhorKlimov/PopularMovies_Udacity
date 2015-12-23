@@ -1,6 +1,9 @@
 package com.example.igorklimov.popularmoviesdemo.fragments;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -12,7 +15,7 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +37,7 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
     private View rootView;
     public static int id = 0;
     private FragmentActivity activity;
+    private boolean mHoldForTransition;
 
     public MoviesGridFragment() {
     }
@@ -49,7 +53,7 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
         recyclerView.smoothScrollToPosition(0);
     }
 
-    private void selectFirstItem() {
+    private void selectFirstItem(CustomAdapter.ViewHolder holder) {
         int sortByPreference = Utility.getSortByPreference(activity);
         Uri movieUri;
         if (sortByPreference == 1) {
@@ -62,7 +66,17 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
             movieUri = MovieContract.FavoriteMovie.buildMovieUri(id);
         }
         CustomAdapter.previous = 0;
-        mainActivity.onItemClick(movieUri);
+        mainActivity.onItemClick(movieUri, holder);
+    }
+
+    @Override
+    public void onInflate(Context context, AttributeSet attrs, Bundle savedInstanceState) {
+        super.onInflate(context, attrs, savedInstanceState);
+        TypedArray a =
+                context.obtainStyledAttributes(attrs, R.styleable.MoviesGridFragment, 0, 0);
+        mHoldForTransition =
+                a.getBoolean(R.styleable.MoviesGridFragment_sharedElementTransitions, false);
+        a.recycle();
     }
 
     @Override
@@ -70,7 +84,13 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
         rootView = inflater.inflate(R.layout.movies_grid, container, false);
         recyclerView = (RecyclerView) rootView.findViewById(R.id.movies_grid);
         activity = getActivity();
-        customAdapter = new CustomAdapter(activity, null, recyclerView);
+        customAdapter = new CustomAdapter(activity, null, recyclerView,
+                new CustomAdapter.MoviesAdapterOnClickHandler() {
+            @Override
+            public void onClick(Uri uri, CustomAdapter.ViewHolder holder) {
+                mainActivity.onItemClick(uri, holder);
+            }
+        });
         recyclerView.setAdapter(customAdapter);
 
         int orientation = activity
@@ -98,6 +118,9 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
         super.onActivityCreated(savedInstanceState);
         getLoaderManager().initLoader(LOADER, null, this);
         mainActivity = (MainActivity) activity;
+        if (mHoldForTransition) {
+            getActivity().supportPostponeEnterTransition();
+        }
     }
 
     @Override
@@ -109,11 +132,13 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
     @Override
     public void onLoadFinished(final Loader<Cursor> cursorLoader, final Cursor cursor) {
         customAdapter.swapCursor(cursor);
-
         if (Utility.getSortByPreference(activity) == 4 && cursor.getCount() == 0) {
             rootView.findViewById(R.id.list_empty).setVisibility(View.VISIBLE);
         } else {
             rootView.findViewById(R.id.list_empty).setVisibility(View.GONE);
+        }
+        if (mHoldForTransition) {
+            getActivity().supportStartPostponedEnterTransition();
         }
         if (Utility.isTabletPreference(activity)) {
             new Handler().postDelayed(new Runnable() {
@@ -124,7 +149,9 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
                             mainActivity.showDetails(null);
                         } else {
                             id = Utility.getId(activity);
-                            selectFirstItem();
+                            CustomAdapter.ViewHolder vh =
+                                    (CustomAdapter.ViewHolder) recyclerView.findViewHolderForAdapterPosition(0);
+                            selectFirstItem(vh);
                         }
                     }
                 }

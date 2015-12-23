@@ -4,8 +4,11 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.util.Pair;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -13,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.example.igorklimov.popularmoviesdemo.R;
 import com.example.igorklimov.popularmoviesdemo.fragments.DetailFragment;
@@ -75,12 +79,16 @@ public class MainActivity extends AppCompatActivity
         if (null != df) df.sortChanged();
     }
 
-    public void onItemClick(Uri movieUri) {
+    public void onItemClick(Uri movieUri, CustomAdapter.ViewHolder holder) {
         if (Utility.isTabletPreference(this)) {
             showDetails(movieUri);
         } else {
             Intent getDetails = new Intent(this, DetailActivity.class).setData(movieUri);
-            startActivity(getDetails);
+            ActivityOptionsCompat activityOptions =
+                    ActivityOptionsCompat.makeSceneTransitionAnimation(this,
+                            new Pair<View, String>(holder.imageView,
+                                    getString(R.string.detail_icon_transition_name)));
+            ActivityCompat.startActivity(this, getDetails, activityOptions.toBundle());
         }
     }
 

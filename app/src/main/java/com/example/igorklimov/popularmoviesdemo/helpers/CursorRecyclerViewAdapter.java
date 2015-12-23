@@ -29,6 +29,10 @@ public abstract class CursorRecyclerViewAdapter<VH extends RecyclerView.ViewHold
         }
     }
 
+    public Cursor getCursor() {
+        return mCursor;
+    }
+
     @Override
     public int getItemCount() {
         if (mDataValid && mCursor != null) {
@@ -50,7 +54,7 @@ public abstract class CursorRecyclerViewAdapter<VH extends RecyclerView.ViewHold
         super.setHasStableIds(true);
     }
 
-    public abstract void onBindViewHolder(VH viewHolder, Cursor cursor);
+    public abstract void onBindViewHolder(VH viewHolder, Cursor cursor, int position);
 
     @Override
     public void onBindViewHolder(VH viewHolder, int position) {
@@ -60,7 +64,7 @@ public abstract class CursorRecyclerViewAdapter<VH extends RecyclerView.ViewHold
         if (!mCursor.moveToPosition(position)) {
             throw new IllegalStateException("couldn't move cursor to position " + position);
         }
-        onBindViewHolder(viewHolder, mCursor);
+        onBindViewHolder(viewHolder, mCursor, position);
     }
 
     /**
