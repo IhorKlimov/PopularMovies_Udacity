@@ -136,8 +136,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
             Cursor cursor = mContentResolver.query(contentUri, null, null, null, null);
             int page = Utility.getPagePreference(context);
-            Log.d("TAG", "onPerformSync: cursorCount " + cursor.getCount() + " page: " + page);
-            if (cursor.getCount() < page * 20) {
+            int count = cursor.getCount();
+            if (count == 0) page = 1;
+            Log.d("TAG", "onPerformSync: cursorCount " + count + " page: " + page);
+            if (count < page * 20) {
                 String jsonResponse = getJsonResponse(DISCOVER_MOVIES + SORT_BY + sortType + PAGE + page + API_KEY);
 
                 try {

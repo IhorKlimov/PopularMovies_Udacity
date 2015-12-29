@@ -15,6 +15,7 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.NestedScrollView;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
@@ -66,6 +67,7 @@ import static com.example.igorklimov.popularmoviesdemo.R.id.toolbar;
 import static com.example.igorklimov.popularmoviesdemo.R.layout.child;
 import static com.example.igorklimov.popularmoviesdemo.R.layout.group;
 import static com.example.igorklimov.popularmoviesdemo.helpers.Utility.getJsonResponse;
+import static com.example.igorklimov.popularmoviesdemo.helpers.Utility.isTabletPreference;
 
 public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -99,6 +101,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private TextView actors;
     private String[] strings;
     private CardView card;
+    private int minHeight;
+    private int minWidth;
+    private int fragmentWidth;
+    private int backdropHeight;
 
     public DetailFragment() {
     }
@@ -106,36 +112,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            getActivity().onBackPressed();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.menu_detail, menu);
-        MenuItem item = menu.findItem(R.id.action_share);
-        if (!Utility.isTabletPreference(context)) {
-            actionProvider = new ShareActionProvider(getActivity()) {
-                @Override
-                public View onCreateActionView() {
-                    return null;
-                }
-            };
-            item.setIcon(R.drawable.ic_share_24dp);
-        } else {
-            actionProvider = new ShareActionProvider(getActivity());
-        }
-        MenuItemCompat.setActionProvider(item, actionProvider);
-        if (trailerUri != null) actionProvider.setShareIntent(createShareIntent());
+        if (!isTabletPreference(getContext())) setHasOptionsMenu(true);
     }
 
     private Intent createShareIntent() {
@@ -143,6 +120,15 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         intent.setType("text/plain");
         intent.putExtra(Intent.EXTRA_TEXT, "#Popular Movies app https://www.youtube.com/watch?v=" + trailerUri);
         return intent;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        if (!isTabletPreference(context)) {
+            inflater.inflate(R.menu.menu_detail, menu);
+            finishCreatingMenu(menu);
+        }
     }
 
     @Override
@@ -165,6 +151,24 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         progressBar = rootView.findViewById(R.id.progressBar);
         playButton = (ImageButton) rootView.findViewById(R.id.play_button);
         card = (CardView) rootView.findViewById(R.id.card_view);
+
+        int fragmentHeight;
+        if (!isTabletPreference(context)) {
+            fragmentHeight = this.getResources().getDisplayMetrics().heightPixels;
+            fragmentWidth = this.getResources().getDisplayMetrics().widthPixels;
+        } else {
+            Bundle arguments = getArguments();
+            fragmentHeight = arguments.getInt("fragmentHeight");
+            fragmentWidth = arguments.getInt("fragmentWidth");
+        }
+        minHeight = fragmentHeight / 3;
+        minWidth = (int) (((double) minHeight / 278) * 185);
+        backdropHeight = (int) (((double) fragmentWidth / 500) * 281);
+
+        posterView.setMinimumWidth(minWidth);
+        posterView.setMinimumHeight(minHeight);
+        back.setMinimumHeight(backdropHeight);
+
         List<Map<String, String>> groupData = new ArrayList<Map<String, String>>() {{
             add(new HashMap<String, String>() {{
                 put("ROOT_NAME", "Reviews");
@@ -201,11 +205,19 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 new String[]{"CHILD_TITLE", "CHILD_TEXT"},
                 new int[]{author, review_text}
         ));
-        Toolbar bar = (Toolbar) rootView.findViewById(R.id.toolbar);
-        if (!Utility.isTabletPreference(context)) {
+        Toolbar bar = (Toolbar) rootView.findViewById(R.id.details_toolbar);
+        if (!isTabletPreference(context)) {
             ((DetailActivity) context).setSupportActionBar(bar);
-            ((DetailActivity) context).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            ActionBar supportActionBar = ((DetailActivity) context).getSupportActionBar();
+            supportActionBar.setDisplayHomeAsUpEnabled(true);
+            supportActionBar.setDisplayShowTitleEnabled(false);
+        } else {
+            Menu menu = bar.getMenu();
+            if (null != menu) menu.clear();
+            bar.inflateMenu(R.menu.menu_detail);
+            finishCreatingMenu(bar.getMenu());
         }
+
         final NestedScrollView scroll = (NestedScrollView) rootView.findViewById(R.id.scrollView);
         final int heightPixels = context.getResources().getDisplayMetrics().heightPixels;
 
@@ -218,7 +230,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 if (parent.getLayoutParams().height > defaultHeight) {
                     final int x = scroll.getScrollX();
                     final int y = scroll.getScrollY() + heightPixels / 4;
-                    Log.d("TAG", "onGroupClick: " + x + " " + y);
                     scroll.post(new Runnable() {
                         @Override
                         public void run() {
@@ -238,7 +249,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                     if (!inserted) {
                         Toast.makeText(context, "Added to Favorites", LENGTH_SHORT).show();
                         fab.setImageResource(R.drawable.star_on);
-                        if (Utility.isTabletPreference(context)
+                        if (isTabletPreference(context)
                                 || Utility.getSortByPreference(context) != 4) {
                             Utility.addToFavorite(cursor, context);
                         } else {
@@ -253,10 +264,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                         fab.setImageResource(R.drawable.star_off);
                         fab.setActivated(false);
 
-                        if (Utility.isTabletPreference(context) || Utility.getSortByPreference(context) != 4) {
+                        if (isTabletPreference(context) || Utility.getSortByPreference(context) != 4) {
                             Utility.removeFromFavorite(cursor, context);
                             MoviesGridFragment.id = Utility.getId(context);
-                            if (Utility.isTabletPreference(context)
+                            if (isTabletPreference(context)
                                     && Utility.getSortByPreference(context) == 4) {
                                 MainActivity activity = (MainActivity) context;
                                 activity.showDetails(MovieContract.FavoriteMovie.buildMovieUri(MoviesGridFragment.id));
@@ -281,6 +292,23 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             }
         });
         return rootView;
+    }
+
+    private void finishCreatingMenu(Menu menu) {
+        MenuItem item = menu.findItem(R.id.action_share);
+        if (!isTabletPreference(context)) {
+            actionProvider = new ShareActionProvider(getActivity()) {
+                @Override
+                public View onCreateActionView() {
+                    return null;
+                }
+            };
+            item.setIcon(R.drawable.ic_share_24dp);
+        } else {
+            actionProvider = new ShareActionProvider(getActivity());
+        }
+        MenuItemCompat.setActionProvider(item, actionProvider);
+        if (trailerUri != null) actionProvider.setShareIntent(createShareIntent());
     }
 
     @Override
@@ -317,23 +345,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
     public void load() {
-        int fragmentWidth;
-        int fragmentHeight;
-        if (!Utility.isTabletPreference(context)) {
-            fragmentHeight = this.getResources().getDisplayMetrics().heightPixels;
-            fragmentWidth = this.getResources().getDisplayMetrics().widthPixels;
-        } else {
-            Bundle arguments = getArguments();
-            fragmentHeight = arguments.getInt("fragmentHeight");
-            fragmentWidth = arguments.getInt("fragmentWidth");
-        }
-        int minHeight = fragmentHeight / 3;
-        int minWidth = (int) (((double) minHeight / 278) * 185);
-        final int backdropHeight = (int) (((double) fragmentWidth / 500) * 281);
 
-        posterView.setMinimumWidth(minWidth);
-        posterView.setMinimumHeight(minHeight);
-        back.setMinimumHeight(backdropHeight);
         progressBar.setVisibility(View.VISIBLE);
         playButton.setVisibility(View.VISIBLE);
         if (strings == null) new Task().execute(cursor.getString(7));
@@ -506,7 +518,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private void noInternet() {
         NoInternet noInternet = new NoInternet();
         noInternet.setTargetFragment(this, 2);
-        if (Utility.isTabletPreference(context)) {
+        if (isTabletPreference(context)) {
             noInternet.show(((MainActivity) context).getSupportFragmentManager(), "2");
         } else {
             noInternet.show(((DetailActivity) context).getSupportFragmentManager(), "2");

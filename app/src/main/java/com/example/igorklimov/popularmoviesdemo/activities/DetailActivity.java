@@ -3,6 +3,9 @@ package com.example.igorklimov.popularmoviesdemo.activities;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import com.example.igorklimov.popularmoviesdemo.R;
 import com.example.igorklimov.popularmoviesdemo.fragments.DetailFragment;
@@ -26,4 +29,16 @@ public class DetailActivity extends AppCompatActivity {
             if (df.toRemove) Utility.removeFromFavorite(df.cursor, this);
         }
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+         if (id == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+
 }

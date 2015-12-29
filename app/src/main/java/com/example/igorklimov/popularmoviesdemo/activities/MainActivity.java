@@ -1,6 +1,7 @@
 package com.example.igorklimov.popularmoviesdemo.activities;
 
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -17,6 +18,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
 import com.example.igorklimov.popularmoviesdemo.R;
 import com.example.igorklimov.popularmoviesdemo.fragments.DetailFragment;
@@ -29,6 +31,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String DETAILFRAGMENT_TAG = "DETAIL_FRAGMENT";
+    private static final String TAG = MainActivity.class.getSimpleName();
     private DrawerLayout drawer;
     private int height;
     private int width;
@@ -48,10 +51,11 @@ public class MainActivity extends AppCompatActivity
 //        OkHttpClient client = new OkHttpClient();
 //        client.networkInterceptors().add(new StethoInterceptor());
 
+
         setContentView(R.layout.drawer);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
         if (savedInstanceState == null) Utility.setSortByPreference(this, 1);
 
         SyncAdapter.initializeSyncAdapter(this);
@@ -66,6 +70,11 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setItemIconTintList(null);
         navigationView.setItemTextColor(null);
+        Typeface typeface = Typeface
+                .createFromAsset(getAssets(), "fonts/RemachineScript_Personal_Use.ttf");
+        TextView title = (TextView) findViewById(R.id.app_title);
+        if (title != null) title.setTypeface(typeface);
+
     }
 
     private void reload() {

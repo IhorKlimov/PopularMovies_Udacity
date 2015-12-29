@@ -1,13 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<fragment xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:name="com.example.igorklimov.popularmoviesdemo.fragments.MoviesGridFragment"
+    xmlns:tools="http://schemas.android.com/tools"
+
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:layout="@layout/movies_grid"
-    android:id="@+id/movies_view"
-    app:sharedElementTransitions="true"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.example.igorklimov.popularmoviesdemo.activities.MainActivity"
-    tools:showIn="@layout/app_bar" />
+    android:orientation="vertical">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+            <TextView
+                android:id="@+id/app_title"
+                android:layout_width="wrap_content"
+                android:layout_height="?attr/actionBarSize"
+                android:gravity="center_vertical"
+                android:text="@string/app_name"
+                android:textColor="#ffffff"
+                android:textSize="34sp" />
+
+        </android.support.v7.widget.Toolbar>
+    </android.support.design.widget.AppBarLayout>
+
+    <fragment
+        android:id="@+id/movies_view"
+        android:name="com.example.igorklimov.popularmoviesdemo.fragments.MoviesGridFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        app:sharedElementTransitions="true"
+        tools:context="com.example.igorklimov.popularmoviesdemo.activities.MainActivity"
+        tools:layout="@layout/movies_grid"
+        tools:showIn="@layout/app_bar" />
+
+</LinearLayout>
