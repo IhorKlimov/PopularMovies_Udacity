@@ -49,6 +49,8 @@
                 android:resource="@xml/syncadapter" />
         </service>
 
+
+
         <provider
             android:name=".data.Provider"
             android:authorities="@string/content_authority"

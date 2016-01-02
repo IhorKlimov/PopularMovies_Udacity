@@ -51,6 +51,9 @@ import static com.example.igorklimov.popularmoviesdemo.helpers.Utility.getJsonRe
  * Handle the transfer of data between a server and an
  * app, using the Android sync adapter framework.
  */
+
+
+//some comment
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private static final int TWO_DAYS_IN_MILLISECONDS = 2 * 24 * 60 * 60 * 1000;
     private static final int SYNC_INTERVAL = 2 * 24 * 60 * 60;

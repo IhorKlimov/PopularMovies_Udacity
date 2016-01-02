@@ -80,6 +80,8 @@ public class CustomAdapter extends CursorRecyclerViewAdapter<CustomAdapter.ViewH
         ViewCompat.setTransitionName(viewHolder.imageView, "iconView" + position);
     }
 
+
+//    again
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public final ImageView imageView;
         final ProgressBar progressBar;

@@ -14,6 +14,8 @@ import com.example.igorklimov.popularmoviesdemo.helpers.Utility;
 /**
  * Created by Igor Klimov on 11/28/2015.
  */
+
+//some comment
 public class MoviesDbHelper extends SQLiteOpenHelper {
 
     public static final int DATABASE_VERSION = 7;

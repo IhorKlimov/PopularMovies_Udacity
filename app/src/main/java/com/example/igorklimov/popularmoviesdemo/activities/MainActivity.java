@@ -15,7 +15,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -27,6 +26,10 @@ import com.example.igorklimov.popularmoviesdemo.helpers.CustomAdapter;
 import com.example.igorklimov.popularmoviesdemo.helpers.Utility;
 import com.example.igorklimov.popularmoviesdemo.sync.SyncAdapter;
 
+/**
+ * Master Activity, used for handsets and tablets, all item clicks
+ * go through {@link #onItemClick(Uri, CustomAdapter.ViewHolder)}
+ */
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -52,6 +55,7 @@ public class MainActivity extends AppCompatActivity
 //        client.networkInterceptors().add(new StethoInterceptor());
 
 
+//        some comment
         setContentView(R.layout.drawer);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -77,6 +81,7 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+
     private void reload() {
         MoviesGridFragment mf = (MoviesGridFragment) getSupportFragmentManager().findFragmentById(R.id.movies_view);
         if (null != mf) {
@@ -88,6 +93,14 @@ public class MainActivity extends AppCompatActivity
         if (null != df) df.sortChanged();
     }
 
+    /**
+     * This method is called every time a user clicks on a movie
+     * and when first movie selected automatically, regardless of handset or tablet
+     *
+     * @param movieUri movieUri selected movie {@link Uri}
+     * @param holder   a {@link com.example.igorklimov.popularmoviesdemo.helpers.CustomAdapter.ViewHolder}
+     *                 used to get a poster transition name for transitions
+     */
     public void onItemClick(Uri movieUri, CustomAdapter.ViewHolder holder) {
         if (Utility.isTabletPreference(this)) {
             showDetails(movieUri);
@@ -101,6 +114,11 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * This method is used for tablets only to display a detail view
+     *
+     * @param movieUri selected movie {@link Uri}
+     */
     public void showDetails(Uri movieUri) {
         DetailFragment fragment;
         if (movieUri == null) {

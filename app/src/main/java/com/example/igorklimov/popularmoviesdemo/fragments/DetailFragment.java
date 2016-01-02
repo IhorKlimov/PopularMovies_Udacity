@@ -69,7 +69,8 @@ import static com.example.igorklimov.popularmoviesdemo.R.layout.group;
 import static com.example.igorklimov.popularmoviesdemo.helpers.Utility.getJsonResponse;
 import static com.example.igorklimov.popularmoviesdemo.helpers.Utility.isTabletPreference;
 
-public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,
+        View.OnClickListener {
 
     private String trailerUri;
     public Cursor cursor;
@@ -242,55 +243,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         });
 
         fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!fab.isActivated()) {
-                    if (!inserted) {
-                        Toast.makeText(context, "Added to Favorites", LENGTH_SHORT).show();
-                        fab.setImageResource(R.drawable.star_on);
-                        if (isTabletPreference(context)
-                                || Utility.getSortByPreference(context) != 4) {
-                            Utility.addToFavorite(cursor, context);
-                        } else {
-                            toRemove = false;
-                        }
-                        fab.setActivated(true);
-                        inserted = true;
-                    }
-                } else {
-                    if (inserted) {
-                        Toast.makeText(context, "Removed from Favorites", LENGTH_SHORT).show();
-                        fab.setImageResource(R.drawable.star_off);
-                        fab.setActivated(false);
-
-                        if (isTabletPreference(context) || Utility.getSortByPreference(context) != 4) {
-                            Utility.removeFromFavorite(cursor, context);
-                            MoviesGridFragment.id = Utility.getId(context);
-                            if (isTabletPreference(context)
-                                    && Utility.getSortByPreference(context) == 4) {
-                                MainActivity activity = (MainActivity) context;
-                                activity.showDetails(MovieContract.FavoriteMovie.buildMovieUri(MoviesGridFragment.id));
-                            }
-                        } else {
-                            toRemove = true;
-                        }
-                        inserted = false;
-                    }
-                }
-            }
-        });
-        playButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (trailerUri != null) {
-                    Log.d("TAG", "onClick: " + trailerUri);
-                    Intent intent = YouTubeStandalonePlayer.createVideoIntent(getActivity(),
-                            YOUTUBE_API_KEY, trailerUri, 0, true, false);
-                    startActivity(intent);
-                }
-            }
-        });
+        fab.setOnClickListener(this);
+        playButton.setOnClickListener(this);
         return rootView;
     }
 
@@ -345,7 +299,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
     public void load() {
-
         progressBar.setVisibility(View.VISIBLE);
         playButton.setVisibility(View.VISIBLE);
         if (strings == null) new Task().execute(cursor.getString(7));
@@ -389,7 +342,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
         if (strings != null) {
             ArrayList<String> author = new ArrayList<>();
             ArrayList<String> review = new ArrayList<>();
@@ -401,6 +353,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             outState.putStringArrayList("author", author);
             outState.putStringArrayList("review", review);
         }
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -411,30 +364,100 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         getLoaderManager().restartLoader(DETAIL_LOADER, null, this);
     }
 
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.fab:
+                if (!fab.isActivated()) {
+                    if (!inserted) {
+                        Toast.makeText(context, "Added to Favorites", LENGTH_SHORT).show();
+                        fab.setImageResource(R.drawable.star_on);
+                        if (isTabletPreference(context)
+                                || Utility.getSortByPreference(context) != 4) {
+                            Utility.addToFavorite(cursor, context);
+                        } else {
+                            toRemove = false;
+                        }
+                        fab.setActivated(true);
+                        inserted = true;
+                    }
+                } else {
+                    if (inserted) {
+                        Toast.makeText(context, "Removed from Favorites", LENGTH_SHORT).show();
+                        fab.setImageResource(R.drawable.star_off);
+                        fab.setActivated(false);
+
+                        if (isTabletPreference(context) || Utility.getSortByPreference(context) != 4) {
+                            Utility.removeFromFavorite(cursor, context);
+                            MoviesGridFragment.id = Utility.getId(context);
+                            if (isTabletPreference(context)
+                                    && Utility.getSortByPreference(context) == 4) {
+                                MainActivity activity = (MainActivity) context;
+                                activity.showDetails(MovieContract.FavoriteMovie.buildMovieUri(MoviesGridFragment.id));
+                            }
+                        } else {
+                            toRemove = true;
+                        }
+                        inserted = false;
+                    }
+                }
+                break;
+            case R.id.play_button:
+                if (trailerUri != null) {
+                    Log.d("TAG", "onClick: " + trailerUri);
+                    Intent intent = YouTubeStandalonePlayer.createVideoIntent(getActivity(),
+                            YOUTUBE_API_KEY, trailerUri, 0, true, false);
+                    startActivity(intent);
+                }
+                break;
+        }
+    }
+
     private class Task extends AsyncTask<String, Void, String[]> {
 
         @Override
         protected String[] doInBackground(String... params) {
             String id = params[0];
-            String JsonResponse;
             strings = new String[5];
             for (int i = 0; i < strings.length; i++) {
                 strings[i] = "n/a";
             }
-            JsonResponse = getJsonResponse("http://api.themoviedb.org/3/movie/" + id + "?api_key=" + BuildConfig.TBDB_API_KEY);
+            getExtraInfo(id);
+            getVideos(id);
+            getReviews(id);
+            getCredits(id);
+
+            return strings;
+        }
+
+        @Override
+        protected void onPostExecute(String[] s) {
+            super.onPostExecute(s);
+            setExtraData(s);
+        }
+
+        private void getExtraInfo(String id) {
+            String JsonResponse;
+            JsonResponse = getJsonResponse("http://api.themoviedb.org/3/movie/" + id +
+                    "?api_key=" + BuildConfig.TBDB_API_KEY);
             try {
                 JSONObject jsonObject = new JSONObject(JsonResponse);
                 String runtime = jsonObject.getString("runtime");
                 String budget = jsonObject.getString("budget");
                 if (runtime != null && !runtime.equals("0")) strings[0] = runtime + " min";
-                if (budget != null && !budget.equals("0"))
+                if (budget != null && !budget.equals("0")) {
                     strings[1] = " $" + Utility.formatBudget(budget);
+                }
             } catch (JSONException | NullPointerException e) {
                 e.printStackTrace();
                 noInternet();
             }
+        }
 
-            JsonResponse = getJsonResponse("http://api.themoviedb.org/3/movie/" + id + "/videos?api_key=" + BuildConfig.TBDB_API_KEY);
+        private void getVideos(String id) {
+            String JsonResponse;
+            JsonResponse = getJsonResponse("http://api.themoviedb.org/3/movie/" + id +
+                    "/videos?api_key=" + BuildConfig.TBDB_API_KEY);
             try {
                 JSONObject jsonObject = new JSONObject(JsonResponse);
                 JSONArray results = jsonObject.getJSONArray("results");
@@ -454,8 +477,12 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 e.printStackTrace();
                 noInternet();
             }
+        }
 
-            JsonResponse = getJsonResponse("http://api.themoviedb.org/3/movie/" + id + "/reviews?api_key=" + BuildConfig.TBDB_API_KEY);
+        private void getReviews(String id) {
+            String JsonResponse;
+            JsonResponse = getJsonResponse("http://api.themoviedb.org/3/movie/" + id +
+                    "/reviews?api_key=" + BuildConfig.TBDB_API_KEY);
             try {
                 JSONObject jsonObject = new JSONObject(JsonResponse);
                 final JSONArray results = jsonObject.getJSONArray("results");
@@ -471,15 +498,20 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 e.printStackTrace();
                 noInternet();
             }
+        }
 
-            JsonResponse = getJsonResponse("http://api.themoviedb.org/3/movie/" + id + "/credits?api_key=" + BuildConfig.TBDB_API_KEY);
+        private void getCredits(String id) {
+            String JsonResponse;
+            JsonResponse = getJsonResponse("http://api.themoviedb.org/3/movie/" + id +
+                    "/credits?api_key=" + BuildConfig.TBDB_API_KEY);
             try {
                 JSONObject jsonObject = new JSONObject(JsonResponse);
                 final JSONArray cast = jsonObject.getJSONArray("cast");
                 String actors = "";
                 int length = cast.length() > 6 ? 6 : cast.length();
                 for (int i = 0; i < length; i++) {
-                    actors = actors.concat(cast.getJSONObject(i).getString("name") + (i < (length - 1) ? ", " : ""));
+                    actors = actors.concat(cast.getJSONObject(i).getString("name") +
+                            (i < (length - 1) ? ", " : ""));
                 }
                 if (actors.length() > 0) strings[3] = actors;
                 JSONArray crew = jsonObject.getJSONArray("crew");
@@ -495,14 +527,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 e.printStackTrace();
                 noInternet();
             }
-
-            return strings;
-        }
-
-        @Override
-        protected void onPostExecute(String[] s) {
-            super.onPostExecute(s);
-            setExtraData(s);
         }
     }
 
@@ -533,7 +557,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         int desiredWidth = View.MeasureSpec.makeMeasureSpec(listView.getWidth(),
                 View.MeasureSpec.EXACTLY);
         for (int i = 0; i < listAdapter.getGroupCount(); i++) {
-//            totalHeight += defaultHeight;
             if (((listView.isGroupExpanded(i)) && (i != group))
                     || ((!listView.isGroupExpanded(i)) && (i == group))) {
                 totalHeight *= 2;

@@ -28,6 +28,7 @@ import com.example.igorklimov.popularmoviesdemo.helpers.ScrollListener;
 import com.example.igorklimov.popularmoviesdemo.helpers.Utility;
 import com.example.igorklimov.popularmoviesdemo.sync.SyncAdapter;
 
+//some comment
 public class MoviesGridFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private RecyclerView recyclerView;
     private CustomAdapter customAdapter;
