@@ -51,5 +51,6 @@
     <string name="title_activity_no_internet">NoInternet</string>
     <string name="detail_icon_transition_name">transition name</string>
     <string name="reviews">Reviews</string>
+    <string name="play_button_description">Play</string>
 
 </resources>

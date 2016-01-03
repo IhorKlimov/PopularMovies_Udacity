@@ -10,4 +10,5 @@
     <dimen name="tablet_fragment_spacing">8dp</dimen>
     <dimen name="detail_container_bottom_margin">32dp</dimen>
     <dimen name="list_item_extra_padding">16dp</dimen>
+    <dimen name="landscape_details_width">360dp</dimen>
 </resources>
