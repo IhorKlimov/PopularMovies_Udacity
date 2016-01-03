@@ -50,5 +50,6 @@
     <string name="backdrop">BackDrop</string>
     <string name="title_activity_no_internet">NoInternet</string>
     <string name="detail_icon_transition_name">transition name</string>
+    <string name="reviews">Reviews</string>
 
 </resources>

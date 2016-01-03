@@ -17,6 +17,7 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.GridLayout;
 import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -28,10 +29,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ScrollView;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -63,7 +62,6 @@ import static com.example.igorklimov.popularmoviesdemo.BuildConfig.YOUTUBE_API_K
 import static com.example.igorklimov.popularmoviesdemo.R.id.author;
 import static com.example.igorklimov.popularmoviesdemo.R.id.group_title;
 import static com.example.igorklimov.popularmoviesdemo.R.id.review_text;
-import static com.example.igorklimov.popularmoviesdemo.R.id.toolbar;
 import static com.example.igorklimov.popularmoviesdemo.R.layout.child;
 import static com.example.igorklimov.popularmoviesdemo.R.layout.group;
 import static com.example.igorklimov.popularmoviesdemo.helpers.Utility.getJsonResponse;
@@ -72,6 +70,7 @@ import static com.example.igorklimov.popularmoviesdemo.helpers.Utility.isTabletP
 public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,
         View.OnClickListener {
 
+    private static final String TAG = "DetailFragment";
     private String trailerUri;
     public Cursor cursor;
 
@@ -169,7 +168,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         posterView.setMinimumWidth(minWidth);
         posterView.setMinimumHeight(minHeight);
         back.setMinimumHeight(backdropHeight);
-
+        if (!Utility.isTabletPreference(context)) {
+            rootView.findViewById(R.id.frame).setMinimumHeight(minHeight + minHeight / 10);
+        }
         List<Map<String, String>> groupData = new ArrayList<Map<String, String>>() {{
             add(new HashMap<String, String>() {{
                 put("ROOT_NAME", "Reviews");
@@ -540,7 +541,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
     private void noInternet() {
-        NoInternet noInternet = new NoInternet();
+        final NoInternet noInternet = new NoInternet();
         noInternet.setTargetFragment(this, 2);
         if (isTabletPreference(context)) {
             noInternet.show(((MainActivity) context).getSupportFragmentManager(), "2");
@@ -559,12 +560,12 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         for (int i = 0; i < listAdapter.getGroupCount(); i++) {
             if (((listView.isGroupExpanded(i)) && (i != group))
                     || ((!listView.isGroupExpanded(i)) && (i == group))) {
-                totalHeight *= 2;
                 for (int j = 0; j < listAdapter.getChildrenCount(i); j++) {
                     View listItem = listAdapter.getChildView(i, j, false, null, listView);
                     listItem.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
                     totalHeight += listItem.getMeasuredHeight();
                 }
+                totalHeight += defaultHeight;
             }
         }
 

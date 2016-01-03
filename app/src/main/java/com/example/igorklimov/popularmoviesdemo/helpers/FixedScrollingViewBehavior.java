@@ -26,7 +26,6 @@ public class FixedScrollingViewBehavior extends AppBarLayout.ScrollingViewBehavi
         if (child.getLayoutParams().height == -1) {
             List dependencies = parent.getDependencies(child);
             if (dependencies.isEmpty()) {
-                Log.v(TAG, "onMeasureChild:1 ");
                 return false;
             }
 
@@ -43,12 +42,10 @@ public class FixedScrollingViewBehavior extends AppBarLayout.ScrollingViewBehavi
                         View.MeasureSpec.EXACTLY);
                 parent.onMeasureChild(child, parentWidthMeasureSpec, widthUsed,
                         heightMeasureSpec, heightUsed);
-                Log.v(TAG, "onMeasureChild:2 ");
                 return true;
             }
         }
 
-        Log.v(TAG, "onMeasureChild:3 ");
         return false;
     }
 
@@ -58,11 +55,9 @@ public class FixedScrollingViewBehavior extends AppBarLayout.ScrollingViewBehavi
         for (int z = views.size(); i < z; ++i) {
             View view = views.get(i);
             if (view instanceof AppBarLayout) {
-                Log.v(TAG, "onMeasureChild:4 ");
                 return (AppBarLayout) view;
             }
         }
-        Log.v(TAG, "onMeasureChild:5 ");
         return null;
     }
 }

@@ -39,7 +39,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:background="@drawable/button_64"
+                    android:background="@drawable/button_86"
                     android:fitsSystemWindows="true"
                     android:visibility="invisible" />
             </FrameLayout>
@@ -47,173 +47,178 @@
             <android.support.v7.widget.Toolbar
                 android:id="@+id/details_toolbar"
                 android:layout_width="match_parent"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
                 android:layout_height="?attr/actionBarSize"
-                app:layout_collapseMode="pin" />
+                app:layout_collapseMode="pin"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
         </android.support.design.widget.CollapsingToolbarLayout>
     </android.support.design.widget.AppBarLayout>
 
     <android.support.v4.widget.NestedScrollView
         android:id="@+id/scrollView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         app:layout_behavior="com.example.igorklimov.popularmoviesdemo.helpers.FixedScrollingViewBehavior">
 
-        <LinearLayout
+        <android.support.v7.widget.GridLayout
+            android:id="@+id/grid"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:paddingTop="16dp">
+            app:columnCount="2"
+            app:rowCount="4">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal"
-                android:paddingBottom="32dp"
-                android:paddingTop="16dp">
+            <FrameLayout
+                android:id="@+id/frame"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:layout_marginStart="@dimen/activity_horizontal_margin"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                app:layout_rowSpan="4">
 
-                <FrameLayout
+                <android.support.v7.widget.CardView
+                    android:id="@+id/card_view"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:visibility="invisible"
+                    app:cardElevation="4dp"
+                    app:cardPreventCornerOverlap="false"
+                    app:cardUseCompatPadding="true">
 
-                    <android.support.v7.widget.CardView
-                        android:id="@+id/card_view"
+                    <ImageView
+                        android:id="@+id/details_poster"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                        android:layout_marginStart="@dimen/activity_horizontal_margin"
-                        android:visibility="invisible"
-                        app:cardElevation="4dp"
-                        app:cardPreventCornerOverlap="false"
-                        app:cardUseCompatPadding="true">
+                        android:contentDescription="@string/poster"
+                        android:scaleType="fitXY"
+                        android:transitionName="@string/detail_icon_transition_name" />
+                </android.support.v7.widget.CardView>
 
-                        <ImageView
-                            android:id="@+id/details_poster"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:contentDescription="@string/poster"
-                            android:scaleType="fitXY"
-                            android:transitionName="@string/detail_icon_transition_name" />
-                    </android.support.v7.widget.CardView>
-
-                    <ProgressBar
-                        android:id="@+id/progressBar"
-                        style="?android:attr/progressBarStyleLarge"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:visibility="invisible" />
-                </FrameLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
+                <ProgressBar
+                    android:id="@+id/progressBar"
+                    style="?android:attr/progressBarStyleLarge"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginLeft="16dp"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="vertical"
-                    android:paddingRight="16dp">
+                    android:layout_gravity="center"
+                    android:visibility="invisible" />
+            </FrameLayout>
 
-                    <TextView
-                        android:id="@+id/title"
-                        style="@style/TextCondensed38"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif-condensed"
-                        android:gravity="center_horizontal"
-                        android:textColor="@color/primary_text" />
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="0dp"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:layout_marginStart="@dimen/activity_horizontal_margin"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                style="@style/TextCondensed38"
+                android:gravity="center_horizontal"
+                android:paddingEnd="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:textColor="@color/primary_text"
+                app:layout_gravity="fill_horizontal" />
 
-                    <TextView
-                        android:id="@+id/genres"
-                        style="@style/TextCondensed30"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:gravity="center_horizontal"
-                        android:textColor="@color/secondary_text" />
+            <TextView
+                android:id="@+id/genres"
+                style="@style/TextCondensed30"
+                android:layout_width="0dp"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:layout_marginStart="@dimen/activity_horizontal_margin"
+                android:layout_marginTop="4dp"
+                android:gravity="center_horizontal"
+                android:paddingEnd="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:textColor="@color/secondary_text"
+                app:layout_gravity="fill_horizontal" />
 
-                    <TextView
-                        android:id="@+id/release_date"
-                        style="@style/TextCondensed30"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:gravity="center_horizontal" />
+            <TextView
+                android:id="@+id/release_date"
+                style="@style/TextCondensed30"
+                android:layout_width="0dp"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:layout_marginStart="@dimen/activity_horizontal_margin"
+                android:layout_marginTop="4dp"
+                android:gravity="center_horizontal"
+                android:paddingEnd="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                app:layout_gravity="fill_horizontal" />
 
-                    <TextView
-                        android:id="@+id/vote"
-                        style="@style/TextCondensed30"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:gravity="center_horizontal" />
-                </LinearLayout>
-            </LinearLayout>
+            <TextView
+                android:id="@+id/vote"
+                style="@style/TextCondensed30"
+                android:layout_width="0dp"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:layout_marginStart="@dimen/activity_horizontal_margin"
+                android:layout_marginTop="4dp"
+                android:gravity="center_horizontal"
+                android:paddingEnd="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                app:layout_gravity="fill_horizontal" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
-                android:orientation="vertical">
+            <View
+                android:layout_height="2dp"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:background="@color/divider"
+                app:layout_columnSpan="2" />
 
-                <TextView
-                    android:id="@+id/budget"
-                    style="@style/TextCondensed30"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                    android:layout_marginRight="@dimen/activity_horizontal_margin"
-                    android:layout_marginTop="4dp"
-                    android:text="@string/budget" />
+            <TextView
+                android:id="@+id/budget"
+                style="@style/TextCondensed30"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:paddingEnd="@dimen/activity_horizontal_margin"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingStart="@dimen/activity_horizontal_margin"
+                android:text="Budget: "
+                app:layout_columnSpan="2" />
 
-                <TextView
-                    android:id="@+id/length"
-                    style="@style/TextCondensed30"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                    android:layout_marginRight="@dimen/activity_horizontal_margin"
-                    android:layout_marginTop="4dp"
-                    android:text="@string/length" />
+            <TextView
+                android:id="@+id/length"
+                style="@style/TextCondensed30"
+                android:layout_marginTop="4dp"
+                android:paddingEnd="@dimen/activity_horizontal_margin"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingStart="@dimen/activity_horizontal_margin"
+                android:text="Length: "
+                app:layout_columnSpan="2" />
 
-                <TextView
-                    android:id="@+id/director"
-                    style="@style/TextCondensed30"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                    android:layout_marginRight="@dimen/activity_horizontal_margin"
-                    android:layout_marginTop="4dp"
-                    android:text="Director: " />
+            <TextView
+                android:id="@+id/director"
+                style="@style/TextCondensed30"
+                android:layout_marginTop="4dp"
+                android:paddingEnd="@dimen/activity_horizontal_margin"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingStart="@dimen/activity_horizontal_margin"
+                android:text="Director: "
+                app:layout_columnSpan="2" />
 
-                <TextView
-                    android:id="@+id/actors"
-                    style="@style/TextCondensed30"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                    android:layout_marginRight="@dimen/activity_horizontal_margin"
-                    android:layout_marginTop="4dp"
-                    android:text="Cast: " />
+            <TextView
+                android:id="@+id/actors"
+                style="@style/TextCondensed30"
+                android:layout_marginTop="4dp"
+                android:paddingEnd="@dimen/activity_horizontal_margin"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingStart="@dimen/activity_horizontal_margin"
+                android:text="Cast: "
+                app:layout_columnSpan="2" />
 
-                <TextView
-                    android:id="@+id/plot"
-                    style="@style/TextLight24"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                    android:layout_marginRight="@dimen/activity_horizontal_margin"
-                    android:layout_marginTop="4dp" />
+            <TextView
+                android:id="@+id/plot"
+                android:layout_marginTop="4dp"
+                style="@style/TextLight24"
+                android:fontFamily="sans-serif-light"
+                android:paddingEnd="@dimen/activity_horizontal_margin"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingStart="@dimen/activity_horizontal_margin"
+                app:layout_columnSpan="2" />
 
-                <ExpandableListView
-                    android:id="@+id/reviews"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:groupIndicator="@null" />
+            <ExpandableListView
+                android:id="@+id/reviews"
+                android:layout_marginTop="8dp"
+                android:groupIndicator="@null"
+                app:layout_columnSpan="2"
+                app:layout_gravity="fill_horizontal" />
 
-            </LinearLayout>
-        </LinearLayout>
+        </android.support.v7.widget.GridLayout>
     </android.support.v4.widget.NestedScrollView>
 
     <android.support.design.widget.FloatingActionButton
