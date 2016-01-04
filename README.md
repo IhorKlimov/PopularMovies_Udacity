@@ -13,7 +13,6 @@ In order for you to use it you need to get an Apiary DB API and YouTube API http
 
 ![landscape_handset](https://cloud.githubusercontent.com/assets/13784275/12090280/b88e1fee-b2ed-11e5-8ddc-10d2ce70da12.png)
 
-![tablet_portrait](https://cloud.githubusercontent.com/assets/13784275/12093444/3d4ed696-b303-11e5-9841-21dc68723048.png)
-
 ![-3](https://cloud.githubusercontent.com/assets/13784275/12041557/c2d3bcd6-ae72-11e5-8270-ccbe14076613.png)
 
+![tablet_portrait](https://cloud.githubusercontent.com/assets/13784275/12093444/3d4ed696-b303-11e5-9841-21dc68723048.png)
