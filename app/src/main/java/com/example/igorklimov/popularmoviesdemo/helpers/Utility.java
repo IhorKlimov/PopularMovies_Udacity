@@ -80,7 +80,7 @@ public class Utility {
         return JsonResponse;
     }
 
-    public static JSONObject[] getJsonMovies(String jsonResponse) {
+    public static JSONObject[] getJsonMovies(@NonNull String jsonResponse) {
         JSONObject[] jsonObjects = null;
         try {
             JSONObject jObj = new JSONObject(jsonResponse);

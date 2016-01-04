@@ -54,16 +54,14 @@ public class MainActivity extends AppCompatActivity
 //        OkHttpClient client = new OkHttpClient();
 //        client.networkInterceptors().add(new StethoInterceptor());
 
-
-//        some comment
         setContentView(R.layout.drawer);
+        Utility.setIsTabletPreference(this, findViewById(R.id.details_fragment) != null);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         if (savedInstanceState == null) Utility.setSortByPreference(this, 1);
 
         SyncAdapter.initializeSyncAdapter(this);
-        Utility.setIsTabletPreference(this, findViewById(R.id.details_fragment) != null);
 
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -83,7 +81,8 @@ public class MainActivity extends AppCompatActivity
 
 
     private void reload() {
-        MoviesGridFragment mf = (MoviesGridFragment) getSupportFragmentManager().findFragmentById(R.id.movies_view);
+        MoviesGridFragment mf = (MoviesGridFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.movies_view);
         if (null != mf) {
             MoviesGridFragment.id = 0;
             CustomAdapter.previous = -1;

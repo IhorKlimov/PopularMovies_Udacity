@@ -14,8 +14,10 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,8 +30,8 @@ import com.example.igorklimov.popularmoviesdemo.helpers.ScrollListener;
 import com.example.igorklimov.popularmoviesdemo.helpers.Utility;
 import com.example.igorklimov.popularmoviesdemo.sync.SyncAdapter;
 
-//some comment
 public class MoviesGridFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+    private static final String TAG = "MoviesGridFragment";
     private RecyclerView recyclerView;
     private CustomAdapter customAdapter;
     public static ScrollListener listener;
@@ -39,6 +41,7 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
     public static int id = 0;
     private FragmentActivity activity;
     private boolean mHoldForTransition;
+    private boolean isTablet;
 
     public MoviesGridFragment() {
     }
@@ -77,6 +80,7 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
                 context.obtainStyledAttributes(attrs, R.styleable.MoviesGridFragment, 0, 0);
         mHoldForTransition =
                 a.getBoolean(R.styleable.MoviesGridFragment_sharedElementTransitions, false);
+        isTablet = !mHoldForTransition;
         a.recycle();
     }
 
@@ -85,26 +89,16 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
         rootView = inflater.inflate(R.layout.movies_grid, container, false);
         recyclerView = (RecyclerView) rootView.findViewById(R.id.movies_grid);
         activity = getActivity();
-        customAdapter = new CustomAdapter(activity, null, recyclerView,
-                new CustomAdapter.MoviesAdapterOnClickHandler() {
-            @Override
-            public void onClick(Uri uri, CustomAdapter.ViewHolder holder) {
-                mainActivity.onItemClick(uri, holder);
-            }
-        });
+        customAdapter = new CustomAdapter(activity, null, recyclerView, new CustomAdapter.MoviesAdapterOnClickHandler() {
+                    @Override
+                    public void onClick(Uri uri, CustomAdapter.ViewHolder holder) {
+                        mainActivity.onItemClick(uri, holder);
+                    }
+                });
         recyclerView.setAdapter(customAdapter);
 
-        int orientation = activity
-                .getResources()
-                .getConfiguration()
-                .orientation;
-        int spanCount;
-        if (orientation == Configuration.ORIENTATION_LANDSCAPE || Utility.isTabletPreference(activity)) {
-            spanCount = 3;
-        } else {
-            spanCount = 2;
-        }
-        recyclerView.setLayoutManager(new GridLayoutManager(activity, spanCount));
+        setupMinSizes();
+
         SyncAdapter.syncImmediately(activity);
 
         listener = new ScrollListener(getActivity());
@@ -112,7 +106,6 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
 
         return rootView;
     }
-
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -163,6 +156,30 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
     @Override
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
         customAdapter.swapCursor(null);
+    }
+
+    /**
+     * This method sets minimum sizes for posters and RecyclerView's
+     * {@link android.support.v7.widget.RecyclerView.LayoutManager}
+     * */
+    private void setupMinSizes() {
+        int orientation = activity
+                .getResources()
+                .getConfiguration()
+                .orientation;
+        int spanCount;
+
+        if (orientation == Configuration.ORIENTATION_PORTRAIT && isTablet) {
+            recyclerView.setLayoutManager(new LinearLayoutManager(activity,
+                    LinearLayoutManager.HORIZONTAL, false));
+        } else {
+            if (orientation == Configuration.ORIENTATION_LANDSCAPE || isTablet) {
+                spanCount = 3;
+            } else {
+                spanCount = 2;
+            }
+            recyclerView.setLayoutManager(new GridLayoutManager(activity, spanCount));
+        }
     }
 
 }

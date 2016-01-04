@@ -145,37 +145,39 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             if (count < page * 20) {
                 String jsonResponse = getJsonResponse(DISCOVER_MOVIES + SORT_BY + sortType + PAGE + page + API_KEY);
 
-                try {
+                if (jsonResponse != null) {
                     JSONObject[] JsonMovies = getJsonMovies(jsonResponse);
-                    Log.d("TAG", "INSERTING EXTRA DATA");
-                    int i = 0;
-                    for (JSONObject jsonMovie : JsonMovies) {
-                        String poster = IMAGE_BASE + W_185 + jsonMovie.getString("poster_path");
-                        String backdropPath = IMAGE_BASE + "/w500" + jsonMovie.getString("backdrop_path");
-                        String title = jsonMovie.getString("title");
-                        String releaseDate = jsonMovie.getString("release_date");
-                        String vote = jsonMovie.getString("vote_average");
-                        String plot = jsonMovie.getString("overview");
-                        String genres = Utility.formatGenres(getGenres(jsonMovie));
-                        String id = jsonMovie.getString("id");
+                    try {
+                        Log.d("TAG", "INSERTING EXTRA DATA");
+                        int i = 0;
+                        for (JSONObject jsonMovie : JsonMovies) {
+                            String poster = IMAGE_BASE + W_185 + jsonMovie.getString("poster_path");
+                            String backdropPath = IMAGE_BASE + "/w500" + jsonMovie.getString("backdrop_path");
+                            String title = jsonMovie.getString("title");
+                            String releaseDate = jsonMovie.getString("release_date");
+                            String vote = jsonMovie.getString("vote_average");
+                            String plot = jsonMovie.getString("overview");
+                            String genres = Utility.formatGenres(getGenres(jsonMovie));
+                            String id = jsonMovie.getString("id");
 
-                        ContentValues values = new ContentValues();
-                        values.put(COLUMN_TITLE, title);
-                        values.put(COLUMN_POSTER, poster);
-                        values.put(COLUMN_RELEASE_DATE, releaseDate);
-                        values.put(COLUMN_GENRES, genres);
-                        values.put(COLUMN_MOVIE_ID, id);
-                        values.put(COLUMN_BACKDROP_PATH, backdropPath);
-                        values.put(COLUMN_AVERAGE_VOTE, vote);
-                        values.put(COLUMN_PLOT, plot);
+                            ContentValues values = new ContentValues();
+                            values.put(COLUMN_TITLE, title);
+                            values.put(COLUMN_POSTER, poster);
+                            values.put(COLUMN_RELEASE_DATE, releaseDate);
+                            values.put(COLUMN_GENRES, genres);
+                            values.put(COLUMN_MOVIE_ID, id);
+                            values.put(COLUMN_BACKDROP_PATH, backdropPath);
+                            values.put(COLUMN_AVERAGE_VOTE, vote);
+                            values.put(COLUMN_PLOT, plot);
 
-                        contentValues[i++] = values;
+                            contentValues[i++] = values;
+                        }
+                        int bulkInsert = mContentResolver.bulkInsert(contentUri, contentValues);
+                        Log.d("TAG", "onPerformSync: bulkInsert " + bulkInsert);
+                        cursor.close();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                    int bulkInsert = mContentResolver.bulkInsert(contentUri, contentValues);
-                    Log.d("TAG", "onPerformSync: bulkInsert " + bulkInsert);
-                    cursor.close();
-                } catch (JSONException e) {
-                    e.printStackTrace();
                 }
             }
         }

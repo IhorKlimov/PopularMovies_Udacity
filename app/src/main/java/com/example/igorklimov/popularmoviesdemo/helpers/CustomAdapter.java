@@ -26,6 +26,7 @@ import com.squareup.picasso.Picasso;
  * Created by Igor Klimov on 11/7/2015.
  */
 public class CustomAdapter extends CursorRecyclerViewAdapter<CustomAdapter.ViewHolder> {
+    private static final String TAG = "CustomAdapter";
     private static Context context;
     private final int orientation;
     private int minWidth = 0;
@@ -47,11 +48,18 @@ public class CustomAdapter extends CursorRecyclerViewAdapter<CustomAdapter.ViewH
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_movie, parent, false);
         ImageView posterImageView = (ImageView) view.findViewById(R.id.poster);
+        boolean isTablet = Utility.isTabletPreference(context);
         if (minWidth == 0) {
-            minWidth = recyclerView.getWidth()
-                    / (orientation == Configuration.ORIENTATION_LANDSCAPE
-                    || Utility.isTabletPreference(context) ? 3 : 2);
-            minHeight = (int) (((double) minWidth / 185) * 278);
+            if (isTablet && orientation == Configuration.ORIENTATION_PORTRAIT) {
+                minHeight = recyclerView.getHeight();
+                minWidth = (int) (((double)minHeight / 278) * 185);
+                Log.v(TAG, "onCreateViewHolder: "+ minWidth + " "+ minHeight);
+            } else {
+                minWidth = recyclerView.getWidth()
+                        / (orientation == Configuration.ORIENTATION_LANDSCAPE
+                        || isTablet ? 3 : 2);
+                minHeight = (int) (((double) minWidth / 185) * 278);
+            }
         }
         posterImageView.setMinimumWidth(minWidth);
         posterImageView.setMinimumHeight(minHeight);
@@ -80,8 +88,6 @@ public class CustomAdapter extends CursorRecyclerViewAdapter<CustomAdapter.ViewH
         ViewCompat.setTransitionName(viewHolder.imageView, "iconView" + position);
     }
 
-
-//    again
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public final ImageView imageView;
         final ProgressBar progressBar;
