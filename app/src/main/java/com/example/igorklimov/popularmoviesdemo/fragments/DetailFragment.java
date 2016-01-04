@@ -2,12 +2,14 @@ package com.example.igorklimov.popularmoviesdemo.fragments;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -17,7 +19,6 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.CardView;
-import android.support.v7.widget.GridLayout;
 import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -27,6 +28,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.ImageButton;
@@ -60,6 +62,7 @@ import java.util.Map;
 import static android.widget.Toast.LENGTH_SHORT;
 import static com.example.igorklimov.popularmoviesdemo.BuildConfig.YOUTUBE_API_KEY;
 import static com.example.igorklimov.popularmoviesdemo.R.id.author;
+import static com.example.igorklimov.popularmoviesdemo.R.id.backdrop;
 import static com.example.igorklimov.popularmoviesdemo.R.id.group_title;
 import static com.example.igorklimov.popularmoviesdemo.R.id.review_text;
 import static com.example.igorklimov.popularmoviesdemo.R.layout.child;
@@ -103,6 +106,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private CardView card;
     private int minHeight;
     private int minWidth;
+    private NestedScrollView scroll;
     private int fragmentWidth;
     private int backdropHeight;
 
@@ -152,118 +156,26 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         playButton = (ImageButton) rootView.findViewById(R.id.play_button);
         card = (CardView) rootView.findViewById(R.id.card_view);
 
-        int fragmentHeight;
-        if (!isTabletPreference(context)) {
-            fragmentHeight = this.getResources().getDisplayMetrics().heightPixels;
-            fragmentWidth = this.getResources().getDisplayMetrics().widthPixels;
-        } else {
-            Bundle arguments = getArguments();
-            fragmentHeight = arguments.getInt("fragmentHeight");
-            fragmentWidth = arguments.getInt("fragmentWidth");
-        }
-        minHeight = fragmentHeight / 3;
-        minWidth = (int) (((double) minHeight / 278) * 185);
-        backdropHeight = (int) (((double) fragmentWidth / 500) * 281);
+        setMinSizes(rootView);
 
-        posterView.setMinimumWidth(minWidth);
-        posterView.setMinimumHeight(minHeight);
-        back.setMinimumHeight(backdropHeight);
-        if (!Utility.isTabletPreference(context)) {
-            rootView.findViewById(R.id.frame).setMinimumHeight(minHeight + minHeight / 10);
-        }
-        List<Map<String, String>> groupData = new ArrayList<Map<String, String>>() {{
-            add(new HashMap<String, String>() {{
-                put("ROOT_NAME", "Reviews");
-            }});
-        }};
-        List<List<Map<String, String>>> listOfChildGroups = new ArrayList<>();
-
-        childGroupForFirstGroupRow = new ArrayList<>();
-        listOfChildGroups.add(childGroupForFirstGroupRow);
+        setupReviews(reviews);
 
         if (savedInstanceState != null && savedInstanceState.containsKey("strings")) {
-            strings = savedInstanceState.getStringArray("strings");
-            ArrayList<String> author = savedInstanceState.getStringArrayList("author");
-            ArrayList<String> review = savedInstanceState.getStringArrayList("review");
-
-            for (int i = 0; i < author.size(); i++) {
-                HashMap<String, String> map = new HashMap<>();
-                map.put("CHILD_TITLE", author.get(i));
-                map.put("CHILD_TEXT", review.get(i));
-                childGroupForFirstGroupRow.add(map);
-            }
-            setExtraData(strings);
+            getSavedData(savedInstanceState);
         }
 
-        reviews.setAdapter(new SimpleExpandableListAdapter(
-                context,
-                groupData,
-                group,
-                new String[]{"ROOT_NAME"},
-                new int[]{group_title},
+        final Toolbar bar = (Toolbar) rootView.findViewById(R.id.details_toolbar);
+        setupToolbar(bar);
 
-                listOfChildGroups,
-                child,
-                new String[]{"CHILD_TITLE", "CHILD_TEXT"},
-                new int[]{author, review_text}
-        ));
-        Toolbar bar = (Toolbar) rootView.findViewById(R.id.details_toolbar);
-        if (!isTabletPreference(context)) {
-            ((DetailActivity) context).setSupportActionBar(bar);
-            ActionBar supportActionBar = ((DetailActivity) context).getSupportActionBar();
-            supportActionBar.setDisplayHomeAsUpEnabled(true);
-            supportActionBar.setDisplayShowTitleEnabled(false);
-        } else {
-            Menu menu = bar.getMenu();
-            if (null != menu) menu.clear();
-            bar.inflateMenu(R.menu.menu_detail);
-            finishCreatingMenu(bar.getMenu());
-        }
+        scroll = (NestedScrollView) rootView.findViewById(R.id.scrollView);
+        final View parallaxBar = rootView.findViewById(R.id.landscape_appbar);
+        if (parallaxBar != null) setupParallaxBar(bar, parallaxBar);
 
-        final NestedScrollView scroll = (NestedScrollView) rootView.findViewById(R.id.scrollView);
-        final int heightPixels = context.getResources().getDisplayMetrics().heightPixels;
-
-        reviews.setDividerHeight(0);
-        reviews.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
-            @Override
-            public boolean onGroupClick(ExpandableListView parent, View v,
-                                        int groupPosition, long id) {
-                setListViewHeight(parent, groupPosition);
-                if (parent.getLayoutParams().height > defaultHeight) {
-                    final int x = scroll.getScrollX();
-                    final int y = scroll.getScrollY() + heightPixels / 4;
-                    scroll.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            scroll.smoothScrollTo(x, y);
-                        }
-                    });
-                }
-                return false;
-            }
-        });
 
         fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
         fab.setOnClickListener(this);
         playButton.setOnClickListener(this);
         return rootView;
-    }
-
-    private void finishCreatingMenu(Menu menu) {
-        MenuItem item = menu.findItem(R.id.action_share);
-        if (!isTabletPreference(context)) {
-            actionProvider = new ShareActionProvider(getActivity()) {
-                @Override
-                public View onCreateActionView() {
-                    return null;
-                }
-            };
-            item.setIcon(R.drawable.ic_share_24dp);
-        } else {
-            actionProvider = new ShareActionProvider(getActivity());
-        }
-        MenuItemCompat.setActionProvider(item, actionProvider);
-        if (trailerUri != null) actionProvider.setShareIntent(createShareIntent());
     }
 
     @Override
@@ -273,6 +185,12 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         NetworkInfo activeNetworkInfo = systemService.getActiveNetworkInfo();
         if (activeNetworkInfo == null) noInternet();
         else initLoader();
+        scroll.post(new Runnable() {
+            @Override
+            public void run() {
+                scroll.smoothScrollTo(0, 0);
+            }
+        });
     }
 
     public void initLoader() {
@@ -323,9 +241,11 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
                     }
                 });
+
         Picasso.with(context)
                 .load(Utility.getBackdrop(cursor))
                 .resize(fragmentWidth, backdropHeight)
+                .centerCrop()
                 .into(back);
         titleView.setText(Utility.getTitle(cursor));
         try {
@@ -363,55 +283,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     public void sortChanged() {
         getLoaderManager().restartLoader(DETAIL_LOADER, null, this);
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.fab:
-                if (!fab.isActivated()) {
-                    if (!inserted) {
-                        Toast.makeText(context, "Added to Favorites", LENGTH_SHORT).show();
-                        fab.setImageResource(R.drawable.star_on);
-                        if (isTabletPreference(context)
-                                || Utility.getSortByPreference(context) != 4) {
-                            Utility.addToFavorite(cursor, context);
-                        } else {
-                            toRemove = false;
-                        }
-                        fab.setActivated(true);
-                        inserted = true;
-                    }
-                } else {
-                    if (inserted) {
-                        Toast.makeText(context, "Removed from Favorites", LENGTH_SHORT).show();
-                        fab.setImageResource(R.drawable.star_off);
-                        fab.setActivated(false);
-
-                        if (isTabletPreference(context) || Utility.getSortByPreference(context) != 4) {
-                            Utility.removeFromFavorite(cursor, context);
-                            MoviesGridFragment.id = Utility.getId(context);
-                            if (isTabletPreference(context)
-                                    && Utility.getSortByPreference(context) == 4) {
-                                MainActivity activity = (MainActivity) context;
-                                activity.showDetails(MovieContract.FavoriteMovie.buildMovieUri(MoviesGridFragment.id));
-                            }
-                        } else {
-                            toRemove = true;
-                        }
-                        inserted = false;
-                    }
-                }
-                break;
-            case R.id.play_button:
-                if (trailerUri != null) {
-                    Log.d("TAG", "onClick: " + trailerUri);
-                    Intent intent = YouTubeStandalonePlayer.createVideoIntent(getActivity(),
-                            YOUTUBE_API_KEY, trailerUri, 0, true, false);
-                    startActivity(intent);
-                }
-                break;
-        }
     }
 
     private class Task extends AsyncTask<String, Void, String[]> {
@@ -531,15 +402,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         }
     }
 
-    private void setExtraData(String[] s) {
-        length.append(s[0]);
-        budget.append(s[1]);
-        if (!s[2].equals("n/a")) trailerUri = s[2];
-        actors.append(s[3]);
-        director.append(s[4]);
-        if (actionProvider != null) actionProvider.setShareIntent(createShareIntent());
-    }
-
     private void noInternet() {
         final NoInternet noInternet = new NoInternet();
         noInternet.setTargetFragment(this, 2);
@@ -548,6 +410,15 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         } else {
             noInternet.show(((DetailActivity) context).getSupportFragmentManager(), "2");
         }
+    }
+
+    private void setExtraData(String[] s) {
+        length.append(s[0]);
+        budget.append(s[1]);
+        if (!s[2].equals("n/a")) trailerUri = s[2];
+        actors.append(s[3]);
+        director.append(s[4]);
+        if (actionProvider != null) actionProvider.setShareIntent(createShareIntent());
     }
 
     private void setListViewHeight(ExpandableListView listView, int group) {
@@ -576,6 +447,195 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         params.height = height;
         listView.setLayoutParams(params);
         listView.requestLayout();
+    }
+
+    private void setupReviews(ExpandableListView reviews) {
+        List<Map<String, String>> groupData = new ArrayList<Map<String, String>>() {{
+            add(new HashMap<String, String>() {{
+                put("ROOT_NAME", "Reviews");
+            }});
+        }};
+        List<List<Map<String, String>>> listOfChildGroups = new ArrayList<>();
+
+        childGroupForFirstGroupRow = new ArrayList<>();
+        listOfChildGroups.add(childGroupForFirstGroupRow);
+
+        reviews.setAdapter(new SimpleExpandableListAdapter(
+                context,
+                groupData,
+                group,
+                new String[]{"ROOT_NAME"},
+                new int[]{group_title},
+
+                listOfChildGroups,
+                child,
+                new String[]{"CHILD_TITLE", "CHILD_TEXT"},
+                new int[]{author, review_text}
+        ));
+
+        final int heightPixels = context.getResources().getDisplayMetrics().heightPixels;
+        reviews.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
+            @Override
+            public boolean onGroupClick(ExpandableListView parent, View v,
+                                        int groupPosition, long id) {
+                setListViewHeight(parent, groupPosition);
+                if (parent.getLayoutParams().height > defaultHeight) {
+                    final int x = scroll.getScrollX();
+                    final int y = scroll.getScrollY() + heightPixels / 4;
+                    scroll.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            scroll.smoothScrollTo(x, y);
+                        }
+                    });
+                }
+                return false;
+            }
+        });
+    }
+
+    private void setupToolbar(Toolbar bar) {
+        if (!isTabletPreference(context)) {
+            ((DetailActivity) context).setSupportActionBar(bar);
+            ActionBar supportActionBar = ((DetailActivity) context).getSupportActionBar();
+            supportActionBar.setDisplayHomeAsUpEnabled(true);
+            supportActionBar.setDisplayShowTitleEnabled(false);
+        } else {
+            Menu menu = bar.getMenu();
+            if (null != menu) menu.clear();
+            bar.inflateMenu(R.menu.menu_detail);
+            finishCreatingMenu(bar.getMenu());
+        }
+    }
+
+    private void getSavedData(Bundle savedInstanceState) {
+        strings = savedInstanceState.getStringArray("strings");
+        ArrayList<String> author = savedInstanceState.getStringArrayList("author");
+        ArrayList<String> review = savedInstanceState.getStringArrayList("review");
+
+        for (int i = 0; i < author.size(); i++) {
+            HashMap<String, String> map = new HashMap<>();
+            map.put("CHILD_TITLE", author.get(i));
+            map.put("CHILD_TEXT", review.get(i));
+            childGroupForFirstGroupRow.add(map);
+        }
+        setExtraData(strings);
+    }
+
+    private void setMinSizes(View rootView) {
+        int fragmentHeight;
+        if (!isTabletPreference(context)) {
+            fragmentHeight = this.getResources().getDisplayMetrics().heightPixels;
+            fragmentWidth = this.getResources().getDisplayMetrics().widthPixels;
+        } else {
+            Bundle arguments = getArguments();
+            fragmentHeight = arguments.getInt("fragmentHeight");
+            fragmentWidth = arguments.getInt("fragmentWidth");
+        }
+        minHeight = fragmentHeight / 3;
+        minWidth = (int) (((double) minHeight / 278) * 185);
+        backdropHeight = (!Utility.isTabletPreference(context) && Configuration.ORIENTATION_LANDSCAPE
+                == context.getResources().getConfiguration().orientation
+                ? fragmentHeight - fragmentHeight / 3
+                : (int) (((double) fragmentWidth / 500) * 281));
+
+        posterView.setMinimumWidth(minWidth);
+        posterView.setMinimumHeight(minHeight);
+        back.setMinimumHeight(backdropHeight);
+        if (!Utility.isTabletPreference(context)) {
+            rootView.findViewById(R.id.frame).setMinimumHeight(minHeight + minHeight / 10);
+        }
+    }
+
+    private void setupParallaxBar(final Toolbar bar, final View parallaxBar) {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                scroll.getViewTreeObserver().addOnScrollChangedListener(
+                        new ViewTreeObserver.OnScrollChangedListener() {
+                            int j = bar.getHeight();
+                            int b = parallaxBar.getHeight();
+
+                            @Override
+                            public void onScrollChanged() {
+                                int i = scroll.getScrollY();
+                                float k = -parallaxBar.getTranslationY();
+                                int n = -(i / 2);
+                                parallaxBar.setTranslationY(n);
+                                if (j + k >= b) {
+                                    int i2 = -(j - (n + b));
+                                    bar.setTranslationY(Math.min(0, i2));
+                                }
+                            }
+                        });
+            }
+        }, 300);
+    }
+
+    private void finishCreatingMenu(Menu menu) {
+        MenuItem item = menu.findItem(R.id.action_share);
+        if (!isTabletPreference(context)) {
+            actionProvider = new ShareActionProvider(getActivity()) {
+                @Override
+                public View onCreateActionView() {
+                    return null;
+                }
+            };
+            item.setIcon(R.drawable.ic_share_24dp);
+        } else {
+            actionProvider = new ShareActionProvider(getActivity());
+        }
+        MenuItemCompat.setActionProvider(item, actionProvider);
+        if (trailerUri != null) actionProvider.setShareIntent(createShareIntent());
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.fab:
+                if (!fab.isActivated()) {
+                    if (!inserted) {
+                        Toast.makeText(context, "Added to Favorites", LENGTH_SHORT).show();
+                        fab.setImageResource(R.drawable.star_on);
+                        if (isTabletPreference(context)
+                                || Utility.getSortByPreference(context) != 4) {
+                            Utility.addToFavorite(cursor, context);
+                        } else {
+                            toRemove = false;
+                        }
+                        fab.setActivated(true);
+                        inserted = true;
+                    }
+                } else {
+                    if (inserted) {
+                        Toast.makeText(context, "Removed from Favorites", LENGTH_SHORT).show();
+                        fab.setImageResource(R.drawable.star_off);
+                        fab.setActivated(false);
+
+                        if (isTabletPreference(context) || Utility.getSortByPreference(context) != 4) {
+                            Utility.removeFromFavorite(cursor, context);
+                            MoviesGridFragment.id = Utility.getId(context);
+                            if (isTabletPreference(context)
+                                    && Utility.getSortByPreference(context) == 4) {
+                                MainActivity activity = (MainActivity) context;
+                                activity.showDetails(MovieContract.FavoriteMovie.buildMovieUri(MoviesGridFragment.id));
+                            }
+                        } else {
+                            toRemove = true;
+                        }
+                        inserted = false;
+                    }
+                }
+                break;
+            case R.id.play_button:
+                if (trailerUri != null) {
+                    Log.d("TAG", "onClick: " + trailerUri);
+                    Intent intent = YouTubeStandalonePlayer.createVideoIntent(getActivity(),
+                            YOUTUBE_API_KEY, trailerUri, 0, true, false);
+                    startActivity(intent);
+                }
+                break;
+        }
     }
 }
 
