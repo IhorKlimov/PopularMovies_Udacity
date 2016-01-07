@@ -27,6 +27,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -164,7 +165,19 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         playButton = (ImageButton) rootView.findViewById(R.id.play_button);
         card = (CardView) rootView.findViewById(R.id.card_view);
         resolver = context.getContentResolver();
-        setMinSizes(rootView);
+        View space = rootView.findViewById(R.id.space);
+
+        if (space != null) {
+            space.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    playButton.performClick();
+                    playButton.setPressed(true);
+                }
+            });
+        }
+
+        setMinSizes(space);
 
         setupReviews();
 
@@ -172,14 +185,12 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         setupToolbar();
 
         scroll = (NestedScrollView) rootView.findViewById(R.id.scrollView);
-        final View parallaxBar = rootView.findViewById(R.id.landscape_appbar);
+        final View parallaxBar = rootView.findViewById(R.id.handset_appbar);
         if (parallaxBar != null) setupParallaxBar(bar, parallaxBar);
-
 
         fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
         fab.setOnClickListener(this);
         playButton.setOnClickListener(this);
-        Log.v(TAG, "onCreateView: ");
         return rootView;
     }
 
@@ -199,11 +210,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onStop() {
         super.onStop();
-        Log.v(TAG, "onStop: ");
         playButton.setOnClickListener(null);
         fab.setOnClickListener(null);
         reviews.setOnGroupClickListener(null);
-        scroll.getViewTreeObserver().addOnScrollChangedListener(null);
+//        scroll.getViewTreeObserver().addOnScrollChangedListener(null);
     }
 
     public void initLoader() {
@@ -241,34 +251,37 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     public void load() {
         progressBar.setVisibility(View.VISIBLE);
-        playButton.setVisibility(View.VISIBLE);
         if (mStrings == null) new Task().execute(cursor.getString(7));
         if (Utility.isFavorite(cursor, context)) {
             fab.setImageResource(R.drawable.star_on);
             fab.setActivated(true);
             inserted = true;
         }
-        Picasso.with(context)
-                .load(Utility.getPoster(cursor))
-//                .resize(minWidth, minHeight)
-                .into(posterView, new Callback() {
-                    @Override
-                    public void onSuccess() {
-                        progressBar.setVisibility(View.INVISIBLE);
-                        card.setVisibility(View.VISIBLE);
-                    }
+        Picasso.with(context).load(Utility.getPoster(cursor)).into(posterView, new Callback() {
+            @Override
+            public void onSuccess() {
+                progressBar.setVisibility(View.INVISIBLE);
+                card.setVisibility(View.VISIBLE);
+                getActivity().supportStartPostponedEnterTransition();
+            }
 
-                    @Override
-                    public void onError() {
+            @Override
+            public void onError() {
 
-                    }
-                });
+            }
+        });
 
-        Picasso.with(context)
-                .load(Utility.getBackdrop(cursor))
-//                .resize(fragmentWidth, backdropHeight)
-//                .centerCrop()
-                .into(back);
+        Picasso.with(context).load(Utility.getBackdrop(cursor)).into(back, new Callback() {
+            @Override
+            public void onSuccess() {
+                playButton.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onError() {
+
+            }
+        });
         titleView.setText(mTitle);
         try {
             releaseDateView.setText(monthYearFormat
@@ -281,22 +294,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         plotView.setText(Utility.getPlot(cursor));
 
         done = true;
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-//        if (mStrings != null) {
-//            ArrayList<String> author = new ArrayList<>();
-//            ArrayList<String> review = new ArrayList<>();
-//            for (int i = 0; i < childGroupForFirstGroupRow.size(); i++) {
-//                author.add(childGroupForFirstGroupRow.get(i).get(AUTHOR));
-//                review.add(childGroupForFirstGroupRow.get(i).get(REVIEW_TEXT));
-//            }
-//            outState.putStringArray("mStrings", mStrings);
-//            outState.putStringArrayList("author", author);
-//            outState.putStringArrayList("review", review);
-//        }
-        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -600,7 +597,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         setExtraData(mStrings);
     }
 
-    private void setMinSizes(View rootView) {
+    private void setMinSizes(View space) {
         int fragmentHeight;
         if (!isTabletPreference(context)) {
             fragmentHeight = this.getResources().getDisplayMetrics().heightPixels;
@@ -620,12 +617,15 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         posterView.setMinimumWidth(minWidth);
         posterView.setMinimumHeight(minHeight);
         back.setMinimumHeight(backdropHeight);
-        if (!Utility.isTabletPreference(context)) {
-            rootView.findViewById(R.id.frame).setMinimumHeight(minHeight + minHeight / 10);
+        if (context.getResources().getConfiguration().orientation
+                == Configuration.ORIENTATION_PORTRAIT && space!= null) {
+            space.setMinimumHeight(backdropHeight);
         }
     }
 
     private void setupParallaxBar(final Toolbar bar, final View parallaxBar) {
+        final boolean isPortrait = context.getResources().getConfiguration().orientation
+                == Configuration.ORIENTATION_PORTRAIT;
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -640,8 +640,13 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                                 float k = -parallaxBar.getTranslationY();
                                 int n = -(i / 2);
                                 parallaxBar.setTranslationY(n);
-                                if (j + k >= b) {
-                                    int i2 = -(j - (n + b));
+                                if (!isPortrait) {
+                                    if (j + k >= b) {
+                                        int i2 = -(j - (n + b));
+                                        bar.setTranslationY(Math.min(0, i2));
+                                    }
+                                } else {
+                                    int i2 = (b - i - j);
                                     bar.setTranslationY(Math.min(0, i2));
                                 }
                             }

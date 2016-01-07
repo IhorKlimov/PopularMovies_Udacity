@@ -10,8 +10,8 @@
     </style>
 
     <style name="AppTheme.Detail" parent="AppTheme">
-        <item name="android:windowEnterTransition">@transition/details_enter_transition</item>
-        <item name="android:windowExitTransition">@transition/details_exit_transition</item>
+        <item name="android:windowEnterTransition">@transition/details_transition</item>
+        <item name="android:windowExitTransition">@transition/details_transition</item>
     </style>
 
 </resources>
