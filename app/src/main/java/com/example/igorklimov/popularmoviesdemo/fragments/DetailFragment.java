@@ -1,11 +1,12 @@
 package com.example.igorklimov.popularmoviesdemo.fragments;
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -42,6 +43,8 @@ import com.example.igorklimov.popularmoviesdemo.R;
 import com.example.igorklimov.popularmoviesdemo.activities.DetailActivity;
 import com.example.igorklimov.popularmoviesdemo.activities.MainActivity;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract;
+import com.example.igorklimov.popularmoviesdemo.data.MovieContract.Details;
+import com.example.igorklimov.popularmoviesdemo.data.MovieContract.Review;
 import com.example.igorklimov.popularmoviesdemo.helpers.Utility;
 import com.google.android.youtube.player.YouTubeStandalonePlayer;
 import com.squareup.picasso.Callback;
@@ -62,7 +65,6 @@ import java.util.Map;
 import static android.widget.Toast.LENGTH_SHORT;
 import static com.example.igorklimov.popularmoviesdemo.BuildConfig.YOUTUBE_API_KEY;
 import static com.example.igorklimov.popularmoviesdemo.R.id.author;
-import static com.example.igorklimov.popularmoviesdemo.R.id.backdrop;
 import static com.example.igorklimov.popularmoviesdemo.R.id.group_title;
 import static com.example.igorklimov.popularmoviesdemo.R.id.review_text;
 import static com.example.igorklimov.popularmoviesdemo.R.layout.child;
@@ -80,6 +82,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private static final SimpleDateFormat initialFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
     private static final SimpleDateFormat monthYearFormat = new SimpleDateFormat("MMMM, yyyy", Locale.US);
     private static final int DETAIL_LOADER = 300;
+    private static final String AUTHOR = "CHILD_TITLE";
+    private static final String REVIEW_TEXT = "CHILD_TEXT";
 
     private ImageView posterView;
     private TextView titleView;
@@ -102,13 +106,17 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private ShareActionProvider actionProvider;
     private TextView director;
     private TextView actors;
-    private String[] strings;
+    private String[] mStrings;
     private CardView card;
     private int minHeight;
     private int minWidth;
     private NestedScrollView scroll;
     private int fragmentWidth;
     private int backdropHeight;
+    private Toolbar bar;
+    private ExpandableListView reviews;
+    private ContentResolver resolver;
+    private String mTitle;
 
     public DetailFragment() {
     }
@@ -149,23 +157,19 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         budget = (TextView) rootView.findViewById(R.id.budget);
         actors = (TextView) rootView.findViewById(R.id.actors);
         director = (TextView) rootView.findViewById(R.id.director);
-        ExpandableListView reviews = (ExpandableListView) rootView.findViewById(R.id.reviews);
+        reviews = (ExpandableListView) rootView.findViewById(R.id.reviews);
         context = getActivity();
         back = (ImageView) rootView.findViewById(R.id.backdrop);
         progressBar = rootView.findViewById(R.id.progressBar);
         playButton = (ImageButton) rootView.findViewById(R.id.play_button);
         card = (CardView) rootView.findViewById(R.id.card_view);
-
+        resolver = context.getContentResolver();
         setMinSizes(rootView);
 
-        setupReviews(reviews);
+        setupReviews();
 
-        if (savedInstanceState != null && savedInstanceState.containsKey("strings")) {
-            getSavedData(savedInstanceState);
-        }
-
-        final Toolbar bar = (Toolbar) rootView.findViewById(R.id.details_toolbar);
-        setupToolbar(bar);
+        bar = (Toolbar) rootView.findViewById(R.id.details_toolbar);
+        setupToolbar();
 
         scroll = (NestedScrollView) rootView.findViewById(R.id.scrollView);
         final View parallaxBar = rootView.findViewById(R.id.landscape_appbar);
@@ -175,15 +179,14 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
         fab.setOnClickListener(this);
         playButton.setOnClickListener(this);
+        Log.v(TAG, "onCreateView: ");
         return rootView;
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        ConnectivityManager systemService = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = systemService.getActiveNetworkInfo();
-        if (activeNetworkInfo == null) noInternet();
+        if (!isInternetAvailable()) noInternetMessage();
         else initLoader();
         scroll.post(new Runnable() {
             @Override
@@ -191,6 +194,16 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 scroll.smoothScrollTo(0, 0);
             }
         });
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.v(TAG, "onStop: ");
+        playButton.setOnClickListener(null);
+        fab.setOnClickListener(null);
+        reviews.setOnGroupClickListener(null);
+        scroll.getViewTreeObserver().addOnScrollChangedListener(null);
     }
 
     public void initLoader() {
@@ -213,6 +226,15 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         if (!done && data.moveToFirst()) {
             cursor = data;
+            mTitle = Utility.getTitle(cursor);
+
+            Cursor query = resolver.query(Details.CONTENT_URI, null,
+                    MovieContract.COLUMN_TITLE + "=?", new String[]{mTitle},
+                    null);
+            if (query != null && query.moveToFirst()) {
+                getSavedData(query);
+                query.close();
+            }
             load();
         }
     }
@@ -220,7 +242,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public void load() {
         progressBar.setVisibility(View.VISIBLE);
         playButton.setVisibility(View.VISIBLE);
-        if (strings == null) new Task().execute(cursor.getString(7));
+        if (mStrings == null) new Task().execute(cursor.getString(7));
         if (Utility.isFavorite(cursor, context)) {
             fab.setImageResource(R.drawable.star_on);
             fab.setActivated(true);
@@ -228,7 +250,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         }
         Picasso.with(context)
                 .load(Utility.getPoster(cursor))
-                .resize(minWidth, minHeight)
+//                .resize(minWidth, minHeight)
                 .into(posterView, new Callback() {
                     @Override
                     public void onSuccess() {
@@ -244,10 +266,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
         Picasso.with(context)
                 .load(Utility.getBackdrop(cursor))
-                .resize(fragmentWidth, backdropHeight)
-                .centerCrop()
+//                .resize(fragmentWidth, backdropHeight)
+//                .centerCrop()
                 .into(back);
-        titleView.setText(Utility.getTitle(cursor));
+        titleView.setText(mTitle);
         try {
             releaseDateView.setText(monthYearFormat
                     .format(initialFormat.parse(Utility.getReleaseDate(cursor))));
@@ -263,17 +285,17 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        if (strings != null) {
-            ArrayList<String> author = new ArrayList<>();
-            ArrayList<String> review = new ArrayList<>();
-            for (int i = 0; i < childGroupForFirstGroupRow.size(); i++) {
-                author.add(childGroupForFirstGroupRow.get(i).get("CHILD_TITLE"));
-                review.add(childGroupForFirstGroupRow.get(i).get("CHILD_TEXT"));
-            }
-            outState.putStringArray("strings", strings);
-            outState.putStringArrayList("author", author);
-            outState.putStringArrayList("review", review);
-        }
+//        if (mStrings != null) {
+//            ArrayList<String> author = new ArrayList<>();
+//            ArrayList<String> review = new ArrayList<>();
+//            for (int i = 0; i < childGroupForFirstGroupRow.size(); i++) {
+//                author.add(childGroupForFirstGroupRow.get(i).get(AUTHOR));
+//                review.add(childGroupForFirstGroupRow.get(i).get(REVIEW_TEXT));
+//            }
+//            outState.putStringArray("mStrings", mStrings);
+//            outState.putStringArrayList("author", author);
+//            outState.putStringArrayList("review", review);
+//        }
         super.onSaveInstanceState(outState);
     }
 
@@ -290,16 +312,44 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         @Override
         protected String[] doInBackground(String... params) {
             String id = params[0];
-            strings = new String[5];
-            for (int i = 0; i < strings.length; i++) {
-                strings[i] = "n/a";
+            mStrings = new String[5];
+            for (int i = 0; i < mStrings.length; i++) {
+                mStrings[i] = "n/a";
             }
             getExtraInfo(id);
             getVideos(id);
             getReviews(id);
             getCredits(id);
+            saveToDb();
 
-            return strings;
+            return mStrings;
+        }
+
+        private void saveToDb() {
+            Log.v(TAG, "saveToDb: ");
+
+            ContentValues details = new ContentValues();
+            ArrayList<ContentValues> allReviews = new ArrayList<>();
+
+            details.put(MovieContract.COLUMN_TITLE, mTitle);
+            details.put(MovieContract.COLUMN_BUDGET, mStrings[1]);
+            details.put(MovieContract.COLUMN_LENGTH, mStrings[0]);
+            details.put(MovieContract.COLUMN_DIRECTOR, mStrings[4]);
+            details.put(MovieContract.COLUMN_CAST, mStrings[3]);
+            details.put(MovieContract.COLUMN_TRAILER_URL, mStrings[2]);
+
+            for (int i = 0; i < childGroupForFirstGroupRow.size(); i++) {
+                ContentValues review = new ContentValues();
+                Map<String, String> map = childGroupForFirstGroupRow.get(i);
+
+                review.put(MovieContract.COLUMN_TITLE, mTitle);
+                review.put(MovieContract.COLUMN_AUTHOR, map.get(AUTHOR));
+                review.put(MovieContract.COLUMN_REVIEW_TEXT, map.get(REVIEW_TEXT));
+
+                allReviews.add(review);
+            }
+
+            Utility.addDetails(details, allReviews, context);
         }
 
         @Override
@@ -316,13 +366,13 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 JSONObject jsonObject = new JSONObject(JsonResponse);
                 String runtime = jsonObject.getString("runtime");
                 String budget = jsonObject.getString("budget");
-                if (runtime != null && !runtime.equals("0")) strings[0] = runtime + " min";
+                if (runtime != null && !runtime.equals("0")) mStrings[0] = runtime + " min";
                 if (budget != null && !budget.equals("0")) {
-                    strings[1] = " $" + Utility.formatBudget(budget);
+                    mStrings[1] = " $" + Utility.formatBudget(budget);
                 }
             } catch (JSONException | NullPointerException e) {
                 e.printStackTrace();
-                noInternet();
+                noInternetMessage();
             }
         }
 
@@ -337,17 +387,17 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                     for (int i = 0; i < results.length(); i++) {
                         if (!results.getJSONObject(i).getString("name").contains("Teaser")) {
                             String key = results.getJSONObject(i).getString("key");
-                            if (key != null) strings[2] = key;
+                            if (key != null) mStrings[2] = key;
                             break;
                         }
                     }
                 } else if (results.length() == 1) {
                     String key = results.getJSONObject(0).getString("key");
-                    if (key != null) strings[2] = key;
+                    if (key != null) mStrings[2] = key;
                 }
             } catch (JSONException | NullPointerException e) {
                 e.printStackTrace();
-                noInternet();
+                noInternetMessage();
             }
         }
 
@@ -362,13 +412,13 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                     HashMap<String, String> map = new HashMap<>();
                     String author = results.getJSONObject(i).getString("author");
                     String content = results.getJSONObject(i).getString("content");
-                    if (author != null) map.put("CHILD_TITLE", author);
-                    if (content != null) map.put("CHILD_TEXT", content);
+                    if (author != null) map.put(AUTHOR, author);
+                    if (content != null) map.put(REVIEW_TEXT, content);
                     childGroupForFirstGroupRow.add(map);
                 }
             } catch (JSONException | NullPointerException e) {
                 e.printStackTrace();
-                noInternet();
+                noInternetMessage();
             }
         }
 
@@ -385,30 +435,20 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                     actors = actors.concat(cast.getJSONObject(i).getString("name") +
                             (i < (length - 1) ? ", " : ""));
                 }
-                if (actors.length() > 0) strings[3] = actors;
+                if (actors.length() > 0) mStrings[3] = actors;
                 JSONArray crew = jsonObject.getJSONArray("crew");
                 for (int i = 0; i < crew.length(); i++) {
                     JSONObject object = crew.getJSONObject(i);
                     if (object.getString("department").equals("Directing")) {
                         String name = object.getString("name");
-                        if (name != null) strings[4] = name;
+                        if (name != null) mStrings[4] = name;
                         break;
                     }
                 }
             } catch (JSONException | NullPointerException e) {
                 e.printStackTrace();
-                noInternet();
+                noInternetMessage();
             }
-        }
-    }
-
-    private void noInternet() {
-        final NoInternet noInternet = new NoInternet();
-        noInternet.setTargetFragment(this, 2);
-        if (isTabletPreference(context)) {
-            noInternet.show(((MainActivity) context).getSupportFragmentManager(), "2");
-        } else {
-            noInternet.show(((DetailActivity) context).getSupportFragmentManager(), "2");
         }
     }
 
@@ -419,6 +459,22 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         actors.append(s[3]);
         director.append(s[4]);
         if (actionProvider != null) actionProvider.setShareIntent(createShareIntent());
+    }
+
+    private boolean isInternetAvailable() {
+        ConnectivityManager systemService = (ConnectivityManager) context
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        return systemService.getActiveNetworkInfo() != null;
+    }
+
+    private void noInternetMessage() {
+        final NoInternet noInternet = new NoInternet();
+        noInternet.setTargetFragment(this, 2);
+        if (isTabletPreference(context)) {
+            noInternet.show(((MainActivity) context).getSupportFragmentManager(), "2");
+        } else {
+            noInternet.show(((DetailActivity) context).getSupportFragmentManager(), "2");
+        }
     }
 
     private void setListViewHeight(ExpandableListView listView, int group) {
@@ -449,7 +505,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         listView.requestLayout();
     }
 
-    private void setupReviews(ExpandableListView reviews) {
+    private void setupReviews() {
         List<Map<String, String>> groupData = new ArrayList<Map<String, String>>() {{
             add(new HashMap<String, String>() {{
                 put("ROOT_NAME", "Reviews");
@@ -469,7 +525,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
                 listOfChildGroups,
                 child,
-                new String[]{"CHILD_TITLE", "CHILD_TEXT"},
+                new String[]{AUTHOR, REVIEW_TEXT},
                 new int[]{author, review_text}
         ));
 
@@ -494,12 +550,13 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         });
     }
 
-    private void setupToolbar(Toolbar bar) {
+    private void setupToolbar() {
         if (!isTabletPreference(context)) {
             ((DetailActivity) context).setSupportActionBar(bar);
             ActionBar supportActionBar = ((DetailActivity) context).getSupportActionBar();
             supportActionBar.setDisplayHomeAsUpEnabled(true);
             supportActionBar.setDisplayShowTitleEnabled(false);
+            ((DetailActivity) context).getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_home);
         } else {
             Menu menu = bar.getMenu();
             if (null != menu) menu.clear();
@@ -508,18 +565,39 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         }
     }
 
-    private void getSavedData(Bundle savedInstanceState) {
-        strings = savedInstanceState.getStringArray("strings");
-        ArrayList<String> author = savedInstanceState.getStringArrayList("author");
-        ArrayList<String> review = savedInstanceState.getStringArrayList("review");
+    private void getSavedData(Cursor query) {
+        mStrings = new String[5];
+        ArrayList<String> author = new ArrayList<>();
+        ArrayList<String> review = new ArrayList<>();
+
+        String length = Utility.getLength(query);
+        String budget = Utility.getBudget(query);
+        String cast = Utility.getCast(query);
+        String director = Utility.getDirector(query);
+        String trailerUrl = Utility.getTrailerUrl(query);
+        mStrings[0] = length;
+        mStrings[1] = budget;
+        mStrings[2] = trailerUrl;
+        mStrings[3] = cast;
+        mStrings[4] = director;
+
+        Cursor r = resolver.query(Review.CONTENT_URI, null, MovieContract.COLUMN_TITLE + "=?",
+                new String[]{mTitle}, null);
+        if (r != null) {
+            while (r.moveToNext()) {
+                author.add(Utility.getAuthor(r));
+                review.add(Utility.getReviewText(r));
+            }
+            r.close();
+        }
 
         for (int i = 0; i < author.size(); i++) {
             HashMap<String, String> map = new HashMap<>();
-            map.put("CHILD_TITLE", author.get(i));
-            map.put("CHILD_TEXT", review.get(i));
+            map.put(AUTHOR, author.get(i));
+            map.put(REVIEW_TEXT, review.get(i));
             childGroupForFirstGroupRow.add(map);
         }
-        setExtraData(strings);
+        setExtraData(mStrings);
     }
 
     private void setMinSizes(View rootView) {
@@ -581,7 +659,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                     return null;
                 }
             };
-            item.setIcon(R.drawable.ic_share_24dp);
+            item.setIcon(R.drawable.ic_share);
         } else {
             actionProvider = new ShareActionProvider(getActivity());
         }

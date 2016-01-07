@@ -32,7 +32,7 @@
                     android:background="@color/accent"
                     android:contentDescription="@string/backdrop"
                     android:fitsSystemWindows="true"
-                    android:scaleType="fitXY" />
+                    android:scaleType="centerCrop" />
 
                 <ImageButton
                     android:id="@+id/play_button"

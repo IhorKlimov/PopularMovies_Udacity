@@ -6,7 +6,7 @@ import android.provider.BaseColumns;
 import android.support.annotation.NonNull;
 
 /**
- * Created by Igor Klimov on 11/28/2015.
+ * A class that defines constants for Database tables
  */
 public final class MovieContract {
 
@@ -16,6 +16,8 @@ public final class MovieContract {
     public static final String PATH_MOVIE_BY_RELEASE_DATE = "movie_by_release_date";
     public static final String PATH_MOVIE_BY_VOTES = "movie_by_votes";
     public static final String PATH_FAVORITE_MOVIE = "favorite_movie";
+    public static final String PATH_DETAILS = "details";
+    public static final String PATH_REVIEW = "review";
 
     public static final String COLUMN_TITLE = "title";
     public static final String COLUMN_POSTER = "poster";
@@ -27,6 +29,12 @@ public final class MovieContract {
     public static final String COLUMN_BUDGET = "budget";
     public static final String COLUMN_MOVIE_ID = "movie_id";
     public static final String COLUMN_PLOT = "plot";
+    public static final String COLUMN_DIRECTOR = "director";
+    public static final String COLUMN_CAST = "cast";
+    public static final String COLUMN_TRAILER_URL = "trailer_url";
+    public static final String COLUMN_AUTHOR = "author";
+    public static final String COLUMN_REVIEW_TEXT = "review_text";
+
 
     private static final String TEXT_TYPE = " TEXT";
     private static final String NOT_NULL = " NOT NULL";
@@ -112,6 +120,45 @@ public final class MovieContract {
         }
     }
 
+    public static abstract class Details implements BaseColumns {
+        public static final String TABLE_NAME = "details";
+
+        public static final String SQL_CREATE_ENTRIES = "CREATE TABLE " + TABLE_NAME + " ("
+                + COLUMN_TITLE + TEXT_TYPE + NOT_NULL + COMA_SEP
+                + COLUMN_BUDGET + TEXT_TYPE + NOT_NULL + COMA_SEP
+                + COLUMN_LENGTH + TEXT_TYPE + NOT_NULL + COMA_SEP
+                + COLUMN_DIRECTOR + TEXT_TYPE + NOT_NULL + COMA_SEP
+                + COLUMN_CAST + TEXT_TYPE + NOT_NULL + COMA_SEP
+                + COLUMN_TRAILER_URL + TEXT_TYPE + ");";
+
+        public static final String SQL_DELETE_ENTRIES = "DROP TABLE IF EXISTS " + TABLE_NAME + ";";
+
+        public static final Uri CONTENT_URI =
+                BASE_CONTENT_URI.buildUpon().appendPath(PATH_DETAILS).build();
+
+        public static Uri buildMovieUri(long id) {
+            return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
+    }
+
+    public static abstract class Review implements BaseColumns {
+        public static final String TABLE_NAME = "review";
+
+        public static final String SQL_CREATE_ENTRIES = "CREATE TABLE " + TABLE_NAME + " ("
+                + COLUMN_TITLE + TEXT_TYPE + NOT_NULL + COMA_SEP
+                + COLUMN_AUTHOR + TEXT_TYPE + NOT_NULL + COMA_SEP
+                + COLUMN_REVIEW_TEXT + TEXT_TYPE + NOT_NULL + ");";
+
+        public static final String SQL_DELETE_ENTRIES = "DROP TABLE IF EXISTS " + TABLE_NAME + ";";
+
+        public static final Uri CONTENT_URI =
+                BASE_CONTENT_URI.buildUpon().appendPath(PATH_REVIEW).build();
+
+        public static Uri buildMovieUri(long id) {
+            return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
+    }
+
     @NonNull
     private static String createEntries(String tableName) {
         return "CREATE TABLE " + tableName + " ("
@@ -123,9 +170,7 @@ public final class MovieContract {
                 + COLUMN_AVERAGE_VOTE + TEXT_TYPE + COMA_SEP
                 + COLUMN_PLOT + TEXT_TYPE + COMA_SEP
                 + COLUMN_MOVIE_ID + TEXT_TYPE + COMA_SEP
-                + COLUMN_BACKDROP_PATH + TEXT_TYPE + COMA_SEP
-                + COLUMN_BUDGET + TEXT_TYPE + COMA_SEP
-                + COLUMN_LENGTH + TEXT_TYPE + ");";
+                + COLUMN_BACKDROP_PATH + TEXT_TYPE + ");";
     }
 
 }

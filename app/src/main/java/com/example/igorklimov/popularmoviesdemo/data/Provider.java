@@ -11,16 +11,20 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.example.igorklimov.popularmoviesdemo.data.MovieContract.Details;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.FavoriteMovie;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByPopularity;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByReleaseDate;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByVotes;
+import com.example.igorklimov.popularmoviesdemo.data.MovieContract.Review;
 
 import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.CONTENT_AUTHORITY;
+import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.PATH_DETAILS;
 import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.PATH_FAVORITE_MOVIE;
 import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.PATH_MOVIE_BY_POPULARITY;
 import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.PATH_MOVIE_BY_RELEASE_DATE;
 import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.PATH_MOVIE_BY_VOTES;
+import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.PATH_REVIEW;
 
 /**
  * Created by Igor Klimov on 11/29/2015.
@@ -28,7 +32,6 @@ import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.PATH_M
 public class Provider extends ContentProvider {
 
     private static final UriMatcher uriMatcher = buildUriMatcher();
-    //    private static final SQLiteQueryBuilder queryBuilder;
     private MoviesDbHelper moviesDbHelper;
     private ContentResolver contentResolver;
 
@@ -40,19 +43,14 @@ public class Provider extends ContentProvider {
     private static final int MOVIE_BY_VOTES_WITH_ID = 301;
     private static final int FAVORITE_MOVIE = 400;
     private static final int FAVORITE_MOVIE_WITH_ID = 401;
+    private static final int MOVIE_DETAILS = 500;
+    private static final int MOVIE_REVIEW = 600;
 
-
-//    static {
-//        queryBuilder = new SQLiteQueryBuilder();
-//        queryBuilder.setTables(MovieContract.MovieByPopularity.TABLE_NAME);
-//    }
 
     @Override
     public boolean onCreate() {
         moviesDbHelper = new MoviesDbHelper(getContext());
-        if (getContext() != null) {
-            contentResolver = getContext().getContentResolver();
-        }
+        if (getContext() != null) contentResolver = getContext().getContentResolver();
         return true;
     }
 
@@ -107,6 +105,14 @@ public class Provider extends ContentProvider {
                 cursor = db.query(FavoriteMovie.TABLE_NAME, projection,
                         FavoriteMovie._ID + "=?", new String[]{id}, null, null, sortOrder);
                 break;
+            case MOVIE_DETAILS:
+                cursor = db.query(Details.TABLE_NAME,
+                        projection, selection, selectionArgs, null, null, sortOrder);
+                break;
+            case MOVIE_REVIEW:
+                cursor = db.query(Review.TABLE_NAME,
+                        projection, selection, selectionArgs, null, null, sortOrder);
+                break;
             default:
                 throw new UnsupportedOperationException();
         }
@@ -116,7 +122,6 @@ public class Provider extends ContentProvider {
 
     @Override
     public Uri insert(@NonNull Uri uri, ContentValues values) {
-        Log.d("TAG", "insert: ");
         SQLiteDatabase db = moviesDbHelper.getWritableDatabase();
         Uri result;
         long insert;
@@ -136,6 +141,14 @@ public class Provider extends ContentProvider {
             case FAVORITE_MOVIE:
                 insert = db.insert(FavoriteMovie.TABLE_NAME, null, values);
                 result = FavoriteMovie.buildMovieUri(insert);
+                break;
+            case MOVIE_DETAILS:
+                insert = db.insert(Details.TABLE_NAME, null, values);
+                result = Details.buildMovieUri(insert);
+                break;
+            case MOVIE_REVIEW:
+                insert = db.insert(Review.TABLE_NAME, null, values);
+                result = Review.buildMovieUri(insert);
                 break;
             default:
                 throw new UnsupportedOperationException();
@@ -197,6 +210,18 @@ public class Provider extends ContentProvider {
                     db.endTransaction();
                 }
                 break;
+            case MOVIE_REVIEW:
+                db.beginTransaction();
+                try {
+                    for (ContentValues value : values) {
+                        long insert = db.insert(Review.TABLE_NAME, null, value);
+                        if (insert != -1) inserted++;
+                    }
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                }
+                break;
             default:
                 throw new UnsupportedOperationException();
         }
@@ -251,6 +276,9 @@ public class Provider extends ContentProvider {
         return 0;
     }
 
+    /**
+     * Utility method to get the intention
+     */
     private static UriMatcher buildUriMatcher() {
         UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         uriMatcher.addURI(CONTENT_AUTHORITY, PATH_MOVIE_BY_POPULARITY, MOVIE_BY_POPULARITY);
@@ -261,6 +289,8 @@ public class Provider extends ContentProvider {
         uriMatcher.addURI(CONTENT_AUTHORITY, PATH_MOVIE_BY_VOTES + "/#", MOVIE_BY_VOTES_WITH_ID);
         uriMatcher.addURI(CONTENT_AUTHORITY, PATH_FAVORITE_MOVIE, FAVORITE_MOVIE);
         uriMatcher.addURI(CONTENT_AUTHORITY, PATH_FAVORITE_MOVIE + "/#", FAVORITE_MOVIE_WITH_ID);
+        uriMatcher.addURI(CONTENT_AUTHORITY, PATH_DETAILS, MOVIE_DETAILS);
+        uriMatcher.addURI(CONTENT_AUTHORITY, PATH_REVIEW, MOVIE_REVIEW);
 
         return uriMatcher;
     }

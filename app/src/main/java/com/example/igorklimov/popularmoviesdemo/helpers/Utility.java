@@ -1,5 +1,6 @@
 package com.example.igorklimov.popularmoviesdemo.helpers;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -26,11 +27,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 
 /**
  * Created by Igor Klimov on 11/27/2015.
  */
 public class Utility {
+
+    private static final String TAG = "Utility";
 
     public static String getJsonResponse(String s) {
         HttpURLConnection connection = null;
@@ -316,17 +320,15 @@ public class Utility {
         values.put(MovieContract.COLUMN_PLOT, Utility.getPlot(cursor));
         values.put(MovieContract.COLUMN_MOVIE_ID, Utility.getMovieId(cursor));
         values.put(MovieContract.COLUMN_BACKDROP_PATH, Utility.getBackdrop(cursor));
-        values.put(MovieContract.COLUMN_BUDGET, Utility.getBudget(cursor));
-        values.put(MovieContract.COLUMN_LENGTH, Utility.getLength(cursor));
 
         return context.getContentResolver().insert(FavoriteMovie.CONTENT_URI, values);
     }
 
-    private static String getLength(Cursor cursor) {
+    public static String getLength(Cursor cursor) {
         return cursor.getString(cursor.getColumnIndex(MovieContract.COLUMN_LENGTH));
     }
 
-    private static String getBudget(Cursor cursor) {
+    public static String getBudget(Cursor cursor) {
         return cursor.getString(cursor.getColumnIndex(MovieContract.COLUMN_BUDGET));
     }
 
@@ -355,6 +357,36 @@ public class Utility {
         return data.getString(data.getColumnIndex(MovieContract.COLUMN_BACKDROP_PATH));
     }
 
+    public static void addDetails(ContentValues details, ArrayList<ContentValues> allReviews,
+                                  Context context) {
+        ContentResolver resolver = context.getContentResolver();
+
+        ContentValues[] a = new ContentValues[allReviews.size()];
+        allReviews.toArray(a);
+
+        Log.v(TAG, "addDetails: " + resolver.insert(MovieContract.Details.CONTENT_URI, details));
+        Log.v(TAG, "addDetails: " + resolver.bulkInsert(MovieContract.Review.CONTENT_URI, a));
+    }
+
+    public static String getCast(Cursor cursor) {
+        return cursor.getString(cursor.getColumnIndex(MovieContract.COLUMN_CAST));
+    }
+
+    public static String getDirector(Cursor cursor) {
+        return cursor.getString(cursor.getColumnIndex(MovieContract.COLUMN_DIRECTOR));
+    }
+
+    public static String getTrailerUrl(Cursor cursor) {
+        return cursor.getString(cursor.getColumnIndex(MovieContract.COLUMN_TRAILER_URL));
+    }
+
+    public static String getAuthor(Cursor cursor) {
+        return cursor.getString(cursor.getColumnIndex(MovieContract.COLUMN_AUTHOR));
+    }
+
+    public static String getReviewText(Cursor cursor) {
+        return cursor.getString(cursor.getColumnIndex(MovieContract.COLUMN_REVIEW_TEXT));
+    }
 }
 
 

@@ -25,6 +25,9 @@ import com.example.igorklimov.popularmoviesdemo.fragments.MoviesGridFragment;
 import com.example.igorklimov.popularmoviesdemo.helpers.CustomAdapter;
 import com.example.igorklimov.popularmoviesdemo.helpers.Utility;
 import com.example.igorklimov.popularmoviesdemo.sync.SyncAdapter;
+import com.facebook.stetho.Stetho;
+import com.facebook.stetho.okhttp.StethoInterceptor;
+import com.squareup.okhttp.OkHttpClient;
 
 /**
  * Master Activity, used for handsets and tablets, all item clicks
@@ -42,17 +45,16 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        Stetho.initializeWithDefaults(this);
-//        OkHttpClient client = new OkHttpClient();
-//        client.networkInterceptors().add(new StethoInterceptor());
-//        Stetho.initialize(
-//                Stetho.newInitializerBuilder(this)
-//                        .enableDumpapp(Stetho.defaultDumperPluginsProvider(this))
-//                        .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this))
-//                        .build());
+        Stetho.initializeWithDefaults(this);
+        OkHttpClient client = new OkHttpClient();
+        client.networkInterceptors().add(new StethoInterceptor());
+        Stetho.initialize(
+                Stetho.newInitializerBuilder(this)
+                        .enableDumpapp(Stetho.defaultDumperPluginsProvider(this))
+                        .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this))
+                        .build());
 
-//        OkHttpClient client = new OkHttpClient();
-//        client.networkInterceptors().add(new StethoInterceptor());
+        client.networkInterceptors().add(new StethoInterceptor());
 
         setContentView(R.layout.drawer);
         Utility.setIsTabletPreference(this, findViewById(R.id.details_fragment) != null);

@@ -7,10 +7,12 @@ import android.net.Uri;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
+import com.example.igorklimov.popularmoviesdemo.data.MovieContract.Details;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.FavoriteMovie;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByPopularity;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByReleaseDate;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByVotes;
+import com.example.igorklimov.popularmoviesdemo.data.MovieContract.Review;
 import com.example.igorklimov.popularmoviesdemo.helpers.Utility;
 
 /**
@@ -75,20 +77,28 @@ public class TestDB extends AndroidTestCase {
 //
 //    }
 
-//    public void testInsert() {
-//        mContext.deleteDatabase(MoviesDbHelper.DATABASE_NAME);
-//        ContentResolver contentResolver = mContext.getContentResolver();
-//        ContentValues values = new ContentValues();
-//        values.put(MovieByPopularity.COLUMN_TITLE, "Title");
-//        values.put(MovieByPopularity.COLUMN_POSTER, "Poster");
-//        values.put(MovieByPopularity.COLUMN_RELEASE_DATE, "Release Date");
-//        values.put(MovieByPopularity.COLUMN_GENRES, "Genres");
-//        values.put(MovieByPopularity.COLUMN_AVERAGE_VOTE, "Votes");
-//        values.put(MovieByPopularity.COLUMN_PLOT, "Plot");
-//
-//        Uri insert = contentResolver.insert(MovieByPopularity.CONTENT_URI, values);
-//        Log.d(LOG_TAG, "testInsert: " + insert);
-//
+    public void testInsert() {
+        mContext.deleteDatabase(MoviesDbHelper.DATABASE_NAME);
+        ContentResolver contentResolver = mContext.getContentResolver();
+        ContentValues values = new ContentValues();
+        values.put(MovieContract.COLUMN_TITLE, "Star Wars");
+        values.put(MovieContract.COLUMN_BUDGET, "Budget");
+        values.put(MovieContract.COLUMN_LENGTH, "Length");
+        values.put(MovieContract.COLUMN_DIRECTOR, "Director");
+        values.put(MovieContract.COLUMN_CAST, "Cast");
+        values.put(MovieContract.COLUMN_TRAILER_URL, "Trailer URL");
+
+        Uri insert = contentResolver.insert(Details.CONTENT_URI, values);
+        Log.d(LOG_TAG, "testInsert: " + insert);
+
+        ContentValues values2 = new ContentValues();
+        values2.put(MovieContract.COLUMN_TITLE, "Star Wars");
+        values2.put(MovieContract.COLUMN_AUTHOR, "Jay");
+        values2.put(MovieContract.COLUMN_REVIEW_TEXT, "Awesome movie!");
+
+        Uri insert2 = contentResolver.insert(Review.CONTENT_URI, values2);
+        Log.d(LOG_TAG, "testInsert: " + insert2);
+
 //        ContentValues values2 = new ContentValues();
 //        values2.put(MovieByPopularity.COLUMN_TITLE, "Title");
 //        values2.put(MovieByPopularity.COLUMN_POSTER, "Poster");
@@ -121,25 +131,41 @@ public class TestDB extends AndroidTestCase {
 //
 //        Uri insert4 = contentResolver.insert(MovieByPopularity.CONTENT_URI, values);
 //        Log.d(LOG_TAG, "testInsert: " + insert4);
-//    }
+    }
 
-//    public void testQuery() {
-//        ContentResolver contentResolver = mContext.getContentResolver();
-//        Cursor cursor = contentResolver.query(MovieByPopularity.CONTENT_URI, null, null, null, null);
-//        assertTrue(cursor != null);
-//
-//        while (cursor.moveToNext()) {
-//            Log.d(LOG_TAG, "testQuery: " + cursor.getString(1));
-//        }
-//        cursor.close();
-//
+    public void testQuery() {
+        ContentResolver contentResolver = mContext.getContentResolver();
+        Cursor cursor = contentResolver.query(Details.CONTENT_URI, null, null, null, null);
+        assertTrue(cursor != null);
+
+        while (cursor.moveToNext()) {
+            Log.d(LOG_TAG, "testQuery: " + cursor.getString(0));
+            Log.d(LOG_TAG, "testQuery: " + cursor.getString(1));
+            Log.d(LOG_TAG, "testQuery: " + cursor.getString(2));
+            Log.d(LOG_TAG, "testQuery: " + cursor.getString(3));
+            Log.d(LOG_TAG, "testQuery: " + cursor.getString(4));
+            Log.d(LOG_TAG, "testQuery: " + cursor.getString(5));
+        }
+        cursor.close();
+
+        Cursor cursor2 = contentResolver.query(Review.CONTENT_URI, null,
+                MovieContract.COLUMN_TITLE + "=?", new String[]{"Star Wars"}, null);
+        assertTrue(cursor2 != null);
+
+        while (cursor2.moveToNext()) {
+            Log.d(LOG_TAG, "testQuery: " + cursor2.getString(0));
+            Log.d(LOG_TAG, "testQuery: " + cursor2.getString(1));
+            Log.d(LOG_TAG, "testQuery: " + cursor2.getString(2));
+        }
+        cursor2.close();
+
 //        Cursor cursor2 = contentResolver.query(MovieByPopularity.buildMovieUri(1), null, null, null, null);
 //        assertTrue(cursor2 != null);
 //        while (cursor2.moveToNext()) {
 //            Log.d(LOG_TAG, "testQuery: 2 " + cursor2.getString(1));
 //        }
 //        cursor2.close();
-//    }
+    }
 
 //    public void testDelete() {
 //        ContentResolver contentResolver = mContext.getContentResolver();
@@ -206,11 +232,8 @@ public class TestDB extends AndroidTestCase {
 ////        query1.close();
 //
 //        assertTrue(Utility.isFavorite(cursor3,mContext));
+
 //    }
 
-    public void testStuff() {
-        int cats = 10, dogs = 5;
-        int cаts = 5;
-    }
 
 }
