@@ -15,4 +15,4 @@ In order for you to use it you need to get an Apiary DB API and YouTube API http
 
 ![-3](https://cloud.githubusercontent.com/assets/13784275/12041557/c2d3bcd6-ae72-11e5-8270-ccbe14076613.png)
 
-![tablet_portrait](https://cloud.githubusercontent.com/assets/13784275/12093444/3d4ed696-b303-11e5-9841-21dc68723048.png)
+![tablet_portrait](http://i.imgur.com/tX4WR2A.png?1)
