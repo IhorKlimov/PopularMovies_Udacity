@@ -9,9 +9,9 @@ In order for you to use it you need to get an Apiary DB API and YouTube API http
 
 ![-1](https://cloud.githubusercontent.com/assets/13784275/12041553/bd157e6a-ae72-11e5-8257-e6914efc20b8.png)
 
-![portrait-handset](https://cloud.githubusercontent.com/assets/13784275/12090367/98e619e8-b2ee-11e5-9eeb-a8f3c3a5e5a4.png)
+![-2](https://cloud.githubusercontent.com/assets/13784275/12198340/5b5b32ec-b60f-11e5-86e2-023ea7a780fb.png)
 
-![landscape_handset](https://cloud.githubusercontent.com/assets/13784275/12090280/b88e1fee-b2ed-11e5-8ddc-10d2ce70da12.png)
+![landscape_handset](https://cloud.githubusercontent.com/assets/13784275/12198351/6d2f9c06-b60f-11e5-90f0-4655807f0ac0.png)
 
 ![-3](https://cloud.githubusercontent.com/assets/13784275/12041557/c2d3bcd6-ae72-11e5-8270-ccbe14076613.png)
 
