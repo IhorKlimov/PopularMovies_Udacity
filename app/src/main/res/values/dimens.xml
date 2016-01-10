@@ -2,16 +2,21 @@
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="play_button_vertical_margin">72dp</dimen>
+    <dimen name="nav_header_vertical_spacing">16dp</dimen>
+    <dimen name="list_item_extra_padding">16dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
     <!-- Default screen margins, per the Android Design guidelines. -->
-    <dimen name="nav_header_vertical_spacing">16dp</dimen>
-    <dimen name="nav_header_height">160dp</dimen>
-    <dimen name="appbar_elevation">4dp</dimen>
+    <dimen name="appbar_elevation">6dp</dimen>
     <dimen name="tablet_fragment_spacing">8dp</dimen>
     <dimen name="detail_container_bottom_margin">32dp</dimen>
-    <dimen name="list_item_extra_padding">16dp</dimen>
-    <dimen name="landscape_details_width">360dp</dimen>
     <dimen name="horizontal_margin_tablet_portrait">64dp</dimen>
+    <dimen name="nav_header_height">160dp</dimen>
+
+
     <dimen name="landscape_vertical_card_margin">84dp</dimen>
-    <dimen name="play_button_vertical_margin">72dp</dimen>
+    <dimen name="landscape_details_width">360dp</dimen>
+    <dimen name="details_grid_vertical_margin">4dp</dimen>
+    <dimen name="details_divider_height">2dp</dimen>
+    <dimen name="details_grid_vertical_list_margin">8dp</dimen>
 </resources>

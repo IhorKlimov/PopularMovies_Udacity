@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <TextView
+        android:id="@+id/title"
+        style="@style/DetailsTitle"
+        android:layout_width="0dp"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:gravity="center_horizontal"
+        android:paddingEnd="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:textColor="@color/primary_text"
+        app:layout_gravity="fill_horizontal" />
+
+    <TextView
+        android:id="@+id/genres"
+        style="@style/DetailsTextMedium"
+        android:layout_width="0dp"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/details_grid_vertical_margin"
+        android:gravity="center_horizontal"
+        android:paddingEnd="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:textColor="@color/secondary_text"
+        app:layout_gravity="fill_horizontal" />
+
+    <TextView
+        android:id="@+id/release_date"
+        style="@style/DetailsTextMedium"
+        android:layout_width="0dp"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/details_grid_vertical_margin"
+        android:gravity="center_horizontal"
+        android:paddingEnd="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        app:layout_gravity="fill_horizontal" />
+
+    <TextView
+        android:id="@+id/vote"
+        style="@style/DetailsTextMedium"
+        android:layout_width="0dp"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/details_grid_vertical_margin"
+        android:gravity="center_horizontal"
+        android:paddingEnd="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        app:layout_gravity="fill_horizontal" />
+
+    <View
+        android:layout_height="@dimen/details_divider_height"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:background="@color/divider"
+        app:layout_columnSpan="2" />
+
+    <TextView
+        android:id="@+id/budget"
+        style="@style/DetailsTextSmall"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:paddingEnd="@dimen/activity_horizontal_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingStart="@dimen/activity_horizontal_margin"
+        android:text="Budget: "
+        app:layout_columnSpan="2" />
+
+    <TextView
+        android:id="@+id/length"
+        style="@style/DetailsTextSmall"
+        android:layout_marginTop="@dimen/details_grid_vertical_margin"
+        android:paddingEnd="@dimen/activity_horizontal_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingStart="@dimen/activity_horizontal_margin"
+        android:text="Length: "
+        app:layout_columnSpan="2" />
+
+    <TextView
+        android:id="@+id/director"
+        style="@style/DetailsTextSmall"
+        android:layout_marginTop="@dimen/details_grid_vertical_margin"
+        android:paddingEnd="@dimen/activity_horizontal_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingStart="@dimen/activity_horizontal_margin"
+        android:text="Director: "
+        app:layout_columnSpan="2" />
+
+    <TextView
+        android:id="@+id/actors"
+        style="@style/DetailsTextSmall"
+        android:layout_marginTop="@dimen/details_grid_vertical_margin"
+        android:paddingEnd="@dimen/activity_horizontal_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingStart="@dimen/activity_horizontal_margin"
+        android:text="Cast: "
+        app:layout_columnSpan="2" />
+
+    <TextView
+        android:id="@+id/plot"
+        style="@style/PlotText"
+        android:layout_marginTop="@dimen/details_grid_vertical_margin"
+        android:fontFamily="sans-serif-light"
+        android:paddingEnd="@dimen/activity_horizontal_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingStart="@dimen/activity_horizontal_margin"
+        app:layout_columnSpan="2" />
+
+    <ExpandableListView
+        android:id="@+id/reviews"
+        android:layout_marginTop="@dimen/details_grid_vertical_list_margin"
+        android:groupIndicator="@null"
+        app:layout_columnSpan="2"
+        app:layout_gravity="fill_horizontal" />
+</merge>

@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2016 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.example.igorklimov.popularmoviesdemo.data;
 
 import android.content.ContentProvider;
@@ -6,10 +22,8 @@ import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.Details;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.FavoriteMovie;
@@ -31,9 +45,9 @@ import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.PATH_R
  */
 public class Provider extends ContentProvider {
 
-    private static final UriMatcher uriMatcher = buildUriMatcher();
-    private MoviesDbHelper moviesDbHelper;
-    private ContentResolver contentResolver;
+    private static final UriMatcher sUriMatcher = buildUriMatcher();
+    private MoviesDbHelper mMoviesDbHelper;
+    private ContentResolver mContentResolver;
 
     private static final int MOVIE_BY_POPULARITY = 100;
     private static final int MOVIE_BY_POPULARITY_WITH_ID = 101;
@@ -49,8 +63,8 @@ public class Provider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        moviesDbHelper = new MoviesDbHelper(getContext());
-        if (getContext() != null) contentResolver = getContext().getContentResolver();
+        mMoviesDbHelper = new MoviesDbHelper(getContext());
+        if (getContext() != null) mContentResolver = getContext().getContentResolver();
         return true;
     }
 
@@ -65,10 +79,10 @@ public class Provider extends ContentProvider {
     @Override
     public Cursor query(@NonNull Uri uri, String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
-        SQLiteDatabase db = moviesDbHelper.getReadableDatabase();
+        SQLiteDatabase db = mMoviesDbHelper.getReadableDatabase();
         Cursor cursor;
         String id;
-        switch (uriMatcher.match(uri)) {
+        switch (sUriMatcher.match(uri)) {
             case MOVIE_BY_POPULARITY:
                 cursor = db.query(MovieByPopularity.TABLE_NAME,
                         projection, selection, selectionArgs, null, null, sortOrder);
@@ -116,16 +130,16 @@ public class Provider extends ContentProvider {
             default:
                 throw new UnsupportedOperationException();
         }
-        cursor.setNotificationUri(contentResolver, uri);
+        cursor.setNotificationUri(mContentResolver, uri);
         return cursor;
     }
 
     @Override
     public Uri insert(@NonNull Uri uri, ContentValues values) {
-        SQLiteDatabase db = moviesDbHelper.getWritableDatabase();
+        SQLiteDatabase db = mMoviesDbHelper.getWritableDatabase();
         Uri result;
         long insert;
-        switch (uriMatcher.match(uri)) {
+        switch (sUriMatcher.match(uri)) {
             case MOVIE_BY_POPULARITY:
                 insert = db.insert(MovieByPopularity.TABLE_NAME, null, values);
                 result = MovieByPopularity.buildMovieUri(insert);
@@ -153,15 +167,15 @@ public class Provider extends ContentProvider {
             default:
                 throw new UnsupportedOperationException();
         }
-        contentResolver.notifyChange(uri, null);
+        mContentResolver.notifyChange(uri, null);
         return result;
     }
 
     @Override
     public int bulkInsert(@NonNull Uri uri, @NonNull ContentValues[] values) {
         int inserted = 0;
-        SQLiteDatabase db = moviesDbHelper.getWritableDatabase();
-        switch (uriMatcher.match(uri)) {
+        SQLiteDatabase db = mMoviesDbHelper.getWritableDatabase();
+        switch (sUriMatcher.match(uri)) {
             case MOVIE_BY_POPULARITY:
                 db.beginTransaction();
                 try {
@@ -226,16 +240,16 @@ public class Provider extends ContentProvider {
                 throw new UnsupportedOperationException();
         }
 
-        if (inserted != 0) contentResolver.notifyChange(uri, null);
+        if (inserted != 0) mContentResolver.notifyChange(uri, null);
         return inserted;
     }
 
     @Override
     public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
-        SQLiteDatabase db = moviesDbHelper.getWritableDatabase();
+        SQLiteDatabase db = mMoviesDbHelper.getWritableDatabase();
         int deleted;
         String id;
-        switch (uriMatcher.match(uri)) {
+        switch (sUriMatcher.match(uri)) {
             case MOVIE_BY_POPULARITY:
                 deleted = db.delete(MovieByPopularity.TABLE_NAME, selection, selectionArgs);
                 break;
@@ -267,7 +281,7 @@ public class Provider extends ContentProvider {
             default:
                 throw new UnsupportedOperationException();
         }
-        if (deleted > 0) contentResolver.notifyChange(uri, null);
+        if (deleted > 0) mContentResolver.notifyChange(uri, null);
 
         return deleted;
     }

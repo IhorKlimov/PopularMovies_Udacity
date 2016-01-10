@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="DetailsTitle">
+        <item name="android:textSize">38sp</item>
+        <item name="android:fontFamily">sans-serif-condensed</item>
+    </style>
+
+    <style name="DetailsTextMedium">
+        <item name="android:textSize">30sp</item>
+        <item name="android:fontFamily">sans-serif-condensed</item>
+    </style>
+
+    <style name="DetailsTextSmall">
+        <item name="android:textSize">30sp</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <style name="PlotText">
+        <item name="android:textSize">24sp</item>
+        <item name="android:fontFamily">sans-serif-light</item>
+    </style>
+
+    <style name="DetailsReviewLarge">
+        <item name="android:textSize">26sp</item>
+        <item name="android:fontFamily">sans-serif-condensed</item>
+    </style>
+
+    <style name="DetailsReview">
+        <item name="android:textSize">22sp</item>
+        <item name="android:fontFamily">sans-serif-light</item>
+    </style>
+</resources>

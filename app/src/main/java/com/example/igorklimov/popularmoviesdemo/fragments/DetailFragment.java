@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2016 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.example.igorklimov.popularmoviesdemo.fragments;
 
 import android.content.ContentResolver;
@@ -27,7 +43,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -77,47 +92,45 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         View.OnClickListener {
 
     private static final String TAG = "DetailFragment";
-    private String trailerUri;
-    public Cursor cursor;
-
     private static final SimpleDateFormat initialFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
     private static final SimpleDateFormat monthYearFormat = new SimpleDateFormat("MMMM, yyyy", Locale.US);
     private static final int DETAIL_LOADER = 300;
     private static final String AUTHOR = "CHILD_TITLE";
     private static final String REVIEW_TEXT = "CHILD_TEXT";
 
-    private ImageView posterView;
-    private TextView titleView;
-    private TextView releaseDateView;
-    private TextView voteView;
-    private TextView plotView;
-    private TextView genresView;
+    public Cursor cursor;
+    private ContentResolver mResolver;
+    private ShareActionProvider mActionProvider;
+    Context context;
+
+    //    Views
     public FloatingActionButton fab;
-    private TextView length;
-    private TextView budget;
-    private boolean done = false;
+    private ImageView mPosterView;
+    private ImageButton mPlayButton;
+    private ImageView mBack;
+    private View mProgressBar;
+    private TextView mTitleView;
+    private TextView mReleaseDateView;
+    private TextView mVoteView;
+    private TextView mPlotView;
+    private TextView mGenresView;
+    private TextView mLength;
+    private TextView mBudget;
+    private TextView mDirectorView;
+    private TextView mCastView;
+    private CardView mCardView;
+    private NestedScrollView mScroll;
+    private ExpandableListView mReviews;
+    private Toolbar mBar;
+
+    private int mDefaultHeight;
     public boolean toRemove = false;
-    private boolean inserted = false;
-    private ImageView back;
-    private View progressBar;
-    private ImageButton playButton;
-    private int defaultHeight;
-    private List<Map<String, String>> childGroupForFirstGroupRow;
-    private Context context;
-    private ShareActionProvider actionProvider;
-    private TextView director;
-    private TextView actors;
+    private boolean mDone = false;
+    private boolean mInserted = false;
+    private String mTrailerUri;
     private String[] mStrings;
-    private CardView card;
-    private int minHeight;
-    private int minWidth;
-    private NestedScrollView scroll;
-    private int fragmentWidth;
-    private int backdropHeight;
-    private Toolbar bar;
-    private ExpandableListView reviews;
-    private ContentResolver resolver;
-    private String mTitle;
+    String title;
+    List<Map<String, String>> reviewsList;
 
     public DetailFragment() {
     }
@@ -131,7 +144,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private Intent createShareIntent() {
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_TEXT, "#Popular Movies app https://www.youtube.com/watch?v=" + trailerUri);
+        intent.putExtra(Intent.EXTRA_TEXT, "#Popular Movies app https://www.youtube.com/watch?v=" + mTrailerUri);
         return intent;
     }
 
@@ -148,31 +161,31 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_details, container, false);
-        posterView = (ImageView) rootView.findViewById(R.id.details_poster);
-        titleView = (TextView) rootView.findViewById(R.id.title);
-        releaseDateView = (TextView) rootView.findViewById(R.id.release_date);
-        voteView = (TextView) rootView.findViewById(R.id.vote);
-        plotView = (TextView) rootView.findViewById(R.id.plot);
-        genresView = (TextView) rootView.findViewById(R.id.genres);
-        length = (TextView) rootView.findViewById(R.id.length);
-        budget = (TextView) rootView.findViewById(R.id.budget);
-        actors = (TextView) rootView.findViewById(R.id.actors);
-        director = (TextView) rootView.findViewById(R.id.director);
-        reviews = (ExpandableListView) rootView.findViewById(R.id.reviews);
+        mPosterView = (ImageView) rootView.findViewById(R.id.details_poster);
+        mTitleView = (TextView) rootView.findViewById(R.id.title);
+        mReleaseDateView = (TextView) rootView.findViewById(R.id.release_date);
+        mVoteView = (TextView) rootView.findViewById(R.id.vote);
+        mPlotView = (TextView) rootView.findViewById(R.id.plot);
+        mGenresView = (TextView) rootView.findViewById(R.id.genres);
+        mLength = (TextView) rootView.findViewById(R.id.length);
+        mBudget = (TextView) rootView.findViewById(R.id.budget);
+        mCastView = (TextView) rootView.findViewById(R.id.actors);
+        mDirectorView = (TextView) rootView.findViewById(R.id.director);
+        mReviews = (ExpandableListView) rootView.findViewById(R.id.reviews);
         context = getActivity();
-        back = (ImageView) rootView.findViewById(R.id.backdrop);
-        progressBar = rootView.findViewById(R.id.progressBar);
-        playButton = (ImageButton) rootView.findViewById(R.id.play_button);
-        card = (CardView) rootView.findViewById(R.id.card_view);
-        resolver = context.getContentResolver();
+        mBack = (ImageView) rootView.findViewById(R.id.backdrop);
+        mProgressBar = rootView.findViewById(R.id.progressBar);
+        mPlayButton = (ImageButton) rootView.findViewById(R.id.play_button);
+        mCardView = (CardView) rootView.findViewById(R.id.card_view);
+        mResolver = context.getContentResolver();
         View space = rootView.findViewById(R.id.space);
 
         if (space != null) {
             space.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    playButton.performClick();
-                    playButton.setPressed(true);
+                    mPlayButton.performClick();
+                    mPlayButton.setPressed(true);
                 }
             });
         }
@@ -181,16 +194,16 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
         setupReviews();
 
-        bar = (Toolbar) rootView.findViewById(R.id.details_toolbar);
+        mBar = (Toolbar) rootView.findViewById(R.id.details_toolbar);
         setupToolbar();
 
-        scroll = (NestedScrollView) rootView.findViewById(R.id.scrollView);
+        mScroll = (NestedScrollView) rootView.findViewById(R.id.scrollView);
         final View parallaxBar = rootView.findViewById(R.id.handset_appbar);
-        if (parallaxBar != null) setupParallaxBar(bar, parallaxBar);
+        if (parallaxBar != null) setupParallaxBar(mBar, parallaxBar);
 
         fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
         fab.setOnClickListener(this);
-        playButton.setOnClickListener(this);
+        mPlayButton.setOnClickListener(this);
         return rootView;
     }
 
@@ -199,10 +212,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         super.onActivityCreated(savedInstanceState);
         if (!isInternetAvailable()) noInternetMessage();
         else initLoader();
-        scroll.post(new Runnable() {
+        mScroll.post(new Runnable() {
             @Override
             public void run() {
-                scroll.smoothScrollTo(0, 0);
+                mScroll.smoothScrollTo(0, 0);
             }
         });
     }
@@ -210,10 +223,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onStop() {
         super.onStop();
-        playButton.setOnClickListener(null);
+        mPlayButton.setOnClickListener(null);
         fab.setOnClickListener(null);
-        reviews.setOnGroupClickListener(null);
-//        scroll.getViewTreeObserver().addOnScrollChangedListener(null);
+        mReviews.setOnGroupClickListener(null);
+//        mScroll.getViewTreeObserver().addOnScrollChangedListener(null);
     }
 
     public void initLoader() {
@@ -234,12 +247,12 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        if (!done && data.moveToFirst()) {
+        if (!mDone && data.moveToFirst()) {
             cursor = data;
-            mTitle = Utility.getTitle(cursor);
+            title = Utility.getTitle(cursor);
 
-            Cursor query = resolver.query(Details.CONTENT_URI, null,
-                    MovieContract.COLUMN_TITLE + "=?", new String[]{mTitle},
+            Cursor query = mResolver.query(Details.CONTENT_URI, null,
+                    MovieContract.COLUMN_TITLE + "=?", new String[]{title},
                     null);
             if (query != null && query.moveToFirst()) {
                 getSavedData(query);
@@ -250,18 +263,18 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
     public void load() {
-        progressBar.setVisibility(View.VISIBLE);
+        if (mProgressBar != null) mProgressBar.setVisibility(View.VISIBLE);
         if (mStrings == null) new Task().execute(cursor.getString(7));
         if (Utility.isFavorite(cursor, context)) {
             fab.setImageResource(R.drawable.star_on);
             fab.setActivated(true);
-            inserted = true;
+            mInserted = true;
         }
-        Picasso.with(context).load(Utility.getPoster(cursor)).into(posterView, new Callback() {
+        Picasso.with(context).load(Utility.getPoster(cursor)).into(mPosterView, new Callback() {
             @Override
             public void onSuccess() {
-                progressBar.setVisibility(View.INVISIBLE);
-                card.setVisibility(View.VISIBLE);
+                if (mProgressBar != null) mProgressBar.setVisibility(View.INVISIBLE);
+                mCardView.setVisibility(View.VISIBLE);
                 getActivity().supportStartPostponedEnterTransition();
             }
 
@@ -271,10 +284,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             }
         });
 
-        Picasso.with(context).load(Utility.getBackdrop(cursor)).into(back, new Callback() {
+        Picasso.with(context).load(Utility.getBackdrop(cursor)).into(mBack, new Callback() {
             @Override
             public void onSuccess() {
-                playButton.setVisibility(View.VISIBLE);
+                mPlayButton.setVisibility(View.VISIBLE);
             }
 
             @Override
@@ -282,18 +295,18 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
             }
         });
-        titleView.setText(mTitle);
+        mTitleView.setText(title);
         try {
-            releaseDateView.setText(monthYearFormat
+            mReleaseDateView.setText(monthYearFormat
                     .format(initialFormat.parse(Utility.getReleaseDate(cursor))));
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        genresView.setText(Utility.getGenres(cursor));
-        voteView.setText(String.format(getString(R.string.format_average_vote), Utility.getVote(cursor)));
-        plotView.setText(Utility.getPlot(cursor));
+        mGenresView.setText(Utility.getGenres(cursor));
+        mVoteView.setText(String.format(getString(R.string.format_average_vote), Utility.getVote(cursor)));
+        mPlotView.setText(Utility.getPlot(cursor));
 
-        done = true;
+        mDone = true;
     }
 
     @Override
@@ -304,7 +317,12 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         getLoaderManager().restartLoader(DETAIL_LOADER, null, this);
     }
 
+
+    /**
+     * An AsyncTask to get movie details
+     */
     private class Task extends AsyncTask<String, Void, String[]> {
+        private boolean mIsCrashed;
 
         @Override
         protected String[] doInBackground(String... params) {
@@ -317,44 +335,22 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             getVideos(id);
             getReviews(id);
             getCredits(id);
-            saveToDb();
+            if (!mIsCrashed) saveToDb();
 
             return mStrings;
         }
 
-        private void saveToDb() {
-            Log.v(TAG, "saveToDb: ");
-
-            ContentValues details = new ContentValues();
-            ArrayList<ContentValues> allReviews = new ArrayList<>();
-
-            details.put(MovieContract.COLUMN_TITLE, mTitle);
-            details.put(MovieContract.COLUMN_BUDGET, mStrings[1]);
-            details.put(MovieContract.COLUMN_LENGTH, mStrings[0]);
-            details.put(MovieContract.COLUMN_DIRECTOR, mStrings[4]);
-            details.put(MovieContract.COLUMN_CAST, mStrings[3]);
-            details.put(MovieContract.COLUMN_TRAILER_URL, mStrings[2]);
-
-            for (int i = 0; i < childGroupForFirstGroupRow.size(); i++) {
-                ContentValues review = new ContentValues();
-                Map<String, String> map = childGroupForFirstGroupRow.get(i);
-
-                review.put(MovieContract.COLUMN_TITLE, mTitle);
-                review.put(MovieContract.COLUMN_AUTHOR, map.get(AUTHOR));
-                review.put(MovieContract.COLUMN_REVIEW_TEXT, map.get(REVIEW_TEXT));
-
-                allReviews.add(review);
-            }
-
-            Utility.addDetails(details, allReviews, context);
-        }
 
         @Override
         protected void onPostExecute(String[] s) {
             super.onPostExecute(s);
+            Log.v(TAG, "onPostExecute: ");
             setExtraData(s);
         }
 
+        /**
+         * Get Runtime and Budget
+         */
         private void getExtraInfo(String id) {
             String JsonResponse;
             JsonResponse = getJsonResponse("http://api.themoviedb.org/3/movie/" + id +
@@ -368,11 +364,15 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                     mStrings[1] = " $" + Utility.formatBudget(budget);
                 }
             } catch (JSONException | NullPointerException e) {
+                mIsCrashed = true;
                 e.printStackTrace();
                 noInternetMessage();
             }
         }
 
+        /**
+         * Get Trailer Url
+         */
         private void getVideos(String id) {
             String JsonResponse;
             JsonResponse = getJsonResponse("http://api.themoviedb.org/3/movie/" + id +
@@ -393,11 +393,15 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                     if (key != null) mStrings[2] = key;
                 }
             } catch (JSONException | NullPointerException e) {
+                mIsCrashed = true;
                 e.printStackTrace();
                 noInternetMessage();
             }
         }
 
+        /**
+         * Get Reviews
+         */
         private void getReviews(String id) {
             String JsonResponse;
             JsonResponse = getJsonResponse("http://api.themoviedb.org/3/movie/" + id +
@@ -411,15 +415,20 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                     String content = results.getJSONObject(i).getString("content");
                     if (author != null) map.put(AUTHOR, author);
                     if (content != null) map.put(REVIEW_TEXT, content);
-                    childGroupForFirstGroupRow.add(map);
+                    reviewsList.add(map);
                 }
             } catch (JSONException | NullPointerException e) {
+                mIsCrashed = true;
                 e.printStackTrace();
                 noInternetMessage();
             }
         }
 
+        /**
+         * Get Actor staff
+         */
         private void getCredits(String id) {
+
             String JsonResponse;
             JsonResponse = getJsonResponse("http://api.themoviedb.org/3/movie/" + id +
                     "/credits?api_key=" + BuildConfig.TBDB_API_KEY);
@@ -443,19 +452,51 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                     }
                 }
             } catch (JSONException | NullPointerException e) {
+                mIsCrashed = true;
                 e.printStackTrace();
                 noInternetMessage();
             }
         }
+
+        /**
+         * Save data to DB if there were no Internet connection problems
+         */
+        private void saveToDb() {
+            Log.v(TAG, "saveToDb: ");
+
+            ContentValues details = new ContentValues();
+            ArrayList<ContentValues> allReviews = new ArrayList<>();
+
+            details.put(MovieContract.COLUMN_TITLE, title);
+            details.put(MovieContract.COLUMN_BUDGET, mStrings[1]);
+            details.put(MovieContract.COLUMN_LENGTH, mStrings[0]);
+            details.put(MovieContract.COLUMN_DIRECTOR, mStrings[4]);
+            details.put(MovieContract.COLUMN_CAST, mStrings[3]);
+            details.put(MovieContract.COLUMN_TRAILER_URL, mStrings[2]);
+
+            for (int i = 0; i < reviewsList.size(); i++) {
+                ContentValues review = new ContentValues();
+                Map<String, String> map = reviewsList.get(i);
+
+                review.put(MovieContract.COLUMN_TITLE, title);
+                review.put(MovieContract.COLUMN_AUTHOR, map.get(AUTHOR));
+                review.put(MovieContract.COLUMN_REVIEW_TEXT, map.get(REVIEW_TEXT));
+
+                allReviews.add(review);
+            }
+
+            Utility.addDetails(details, allReviews, context);
+        }
+
     }
 
     private void setExtraData(String[] s) {
-        length.append(s[0]);
-        budget.append(s[1]);
-        if (!s[2].equals("n/a")) trailerUri = s[2];
-        actors.append(s[3]);
-        director.append(s[4]);
-        if (actionProvider != null) actionProvider.setShareIntent(createShareIntent());
+        mLength.append(s[0]);
+        mBudget.append(s[1]);
+        if (!s[2].equals("n/a")) mTrailerUri = s[2];
+        mCastView.append(s[3]);
+        mDirectorView.append(s[4]);
+        if (mActionProvider != null) mActionProvider.setShareIntent(createShareIntent());
     }
 
     private boolean isInternetAvailable() {
@@ -476,7 +517,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     private void setListViewHeight(ExpandableListView listView, int group) {
         ExpandableListAdapter listAdapter = listView.getExpandableListAdapter();
-        if (defaultHeight == 0) defaultHeight = listView.getHeight();
+        if (mDefaultHeight == 0) mDefaultHeight = listView.getHeight();
         int totalHeight = 0;
 
         int desiredWidth = View.MeasureSpec.makeMeasureSpec(listView.getWidth(),
@@ -489,14 +530,14 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                     listItem.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
                     totalHeight += listItem.getMeasuredHeight();
                 }
-                totalHeight += defaultHeight;
+                totalHeight += mDefaultHeight;
             }
         }
 
         ViewGroup.LayoutParams params = listView.getLayoutParams();
         int height = totalHeight
                 + (listView.getDividerHeight() * (listAdapter.getGroupCount() - 1));
-        if (height < defaultHeight) height = defaultHeight;
+        if (height < mDefaultHeight) height = mDefaultHeight;
         params.height = height;
         listView.setLayoutParams(params);
         listView.requestLayout();
@@ -510,10 +551,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         }};
         List<List<Map<String, String>>> listOfChildGroups = new ArrayList<>();
 
-        childGroupForFirstGroupRow = new ArrayList<>();
-        listOfChildGroups.add(childGroupForFirstGroupRow);
+        reviewsList = new ArrayList<>();
+        listOfChildGroups.add(reviewsList);
 
-        reviews.setAdapter(new SimpleExpandableListAdapter(
+        mReviews.setAdapter(new SimpleExpandableListAdapter(
                 context,
                 groupData,
                 group,
@@ -527,18 +568,18 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         ));
 
         final int heightPixels = context.getResources().getDisplayMetrics().heightPixels;
-        reviews.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
+        mReviews.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
             @Override
             public boolean onGroupClick(ExpandableListView parent, View v,
                                         int groupPosition, long id) {
                 setListViewHeight(parent, groupPosition);
-                if (parent.getLayoutParams().height > defaultHeight) {
-                    final int x = scroll.getScrollX();
-                    final int y = scroll.getScrollY() + heightPixels / 4;
-                    scroll.post(new Runnable() {
+                if (parent.getLayoutParams().height > mDefaultHeight) {
+                    final int x = mScroll.getScrollX();
+                    final int y = mScroll.getScrollY() + heightPixels / 4;
+                    mScroll.post(new Runnable() {
                         @Override
                         public void run() {
-                            scroll.smoothScrollTo(x, y);
+                            mScroll.smoothScrollTo(x, y);
                         }
                     });
                 }
@@ -549,16 +590,16 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     private void setupToolbar() {
         if (!isTabletPreference(context)) {
-            ((DetailActivity) context).setSupportActionBar(bar);
+            ((DetailActivity) context).setSupportActionBar(mBar);
             ActionBar supportActionBar = ((DetailActivity) context).getSupportActionBar();
             supportActionBar.setDisplayHomeAsUpEnabled(true);
             supportActionBar.setDisplayShowTitleEnabled(false);
             ((DetailActivity) context).getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_home);
         } else {
-            Menu menu = bar.getMenu();
+            Menu menu = mBar.getMenu();
             if (null != menu) menu.clear();
-            bar.inflateMenu(R.menu.menu_detail);
-            finishCreatingMenu(bar.getMenu());
+            mBar.inflateMenu(R.menu.menu_detail);
+            finishCreatingMenu(mBar.getMenu());
         }
     }
 
@@ -578,8 +619,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         mStrings[3] = cast;
         mStrings[4] = director;
 
-        Cursor r = resolver.query(Review.CONTENT_URI, null, MovieContract.COLUMN_TITLE + "=?",
-                new String[]{mTitle}, null);
+        Cursor r = mResolver.query(Review.CONTENT_URI, null, MovieContract.COLUMN_TITLE + "=?",
+                new String[]{title}, null);
         if (r != null) {
             while (r.moveToNext()) {
                 author.add(Utility.getAuthor(r));
@@ -592,13 +633,14 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             HashMap<String, String> map = new HashMap<>();
             map.put(AUTHOR, author.get(i));
             map.put(REVIEW_TEXT, review.get(i));
-            childGroupForFirstGroupRow.add(map);
+            reviewsList.add(map);
         }
         setExtraData(mStrings);
     }
 
     private void setMinSizes(View space) {
         int fragmentHeight;
+        int fragmentWidth;
         if (!isTabletPreference(context)) {
             fragmentHeight = this.getResources().getDisplayMetrics().heightPixels;
             fragmentWidth = this.getResources().getDisplayMetrics().widthPixels;
@@ -607,18 +649,18 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             fragmentHeight = arguments.getInt("fragmentHeight");
             fragmentWidth = arguments.getInt("fragmentWidth");
         }
-        minHeight = fragmentHeight / 3;
-        minWidth = (int) (((double) minHeight / 278) * 185);
-        backdropHeight = (!Utility.isTabletPreference(context) && Configuration.ORIENTATION_LANDSCAPE
+        int minHeight = fragmentHeight / 3;
+        int minWidth = (int) (((double) minHeight / 278) * 185);
+        int backdropHeight = (!Utility.isTabletPreference(context) && Configuration.ORIENTATION_LANDSCAPE
                 == context.getResources().getConfiguration().orientation
                 ? fragmentHeight - fragmentHeight / 3
                 : (int) (((double) fragmentWidth / 500) * 281));
 
-        posterView.setMinimumWidth(minWidth);
-        posterView.setMinimumHeight(minHeight);
-        back.setMinimumHeight(backdropHeight);
+        mPosterView.setMinimumWidth(minWidth);
+        mPosterView.setMinimumHeight(minHeight);
+        mBack.setMinimumHeight(backdropHeight);
         if (context.getResources().getConfiguration().orientation
-                == Configuration.ORIENTATION_PORTRAIT && space!= null) {
+                == Configuration.ORIENTATION_PORTRAIT && space != null) {
             space.setMinimumHeight(backdropHeight);
         }
     }
@@ -629,14 +671,14 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                scroll.getViewTreeObserver().addOnScrollChangedListener(
+                mScroll.getViewTreeObserver().addOnScrollChangedListener(
                         new ViewTreeObserver.OnScrollChangedListener() {
                             int j = bar.getHeight();
                             int b = parallaxBar.getHeight();
 
                             @Override
                             public void onScrollChanged() {
-                                int i = scroll.getScrollY();
+                                int i = mScroll.getScrollY();
                                 float k = -parallaxBar.getTranslationY();
                                 int n = -(i / 2);
                                 parallaxBar.setTranslationY(n);
@@ -658,7 +700,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private void finishCreatingMenu(Menu menu) {
         MenuItem item = menu.findItem(R.id.action_share);
         if (!isTabletPreference(context)) {
-            actionProvider = new ShareActionProvider(getActivity()) {
+            mActionProvider = new ShareActionProvider(getActivity()) {
                 @Override
                 public View onCreateActionView() {
                     return null;
@@ -666,10 +708,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             };
             item.setIcon(R.drawable.ic_share);
         } else {
-            actionProvider = new ShareActionProvider(getActivity());
+            mActionProvider = new ShareActionProvider(getActivity());
         }
-        MenuItemCompat.setActionProvider(item, actionProvider);
-        if (trailerUri != null) actionProvider.setShareIntent(createShareIntent());
+        MenuItemCompat.setActionProvider(item, mActionProvider);
+        if (mTrailerUri != null) mActionProvider.setShareIntent(createShareIntent());
     }
 
     @Override
@@ -677,7 +719,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         switch (v.getId()) {
             case R.id.fab:
                 if (!fab.isActivated()) {
-                    if (!inserted) {
+                    if (!mInserted) {
                         Toast.makeText(context, "Added to Favorites", LENGTH_SHORT).show();
                         fab.setImageResource(R.drawable.star_on);
                         if (isTabletPreference(context)
@@ -687,34 +729,34 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                             toRemove = false;
                         }
                         fab.setActivated(true);
-                        inserted = true;
+                        mInserted = true;
                     }
                 } else {
-                    if (inserted) {
+                    if (mInserted) {
                         Toast.makeText(context, "Removed from Favorites", LENGTH_SHORT).show();
                         fab.setImageResource(R.drawable.star_off);
                         fab.setActivated(false);
 
                         if (isTabletPreference(context) || Utility.getSortByPreference(context) != 4) {
                             Utility.removeFromFavorite(cursor, context);
-                            MoviesGridFragment.id = Utility.getId(context);
+                            MoviesGridFragment.sId = Utility.getId(context);
                             if (isTabletPreference(context)
                                     && Utility.getSortByPreference(context) == 4) {
                                 MainActivity activity = (MainActivity) context;
-                                activity.showDetails(MovieContract.FavoriteMovie.buildMovieUri(MoviesGridFragment.id));
+                                activity.showDetails(MovieContract.FavoriteMovie.buildMovieUri(MoviesGridFragment.sId));
                             }
                         } else {
                             toRemove = true;
                         }
-                        inserted = false;
+                        mInserted = false;
                     }
                 }
                 break;
             case R.id.play_button:
-                if (trailerUri != null) {
-                    Log.d("TAG", "onClick: " + trailerUri);
+                if (mTrailerUri != null) {
+                    Log.d("TAG", "onClick: " + mTrailerUri);
                     Intent intent = YouTubeStandalonePlayer.createVideoIntent(getActivity(),
-                            YOUTUBE_API_KEY, trailerUri, 0, true, false);
+                            YOUTUBE_API_KEY, mTrailerUri, 0, true, false);
                     startActivity(intent);
                 }
                 break;

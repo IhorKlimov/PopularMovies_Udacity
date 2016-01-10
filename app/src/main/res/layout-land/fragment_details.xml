@@ -1,241 +1,81 @@
-<RelativeLayout xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_height="match_parent"
-    android:layout_width="match_parent">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <FrameLayout
-        android:background="@color/accent"
         android:id="@+id/handset_appbar"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_width="match_parent">
+        android:background="@color/accent">
 
         <ImageView
-            android:contentDescription="@string/backdrop"
             android:id="@+id/backdrop"
-            android:layout_height="wrap_content"
             android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/backdrop"
             android:scaleType="centerCrop" />
 
         <ImageButton
+            android:id="@+id/play_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/play_button_vertical_margin"
             android:background="@drawable/button_64"
             android:contentDescription="@string/play_button_description"
             android:fitsSystemWindows="true"
-            android:id="@+id/play_button"
-            android:layout_gravity="center_horizontal"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/play_button_vertical_margin"
-            android:layout_width="wrap_content"
             android:visibility="invisible" />
     </FrameLayout>
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/details_toolbar"
-        android:layout_height="?attr/actionBarSize"
         android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <android.support.v4.widget.NestedScrollView
-        android:elevation="4dp"
         android:id="@+id/scrollView"
-        android:layout_centerHorizontal="true"
-        android:layout_height="wrap_content"
         android:layout_width="@dimen/landscape_details_width"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:elevation="4dp"
         android:scrollbars="none">
 
         <LinearLayout
-            android:elevation="4dp"
-            android:layout_height="wrap_content"
             android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:elevation="4dp"
             android:orientation="vertical">
 
             <View
                 android:id="@+id/space"
-                android:layout_gravity="center_horizontal"
+                android:layout_width="64dp"
                 android:layout_height="@dimen/landscape_vertical_card_margin"
-                android:layout_marginTop="@dimen/play_button_vertical_margin"
-                android:layout_width="64dp" />
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="@dimen/play_button_vertical_margin" />
 
             <android.support.v7.widget.CardView
-                android:layout_height="wrap_content"
                 android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 app:cardElevation="4dp">
 
-                <android.support.v7.widget.GridLayout
-                    android:id="@+id/grid"
-                    android:layout_height="match_parent"
-                    android:layout_width="match_parent"
-                    app:columnCount="2"
-                    app:rowCount="4">
-
-                    <FrameLayout
-                        android:id="@+id/frame"
-                        android:layout_marginTop="@dimen/activity_vertical_margin"
-                        app:layout_rowSpan="4">
-
-                        <android.support.v7.widget.CardView
-                            android:id="@+id/card_view"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="16dp"
-                            android:layout_marginStart="16dp"
-                            android:layout_width="wrap_content"
-                            android:visibility="invisible"
-                            app:cardElevation="4dp"
-                            app:cardPreventCornerOverlap="false"
-                            app:cardUseCompatPadding="true">
-
-                            <ImageView
-                                android:contentDescription="@string/poster"
-                                android:id="@+id/details_poster"
-                                android:layout_height="wrap_content"
-                                android:layout_width="wrap_content"
-                                android:scaleType="fitXY"
-                                android:transitionName="@string/detail_icon_transition_name" />
-                        </android.support.v7.widget.CardView>
-
-                        <ProgressBar
-                            style="?android:attr/progressBarStyleLarge"
-                            android:id="@+id/progressBar"
-                            android:layout_gravity="center"
-                            android:layout_height="wrap_content"
-                            android:layout_width="wrap_content"
-                            android:visibility="invisible" />
-                    </FrameLayout>
-
-                    <TextView
-                        android:fontFamily="sans-serif-condensed"
-                        android:gravity="center_horizontal"
-                        android:id="@+id/title"
-                        android:layout_marginLeft="16dp"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginTop="16dp"
-                        android:layout_width="0dp"
-                        android:paddingEnd="@dimen/activity_horizontal_margin"
-                        android:paddingRight="@dimen/activity_horizontal_margin"
-                        android:textColor="@color/primary_text"
-                        android:textSize="28sp"
-                        app:layout_gravity="fill_horizontal" />
-
-                    <TextView
-                        style="@style/TextCondensed20"
-                        android:gravity="center_horizontal"
-                        android:id="@+id/genres"
-                        android:layout_marginLeft="16dp"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginTop="4dp"
-                        android:layout_width="0dp"
-                        android:paddingEnd="@dimen/activity_horizontal_margin"
-                        android:paddingRight="@dimen/activity_horizontal_margin"
-                        android:textColor="@color/secondary_text"
-                        app:layout_gravity="fill_horizontal" />
-
-                    <TextView
-                        style="@style/TextCondensed20"
-                        android:gravity="center_horizontal"
-                        android:id="@+id/release_date"
-                        android:layout_marginLeft="16dp"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginTop="4dp"
-                        android:layout_width="0dp"
-                        android:paddingEnd="@dimen/activity_horizontal_margin"
-                        android:paddingRight="@dimen/activity_horizontal_margin"
-                        app:layout_gravity="fill_horizontal" />
-
-                    <TextView
-                        style="@style/TextCondensed20"
-                        android:gravity="center_horizontal"
-                        android:id="@+id/vote"
-                        android:layout_marginLeft="16dp"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginTop="4dp"
-                        android:layout_width="0dp"
-                        android:paddingEnd="@dimen/activity_horizontal_margin"
-                        android:paddingRight="@dimen/activity_horizontal_margin"
-                        app:layout_gravity="fill_horizontal" />
-
-                    <View
-                        android:background="@color/divider"
-                        android:layout_height="2dp"
-                        android:layout_marginTop="@dimen/activity_vertical_margin"
-                        app:layout_columnSpan="2" />
-
-                    <TextView
-                        style="@style/Text20"
-                        android:id="@+id/budget"
-                        android:layout_marginTop="@dimen/activity_vertical_margin"
-                        android:paddingEnd="@dimen/activity_horizontal_margin"
-                        android:paddingLeft="@dimen/activity_horizontal_margin"
-                        android:paddingRight="@dimen/activity_horizontal_margin"
-                        android:paddingStart="@dimen/activity_horizontal_margin"
-                        android:text="Budget: "
-                        app:layout_columnSpan="2" />
-
-                    <TextView
-                        style="@style/Text20"
-                        android:id="@+id/length"
-                        android:layout_marginTop="4dp"
-                        android:paddingEnd="@dimen/activity_horizontal_margin"
-                        android:paddingLeft="@dimen/activity_horizontal_margin"
-                        android:paddingRight="@dimen/activity_horizontal_margin"
-                        android:paddingStart="@dimen/activity_horizontal_margin"
-                        android:text="Length: "
-                        app:layout_columnSpan="2" />
-
-                    <TextView
-                        style="@style/Text20"
-                        android:id="@+id/director"
-                        android:layout_marginTop="4dp"
-                        android:paddingEnd="@dimen/activity_horizontal_margin"
-                        android:paddingLeft="@dimen/activity_horizontal_margin"
-                        android:paddingRight="@dimen/activity_horizontal_margin"
-                        android:paddingStart="@dimen/activity_horizontal_margin"
-                        android:text="Director: "
-                        app:layout_columnSpan="2" />
-
-                    <TextView
-                        style="@style/Text20"
-                        android:id="@+id/actors"
-                        android:layout_marginTop="4dp"
-                        android:paddingEnd="@dimen/activity_horizontal_margin"
-                        android:paddingLeft="@dimen/activity_horizontal_margin"
-                        android:paddingRight="@dimen/activity_horizontal_margin"
-                        android:paddingStart="@dimen/activity_horizontal_margin"
-                        android:text="Cast: "
-                        app:layout_columnSpan="2" />
-
-                    <TextView
-                        android:fontFamily="sans-serif-light"
-                        android:id="@+id/plot"
-                        android:layout_marginTop="4dp"
-                        android:paddingEnd="@dimen/activity_horizontal_margin"
-                        android:paddingLeft="@dimen/activity_horizontal_margin"
-                        android:paddingRight="@dimen/activity_horizontal_margin"
-                        android:paddingStart="@dimen/activity_horizontal_margin"
-                        android:textSize="18sp"
-                        app:layout_columnSpan="2" />
-
-                    <ExpandableListView
-                        android:groupIndicator="@null"
-                        android:id="@+id/reviews"
-                        android:layout_marginTop="8dp"
-                        app:layout_columnSpan="2"
-                        app:layout_gravity="fill_horizontal" />
-
-                </android.support.v7.widget.GridLayout>
+                <include layout="@layout/details_grid" />
             </android.support.v7.widget.CardView>
         </LinearLayout>
     </android.support.v4.widget.NestedScrollView>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/activity_vertical_margin"
         android:layout_marginEnd="@dimen/activity_horizontal_margin"
         android:layout_marginRight="@dimen/activity_horizontal_margin"
-        android:layout_width="wrap_content"
         android:src="@drawable/star_off"
         app:elevation="6dp"
         app:fabSize="normal" />

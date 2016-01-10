@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2016 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.example.igorklimov.popularmoviesdemo.helpers;
 
 import android.content.Context;
@@ -14,7 +30,6 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import com.example.igorklimov.popularmoviesdemo.R;
-import com.example.igorklimov.popularmoviesdemo.activities.MainActivity;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByPopularity;
 import com.example.igorklimov.popularmoviesdemo.data.MovieContract.MovieByReleaseDate;
@@ -27,42 +42,42 @@ import com.squareup.picasso.Picasso;
  */
 public class CustomAdapter extends CursorRecyclerViewAdapter<CustomAdapter.ViewHolder> {
     private static final String TAG = "CustomAdapter";
-    private static Context context;
-    private final int orientation;
-    private int minWidth = 0;
-    private int minHeight = 0;
-    private RecyclerView recyclerView;
-    private MoviesAdapterOnClickHandler handler;
-    public static int previous = -1;
+    public static int sPrevious = -1;
+
+    private  Context mContext;
+    private final int mOrientation;
+    private int mMinWidth = 0;
+    private int mMinHeight = 0;
+    private RecyclerView mRecyclerView;
+    private MoviesAdapterOnClickHandler mHandler;
 
     public CustomAdapter(Context context, Cursor c, RecyclerView recyclerView,
                          MoviesAdapterOnClickHandler handler) {
         super(c);
-        CustomAdapter.context = context;
-        orientation = context.getResources().getConfiguration().orientation;
-        this.recyclerView = recyclerView;
-        this.handler = handler;
+        mContext = context;
+        mOrientation = context.getResources().getConfiguration().orientation;
+        mRecyclerView = recyclerView;
+        mHandler = handler;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_movie, parent, false);
         ImageView posterImageView = (ImageView) view.findViewById(R.id.poster);
-        boolean isTablet = Utility.isTabletPreference(context);
-        if (minWidth == 0) {
-            if (isTablet && orientation == Configuration.ORIENTATION_PORTRAIT) {
-                minHeight = recyclerView.getHeight();
-                minWidth = (int) (((double)minHeight / 278) * 185);
-                Log.v(TAG, "onCreateViewHolder: "+ minWidth + " "+ minHeight);
+        boolean isTablet = Utility.isTabletPreference(mContext);
+        if (mMinWidth == 0) {
+            if (isTablet && mOrientation == Configuration.ORIENTATION_PORTRAIT) {
+                mMinHeight = mRecyclerView.getHeight();
+                mMinWidth = (int) (((double) mMinHeight / 278) * 185);
             } else {
-                minWidth = recyclerView.getWidth()
-                        / (orientation == Configuration.ORIENTATION_LANDSCAPE
+                mMinWidth = mRecyclerView.getWidth()
+                        / (mOrientation == Configuration.ORIENTATION_LANDSCAPE
                         || isTablet ? 3 : 2);
-                minHeight = (int) (((double) minWidth / 185) * 278);
+                mMinHeight = (int) (((double) mMinWidth / 185) * 278);
             }
         }
-        posterImageView.setMinimumWidth(minWidth);
-        posterImageView.setMinimumHeight(minHeight);
+        posterImageView.setMinimumWidth(mMinWidth);
+        posterImageView.setMinimumHeight(mMinHeight);
         return new ViewHolder(view);
     }
 
@@ -71,7 +86,7 @@ public class CustomAdapter extends CursorRecyclerViewAdapter<CustomAdapter.ViewH
         viewHolder.progressBar.setVisibility(View.VISIBLE);
         viewHolder.id = cursor.getInt(0);
 
-        Picasso.with(context)
+        Picasso.with(mContext)
                 .load(Utility.getPoster(cursor))
                 .noFade()
                 .into(viewHolder.imageView, new Callback() {
@@ -102,9 +117,9 @@ public class CustomAdapter extends CursorRecyclerViewAdapter<CustomAdapter.ViewH
 
         @Override
         public void onClick(View v) {
-            if (!Utility.isTabletPreference(context) || getAdapterPosition() != previous) {
+            if (!Utility.isTabletPreference(mContext) || getAdapterPosition() != sPrevious) {
                 Uri movieUri = null;
-                switch (Utility.getSortByPreference(context)) {
+                switch (Utility.getSortByPreference(mContext)) {
                     case 1:
                         movieUri = MovieByPopularity.buildMovieUri(id);
                         break;
@@ -119,8 +134,8 @@ public class CustomAdapter extends CursorRecyclerViewAdapter<CustomAdapter.ViewH
                         break;
                 }
                 Log.d("TAG", "onClick: " + movieUri);
-                handler.onClick(movieUri, this);
-                previous = getAdapterPosition();
+                mHandler.onClick(movieUri, this);
+                sPrevious = getAdapterPosition();
             }
         }
     }
@@ -128,5 +143,4 @@ public class CustomAdapter extends CursorRecyclerViewAdapter<CustomAdapter.ViewH
     public interface MoviesAdapterOnClickHandler {
         void onClick(Uri uri, ViewHolder holder);
     }
-
 }

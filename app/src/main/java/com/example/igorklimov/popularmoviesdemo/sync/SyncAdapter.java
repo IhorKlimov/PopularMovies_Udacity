@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2016 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.example.igorklimov.popularmoviesdemo.sync;
 
 import android.accounts.Account;
@@ -17,7 +33,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.example.igorklimov.popularmoviesdemo.BuildConfig;
@@ -69,14 +84,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private final static String RELEASE_DATE_DESC = "release_date.desc&vote_count.gte=10&vote_average.gte=7&release_date.lte=";
     private final static String VOTE_AVG_DESC = "vote_average.desc&vote_count.gte=1000";
 
-    private Context context;
+    private Context mContext;
     private ContentResolver mContentResolver;
-    private ContentValues[] contentValues = new ContentValues[20];
+    private ContentValues[] mContentValues = new ContentValues[20];
 
     public SyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
         mContentResolver = context.getContentResolver();
-        this.context = context;
+        mContext = context;
     }
 
 
@@ -97,8 +112,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority,
                               ContentProviderClient provider, SyncResult syncResult) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        long lastUpdate = prefs.getLong(context.getString(R.string.last_update), System.currentTimeMillis());
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+        long lastUpdate = prefs.getLong(mContext.getString(R.string.last_update), System.currentTimeMillis());
         Log.d("TAG", "onPerformSync: IF " + (System.currentTimeMillis() - lastUpdate));
         if (System.currentTimeMillis() - lastUpdate >= TWO_DAYS_IN_MILLISECONDS) {
             int delete1 = mContentResolver.delete(MovieByPopularity.CONTENT_URI, null, null);
@@ -107,17 +122,17 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             Log.d("TAG", "onPerformSync: ERASE THE DATABASE -------" + delete1);
             Log.d("TAG", "onPerformSync: ERASE THE DATABASE -------" + delete2);
             Log.d("TAG", "onPerformSync: ERASE THE DATABASE -------" + delete3);
-            prefs.edit().putLong(context.getString(R.string.last_update), System.currentTimeMillis()).apply();
-            Utility.initializePagePreference(context);
-            if (MoviesGridFragment.listener != null) MoviesGridFragment.listener.refresh();
-            syncImmediately(context);
+            prefs.edit().putLong(mContext.getString(R.string.last_update), System.currentTimeMillis()).apply();
+            Utility.initializePagePreference(mContext);
+            if (MoviesGridFragment.sListener != null) MoviesGridFragment.sListener.refresh();
+            syncImmediately(mContext);
         } else {
             getData();
         }
     }
 
     private void getData() {
-        int sortByPreference = Utility.getSortByPreference(context);
+        int sortByPreference = Utility.getSortByPreference(mContext);
         Uri contentUri = null;
 
         if (sortByPreference != 4) {
@@ -138,7 +153,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             }
 
             Cursor cursor = mContentResolver.query(contentUri, null, null, null, null);
-            int page = Utility.getPagePreference(context);
+            int page = Utility.getPagePreference(mContext);
             int count = cursor.getCount();
             if (count == 0) page = 1;
             Log.d("TAG", "onPerformSync: cursorCount " + count + " page: " + page);
@@ -170,9 +185,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             values.put(COLUMN_AVERAGE_VOTE, vote);
                             values.put(COLUMN_PLOT, plot);
 
-                            contentValues[i++] = values;
+                            mContentValues[i++] = values;
                         }
-                        int bulkInsert = mContentResolver.bulkInsert(contentUri, contentValues);
+                        int bulkInsert = mContentResolver.bulkInsert(contentUri, mContentValues);
                         Log.d("TAG", "onPerformSync: bulkInsert " + bulkInsert);
                         cursor.close();
                     } catch (JSONException e) {

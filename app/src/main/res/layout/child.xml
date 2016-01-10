@@ -6,13 +6,15 @@
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:orientation="vertical"
     android:paddingBottom="2dip"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp"
+    android:paddingEnd="@dimen/activity_horizontal_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingStart="@dimen/activity_horizontal_margin"
     android:paddingTop="2dip">
 
     <TextView
         android:id="@+id/author"
-        style="@style/TextCondensed20"
+        style="@style/DetailsReviewLarge"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dip"
@@ -20,10 +22,10 @@
 
     <TextView
         android:id="@+id/review_text"
+        style="@style/DetailsReview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fontFamily="sans-serif-light"
-        android:textColor="#ffffff"
-        android:textSize="16sp" />
+        android:textColor="#ffffff" />
 
 </LinearLayout>

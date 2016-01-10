@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2016 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.example.igorklimov.popularmoviesdemo.activities;
 
 import android.content.Intent;
@@ -37,24 +53,23 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String DETAILFRAGMENT_TAG = "DETAIL_FRAGMENT";
-    private static final String TAG = MainActivity.class.getSimpleName();
-    private DrawerLayout drawer;
-    private int height;
-    private int width;
+    private DrawerLayout mDrawer;
+    private int mHeight;
+    private int mWidth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        Stetho.initializeWithDefaults(this);
-//        OkHttpClient client = new OkHttpClient();
-//        client.networkInterceptors().add(new StethoInterceptor());
-//        Stetho.initialize(
-//                Stetho.newInitializerBuilder(this)
-//                        .enableDumpapp(Stetho.defaultDumperPluginsProvider(this))
-//                        .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this))
-//                        .build());
+        Stetho.initializeWithDefaults(this);
+        OkHttpClient client = new OkHttpClient();
+        client.networkInterceptors().add(new StethoInterceptor());
+        Stetho.initialize(
+                Stetho.newInitializerBuilder(this)
+                        .enableDumpapp(Stetho.defaultDumperPluginsProvider(this))
+                        .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this))
+                        .build());
 //
-//        client.networkInterceptors().add(new StethoInterceptor());
+        client.networkInterceptors().add(new StethoInterceptor());
 
         setContentView(R.layout.drawer);
         Utility.setIsTabletPreference(this, findViewById(R.id.details_fragment) != null);
@@ -65,10 +80,10 @@ public class MainActivity extends AppCompatActivity
 
         SyncAdapter.initializeSyncAdapter(this);
 
-        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
+                this, mDrawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        mDrawer.setDrawerListener(toggle);
         toggle.syncState();
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -86,8 +101,8 @@ public class MainActivity extends AppCompatActivity
         MoviesGridFragment mf = (MoviesGridFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.movies_view);
         if (null != mf) {
-            MoviesGridFragment.id = 0;
-            CustomAdapter.previous = -1;
+            MoviesGridFragment.sId = 0;
+            CustomAdapter.sPrevious = -1;
             mf.sortChanged();
         }
         DetailFragment df = (DetailFragment) getSupportFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG);
@@ -130,15 +145,15 @@ public class MainActivity extends AppCompatActivity
                 transaction.commit();
             }
         } else {
-            if (height == 0) {
-                height = findViewById(R.id.details_fragment).getHeight();
-                width = findViewById(R.id.details_fragment).getWidth();
+            if (mHeight == 0) {
+                mHeight = findViewById(R.id.details_fragment).getHeight();
+                mWidth = findViewById(R.id.details_fragment).getWidth();
             }
             fragment = new DetailFragment();
             Bundle bundle = new Bundle();
             bundle.putParcelable("movie", movieUri);
-            bundle.putInt("fragmentHeight", height);
-            bundle.putInt("fragmentWidth", width);
+            bundle.putInt("fragmentHeight", mHeight);
+            bundle.putInt("fragmentWidth", mWidth);
             fragment.setArguments(bundle);
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.details_fragment, fragment, DETAILFRAGMENT_TAG);
@@ -148,7 +163,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        if (drawer.isDrawerOpen(GravityCompat.START)) drawer.closeDrawer(GravityCompat.START);
+        if (mDrawer.isDrawerOpen(GravityCompat.START)) mDrawer.closeDrawer(GravityCompat.START);
         else super.onBackPressed();
     }
 
@@ -176,7 +191,7 @@ public class MainActivity extends AppCompatActivity
                 reload();
                 break;
         }
-        drawer.closeDrawer(GravityCompat.START);
+        mDrawer.closeDrawer(GravityCompat.START);
         return true;
     }
 }

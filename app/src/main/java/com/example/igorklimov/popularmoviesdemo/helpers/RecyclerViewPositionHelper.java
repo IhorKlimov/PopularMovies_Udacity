@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2016 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.example.igorklimov.popularmoviesdemo.helpers;
 
 import android.support.v7.widget.OrientationHelper;
@@ -6,12 +22,12 @@ import android.view.View;
 
 public class RecyclerViewPositionHelper {
 
-    final RecyclerView recyclerView;
-    final RecyclerView.LayoutManager layoutManager;
+    private final RecyclerView mRecyclerView;
+    private final RecyclerView.LayoutManager mLayoutManager;
 
     RecyclerViewPositionHelper(RecyclerView recyclerView) {
-        this.recyclerView = recyclerView;
-        this.layoutManager = recyclerView.getLayoutManager();
+        mRecyclerView = recyclerView;
+        mLayoutManager = recyclerView.getLayoutManager();
     }
 
     public static RecyclerViewPositionHelper createHelper(RecyclerView recyclerView) {
@@ -27,7 +43,7 @@ public class RecyclerViewPositionHelper {
      * @return The total number on items in a layout manager
      */
     public int getItemCount() {
-        return layoutManager == null ? 0 : layoutManager.getItemCount();
+        return mLayoutManager == null ? 0 : mLayoutManager.getItemCount();
     }
 
     /**
@@ -38,17 +54,17 @@ public class RecyclerViewPositionHelper {
      * there aren't any visible items.
      */
     public int findFirstVisibleItemPosition() {
-        final View child = findOneVisibleChild(0, layoutManager.getChildCount(), false, true);
-        return child == null ? RecyclerView.NO_POSITION : recyclerView.getChildAdapterPosition(child);
+        final View child = findOneVisibleChild(0, mLayoutManager.getChildCount(), false, true);
+        return child == null ? RecyclerView.NO_POSITION : mRecyclerView.getChildAdapterPosition(child);
     }
 
     View findOneVisibleChild(int fromIndex, int toIndex, boolean completelyVisible,
                              boolean acceptPartiallyVisible) {
         OrientationHelper helper;
-        if (layoutManager.canScrollVertically()) {
-            helper = OrientationHelper.createVerticalHelper(layoutManager);
+        if (mLayoutManager.canScrollVertically()) {
+            helper = OrientationHelper.createVerticalHelper(mLayoutManager);
         } else {
-            helper = OrientationHelper.createHorizontalHelper(layoutManager);
+            helper = OrientationHelper.createHorizontalHelper(mLayoutManager);
         }
 
         final int start = helper.getStartAfterPadding();
@@ -56,7 +72,7 @@ public class RecyclerViewPositionHelper {
         final int next = toIndex > fromIndex ? 1 : -1;
         View partiallyVisible = null;
         for (int i = fromIndex; i != toIndex; i += next) {
-            final View child = layoutManager.getChildAt(i);
+            final View child = mLayoutManager.getChildAt(i);
             final int childStart = helper.getDecoratedStart(child);
             final int childEnd = helper.getDecoratedEnd(child);
             if (childStart < end && childEnd > start) {
