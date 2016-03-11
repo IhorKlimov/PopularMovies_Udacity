@@ -41,10 +41,11 @@ import com.squareup.picasso.Picasso;
  * Created by Igor Klimov on 11/7/2015.
  */
 public class CustomAdapter extends CursorRecyclerViewAdapter<CustomAdapter.ViewHolder> {
+    private static final String LOG_TAG = "CustomAdapter";
     private static final String TAG = "CustomAdapter";
     public static int sPrevious = -1;
 
-    private  Context mContext;
+    private Context mContext;
     private final int mOrientation;
     private int mMinWidth = 0;
     private int mMinHeight = 0;
@@ -62,6 +63,7 @@ public class CustomAdapter extends CursorRecyclerViewAdapter<CustomAdapter.ViewH
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        Log.d(LOG_TAG, "onCreateViewHolder: ");
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_movie, parent, false);
         ImageView posterImageView = (ImageView) view.findViewById(R.id.poster);
         boolean isTablet = Utility.isTabletPreference(mContext);
