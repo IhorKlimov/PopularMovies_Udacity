@@ -85,36 +85,26 @@ public class CustomAdapter extends CursorRecyclerViewAdapter<CustomAdapter.ViewH
 
     @Override
     public void onBindViewHolder(final ViewHolder viewHolder, Cursor cursor, int position) {
-        viewHolder.progressBar.setVisibility(View.VISIBLE);
+//        viewHolder.progressBar.setVisibility(View.VISIBLE);
         viewHolder.id = cursor.getInt(0);
 
         Picasso.with(mContext)
                 .load(Utility.getPoster(cursor))
-                .noFade()
-                .into(viewHolder.imageView, new Callback() {
-                    @Override
-                    public void onSuccess() {
-                        viewHolder.progressBar.setVisibility(View.INVISIBLE);
-                    }
-
-                    @Override
-                    public void onError() {
-
-                    }
-                });
+                .placeholder(R.drawable.holder)
+                .into(viewHolder.imageView);
         ViewCompat.setTransitionName(viewHolder.imageView, "iconView" + position);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public final ImageView imageView;
-        final ProgressBar progressBar;
+//        final ProgressBar progressBar;
         int id;
 
         public ViewHolder(View itemView) {
             super(itemView);
             itemView.setOnClickListener(this);
             imageView = (ImageView) itemView.findViewById(R.id.poster);
-            progressBar = (ProgressBar) itemView.findViewById(R.id.progressBar);
+//            progressBar = (ProgressBar) itemView.findViewById(R.id.progressBar);
         }
 
         @Override
