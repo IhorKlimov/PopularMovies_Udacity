@@ -41,10 +41,11 @@ import com.squareup.picasso.Picasso;
  * Created by Igor Klimov on 11/7/2015.
  */
 public class CustomAdapter extends CursorRecyclerViewAdapter<CustomAdapter.ViewHolder> {
+    private static final String LOG_TAG = "CustomAdapter";
     private static final String TAG = "CustomAdapter";
     public static int sPrevious = -1;
 
-    private  Context mContext;
+    private Context mContext;
     private final int mOrientation;
     private int mMinWidth = 0;
     private int mMinHeight = 0;
@@ -62,6 +63,7 @@ public class CustomAdapter extends CursorRecyclerViewAdapter<CustomAdapter.ViewH
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        Log.d(LOG_TAG, "onCreateViewHolder: ");
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_movie, parent, false);
         ImageView posterImageView = (ImageView) view.findViewById(R.id.poster);
         boolean isTablet = Utility.isTabletPreference(mContext);
@@ -83,36 +85,26 @@ public class CustomAdapter extends CursorRecyclerViewAdapter<CustomAdapter.ViewH
 
     @Override
     public void onBindViewHolder(final ViewHolder viewHolder, Cursor cursor, int position) {
-        viewHolder.progressBar.setVisibility(View.VISIBLE);
+//        viewHolder.progressBar.setVisibility(View.VISIBLE);
         viewHolder.id = cursor.getInt(0);
 
         Picasso.with(mContext)
                 .load(Utility.getPoster(cursor))
-                .noFade()
-                .into(viewHolder.imageView, new Callback() {
-                    @Override
-                    public void onSuccess() {
-                        viewHolder.progressBar.setVisibility(View.INVISIBLE);
-                    }
-
-                    @Override
-                    public void onError() {
-
-                    }
-                });
+                .placeholder(R.drawable.holder)
+                .into(viewHolder.imageView);
         ViewCompat.setTransitionName(viewHolder.imageView, "iconView" + position);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public final ImageView imageView;
-        final ProgressBar progressBar;
+//        final ProgressBar progressBar;
         int id;
 
         public ViewHolder(View itemView) {
             super(itemView);
             itemView.setOnClickListener(this);
             imageView = (ImageView) itemView.findViewById(R.id.poster);
-            progressBar = (ProgressBar) itemView.findViewById(R.id.progressBar);
+//            progressBar = (ProgressBar) itemView.findViewById(R.id.progressBar);
         }
 
         @Override

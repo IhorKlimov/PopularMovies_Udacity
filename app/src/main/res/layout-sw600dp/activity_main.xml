@@ -7,8 +7,7 @@
     android:baselineAligned="false"
     android:orientation="horizontal"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:mContext="com.example.igorklimov.popularmoviesdemo.activities.MainActivity"
-    tools:showIn="@layout/app_bar">
+    tools:mContext="com.example.igorklimov.popularmoviesdemo.activities.MainActivity">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/appbar"
