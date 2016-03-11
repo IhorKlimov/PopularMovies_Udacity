@@ -30,6 +30,7 @@ public class ScrollListener extends RecyclerView.OnScrollListener {
     private int mVisibleThreshold = 6; // The minimum amount of items to have below your current scroll position before loading more.
     private Context mContext;
     private int mFirstVisibleItem, mVisibleItemCount, mTotalItemCount;
+    private RecyclerViewPositionHelper mHelper;
 
     public ScrollListener(Context context) {
         mContext = context;
@@ -39,10 +40,12 @@ public class ScrollListener extends RecyclerView.OnScrollListener {
     public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
         super.onScrolled(recyclerView, dx, dy);
         if (Utility.getSortByPreference(mContext)!=4) {
-            RecyclerViewPositionHelper helper = RecyclerViewPositionHelper.createHelper(recyclerView);
+            if (mHelper == null) {
+                mHelper = RecyclerViewPositionHelper.createHelper(recyclerView);
+            }
             mVisibleItemCount = recyclerView.getChildCount();
-            mTotalItemCount = helper.getItemCount();
-            mFirstVisibleItem = helper.findFirstVisibleItemPosition();
+            mTotalItemCount = mHelper.getItemCount();
+            mFirstVisibleItem = mHelper.findFirstVisibleItemPosition();
             if (mLoading && mTotalItemCount > mPreviousTotal) {
                     mLoading = false;
                     mPreviousTotal = mTotalItemCount;
@@ -62,6 +65,7 @@ public class ScrollListener extends RecyclerView.OnScrollListener {
         mFirstVisibleItem = 0;
         mVisibleItemCount = 0;
         mTotalItemCount = 0;
+        mHelper = null;
     }
 
 }

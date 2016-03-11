@@ -61,15 +61,14 @@ import static com.example.igorklimov.popularmoviesdemo.data.MovieContract.COLUMN
 import static com.example.igorklimov.popularmoviesdemo.helpers.Utility.getGenres;
 import static com.example.igorklimov.popularmoviesdemo.helpers.Utility.getJsonMovies;
 import static com.example.igorklimov.popularmoviesdemo.helpers.Utility.getJsonResponse;
+import static java.lang.System.currentTimeMillis;
 
 /**
  * Handle the transfer of data between a server and an
  * app, using the Android sync adapter framework.
  */
-
-
-//some comment
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
+    private static final String LOG_TAG = "SyncAdapter";
     private static final int TWO_DAYS_IN_MILLISECONDS = 2 * 24 * 60 * 60 * 1000;
     private static final int SYNC_INTERVAL = 2 * 24 * 60 * 60;
     private static final int FLEX_TIME = SYNC_INTERVAL / 3;
@@ -96,7 +95,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
 
     public static void syncImmediately(Context context) {
-        Log.d("TAG", "syncImmediately: ");
+        Log.d(LOG_TAG, "syncImmediately: ");
         ConnectivityManager systemService = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = systemService.getActiveNetworkInfo();
         if (activeNetworkInfo == null) {
@@ -114,14 +113,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                               ContentProviderClient provider, SyncResult syncResult) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
         long lastUpdate = prefs.getLong(mContext.getString(R.string.last_update), System.currentTimeMillis());
-        Log.d("TAG", "onPerformSync: IF " + (System.currentTimeMillis() - lastUpdate));
+        Log.d(LOG_TAG, "onPerformSync: IF " + (currentTimeMillis() - lastUpdate));
         if (System.currentTimeMillis() - lastUpdate >= TWO_DAYS_IN_MILLISECONDS) {
             int delete1 = mContentResolver.delete(MovieByPopularity.CONTENT_URI, null, null);
             int delete2 = mContentResolver.delete(MovieByReleaseDate.CONTENT_URI, null, null);
             int delete3 = mContentResolver.delete(MovieByVotes.CONTENT_URI, null, null);
-            Log.d("TAG", "onPerformSync: ERASE THE DATABASE -------" + delete1);
-            Log.d("TAG", "onPerformSync: ERASE THE DATABASE -------" + delete2);
-            Log.d("TAG", "onPerformSync: ERASE THE DATABASE -------" + delete3);
+            Log.d(LOG_TAG, "onPerformSync: ERASE THE DATABASE -------" + delete1);
+            Log.d(LOG_TAG, "onPerformSync: ERASE THE DATABASE -------" + delete2);
+            Log.d(LOG_TAG, "onPerformSync: ERASE THE DATABASE -------" + delete3);
             prefs.edit().putLong(mContext.getString(R.string.last_update), System.currentTimeMillis()).apply();
             Utility.initializePagePreference(mContext);
             if (MoviesGridFragment.sListener != null) MoviesGridFragment.sListener.refresh();
@@ -156,14 +155,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             int page = Utility.getPagePreference(mContext);
             int count = cursor.getCount();
             if (count == 0) page = 1;
-            Log.d("TAG", "onPerformSync: cursorCount " + count + " page: " + page);
+            Log.d(LOG_TAG, "onPerformSync: cursorCount " + count + " page: " + page);
             if (count < page * 20) {
                 String jsonResponse = getJsonResponse(DISCOVER_MOVIES + SORT_BY + sortType + PAGE + page + API_KEY);
 
                 if (jsonResponse != null) {
                     JSONObject[] JsonMovies = getJsonMovies(jsonResponse);
                     try {
-                        Log.d("TAG", "INSERTING EXTRA DATA");
+                        Log.d(LOG_TAG, "INSERTING EXTRA DATA");
                         int i = 0;
                         for (JSONObject jsonMovie : JsonMovies) {
                             String poster = IMAGE_BASE + W_185 + jsonMovie.getString("poster_path");
@@ -188,7 +187,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                             mContentValues[i++] = values;
                         }
                         int bulkInsert = mContentResolver.bulkInsert(contentUri, mContentValues);
-                        Log.d("TAG", "onPerformSync: bulkInsert " + bulkInsert);
+                        Log.d(LOG_TAG, "onPerformSync: bulkInsert " + bulkInsert);
                         cursor.close();
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -225,7 +224,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private static void onAccountCreated(Account newAccount, Context context) {
-        Log.d("TAG", "CREATED NEW ACCOUNT");
+        Log.d(LOG_TAG, "CREATED NEW ACCOUNT");
         SyncAdapter.configurePeriodicSync(context, SYNC_INTERVAL, FLEX_TIME);
 
         ContentResolver.setSyncAutomatically(newAccount,

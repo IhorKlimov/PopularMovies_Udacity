@@ -59,35 +59,18 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
     private boolean mHoldForTransition;
     private boolean mIsTablet;
     private TextView mEmptyMessage;
+    private Context mContext;
 
     public MoviesGridFragment() {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    public void sortChanged() {
-        getLoaderManager().restartLoader(LOADER, null, this);
-        sListener.refresh();
-        mRecyclerView.smoothScrollToPosition(0);
-    }
-
-    private void selectFirstItem(CustomAdapter.ViewHolder holder) {
-        int sortByPreference = Utility.getSortByPreference(mMainActivity);
-        Uri movieUri;
-        if (sortByPreference == 1) {
-            movieUri = MovieContract.MovieByPopularity.buildMovieUri(sId);
-        } else if (sortByPreference == 2) {
-            movieUri = MovieContract.MovieByReleaseDate.buildMovieUri(sId);
-        } else if (sortByPreference == 3) {
-            movieUri = MovieContract.MovieByVotes.buildMovieUri(sId);
-        } else {
-            movieUri = MovieContract.FavoriteMovie.buildMovieUri(sId);
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        getLoaderManager().initLoader(LOADER, null, this);
+        if (mHoldForTransition) {
+            getActivity().supportPostponeEnterTransition();
         }
-        CustomAdapter.sPrevious = 0;
-        mMainActivity.onItemClick(movieUri, holder);
     }
 
     @Override
@@ -102,12 +85,15 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.movies_grid, container, false);
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.movies_grid);
         mEmptyMessage = (TextView) rootView.findViewById(R.id.list_empty);
         mMainActivity = (MainActivity) getActivity();
-        mCustomAdapter = new CustomAdapter(mMainActivity, null, mRecyclerView, new MoviesAdapterOnClickHandler() {
+        mContext = getContext();
+        mCustomAdapter = new CustomAdapter(
+                mContext, null, mRecyclerView, new MoviesAdapterOnClickHandler() {
             @Override
             public void onClick(Uri uri, CustomAdapter.ViewHolder holder) {
                 mMainActivity.onItemClick(uri, holder);
@@ -117,7 +103,7 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
 
         setupMinSizes();
 
-        SyncAdapter.syncImmediately(mMainActivity);
+        SyncAdapter.syncImmediately(mContext);
 
         sListener = new ScrollListener(getActivity());
         mRecyclerView.addOnScrollListener(sListener);
@@ -126,24 +112,21 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        getLoaderManager().initLoader(LOADER, null, this);
-        if (mHoldForTransition) {
-            getActivity().supportPostponeEnterTransition();
-        }
+    public void onStop() {
+        super.onStop();
+        mRecyclerView.clearOnScrollListeners();
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        Uri contentUri = Utility.getContentUri(mMainActivity);
+        Uri contentUri = Utility.getContentUri(mContext);
         return new CursorLoader(getActivity(), contentUri, null, null, null, null);
     }
 
     @Override
     public void onLoadFinished(final Loader<Cursor> cursorLoader, final Cursor cursor) {
         mCustomAdapter.swapCursor(cursor);
-        if (Utility.getSortByPreference(mMainActivity) == 4 && cursor.getCount() == 0) {
+        if (Utility.getSortByPreference(mContext) == 4 && cursor.getCount() == 0) {
             mEmptyMessage.setVisibility(View.VISIBLE);
         } else {
             mEmptyMessage.setVisibility(View.GONE);
@@ -151,7 +134,7 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
         if (mHoldForTransition) {
             getActivity().supportStartPostponedEnterTransition();
         }
-        if (Utility.isTabletPreference(mMainActivity)) {
+        if (Utility.isTabletPreference(mContext)) {
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -159,7 +142,7 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
                         if (cursor.getCount() == 0) {
                             mMainActivity.showDetails(null);
                         } else {
-                            sId = Utility.getId(mMainActivity);
+                            sId = Utility.getId(mContext);
                             CustomAdapter.ViewHolder vh =
                                     (CustomAdapter.ViewHolder) mRecyclerView.findViewHolderForAdapterPosition(0);
                             selectFirstItem(vh);
@@ -187,8 +170,8 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
         int spanCount;
 
         if (orientation == Configuration.ORIENTATION_PORTRAIT && mIsTablet) {
-            mRecyclerView.setLayoutManager(new LinearLayoutManager(mMainActivity,
-                    HORIZONTAL, false));
+            mRecyclerView.setLayoutManager(
+                    new LinearLayoutManager(mContext, HORIZONTAL, false));
         } else {
             if (orientation == Configuration.ORIENTATION_LANDSCAPE || mIsTablet) {
                 spanCount = 3;
@@ -197,6 +180,28 @@ public class MoviesGridFragment extends Fragment implements LoaderManager.Loader
             }
             mRecyclerView.setLayoutManager(new GridLayoutManager(mMainActivity, spanCount));
         }
+    }
+
+    public void sortChanged() {
+        getLoaderManager().restartLoader(LOADER, null, this);
+        sListener.refresh();
+        mRecyclerView.smoothScrollToPosition(0);
+    }
+
+    private void selectFirstItem(CustomAdapter.ViewHolder holder) {
+        int sortByPreference = Utility.getSortByPreference(mMainActivity);
+        Uri movieUri;
+        if (sortByPreference == 1) {
+            movieUri = MovieContract.MovieByPopularity.buildMovieUri(sId);
+        } else if (sortByPreference == 2) {
+            movieUri = MovieContract.MovieByReleaseDate.buildMovieUri(sId);
+        } else if (sortByPreference == 3) {
+            movieUri = MovieContract.MovieByVotes.buildMovieUri(sId);
+        } else {
+            movieUri = MovieContract.FavoriteMovie.buildMovieUri(sId);
+        }
+        CustomAdapter.sPrevious = 0;
+        mMainActivity.onItemClick(movieUri, holder);
     }
 
 }

@@ -39,6 +39,7 @@ import android.support.v7.widget.CardView;
 import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -53,6 +54,8 @@ import android.widget.ImageView;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.net.NetworkInfo;
+
 
 import com.example.igorklimov.popularmoviesdemo.BuildConfig;
 import com.example.igorklimov.popularmoviesdemo.R;
@@ -502,7 +505,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private boolean isInternetAvailable() {
         ConnectivityManager systemService = (ConnectivityManager) context
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
-        return systemService.getActiveNetworkInfo() != null;
+				NetworkInfo activeNetworkInfo = systemService.getActiveNetworkInfo();
+        return  activeNetworkInfo != null&& activeNetworkInfo.isConnected();
     }
 
     private void noInternetMessage() {

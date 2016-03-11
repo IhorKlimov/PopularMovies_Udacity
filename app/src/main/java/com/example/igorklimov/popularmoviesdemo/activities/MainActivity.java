@@ -96,7 +96,9 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-
+    /**
+     *  This method is called after used changed a sort type
+     * */
     private void reload() {
         MoviesGridFragment mf = (MoviesGridFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.movies_view);
@@ -105,7 +107,8 @@ public class MainActivity extends AppCompatActivity
             CustomAdapter.sPrevious = -1;
             mf.sortChanged();
         }
-        DetailFragment df = (DetailFragment) getSupportFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG);
+        DetailFragment df = (DetailFragment) getSupportFragmentManager()
+                .findFragmentByTag(DETAILFRAGMENT_TAG);
         if (null != df) df.sortChanged();
     }
 

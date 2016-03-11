@@ -1,19 +1,29 @@
 package com.example.igorklimov.popularmoviesdemo;
 
-import android.app.Application;
-import android.test.ApplicationTestCase;
-import android.test.suitebuilder.TestSuiteBuilder;
+import android.support.test.rule.ActivityTestRule;
+import android.support.test.runner.AndroidJUnit4;
+import android.test.suitebuilder.annotation.LargeTest;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.example.igorklimov.popularmoviesdemo.activities.MainActivity;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * <a href="http://d.android.com/tools/testing/testing_android.html">Testing Fundamentals</a>
  */
-public class FullTest extends TestSuite {
+@RunWith(AndroidJUnit4.class)
+@LargeTest
+public class FullTest {
 
-    public static Test suite() {
-        return new TestSuiteBuilder(FullTest.class).includeAllPackagesUnderHere().build();
+    @Rule
+    public ActivityTestRule<MainActivity> mActivityTestRule =
+            new ActivityTestRule<>(MainActivity.class);
+
+
+    @Test
+    public void doSome() {
+
     }
-
 }

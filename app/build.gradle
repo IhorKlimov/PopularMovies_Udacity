@@ -1,18 +1,30 @@
 apply plugin: 'com.android.application'
 
-ext{
+ext {
     supportVersion = '23.1.1'
+    supportLibraryVersion = '23.2.0'
+    guavaVersion = '18.0'
+    mockitoVersion = '1.10.19'
+    powerMockito = '1.6.2'
+    hamcrestVersion = '1.3'
+    runnerVersion = '0.4.1'
+    rulesVersion = '0.4.1'
+    espressoVersion = '2.2.1'
 }
 
 android {
     compileSdkVersion 23
     buildToolsVersion "23.0.2"
 
+    dataBinding{
+        enabled = true
+    }
+
     defaultConfig {
         applicationId "com.example.igorklimov.popularmoviesdemo"
         minSdkVersion 11
         targetSdkVersion 23
-        versionCode 1
+        versionCode 4
         versionName "1.0.4"
     }
     buildTypes {
@@ -32,6 +44,7 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
+
     compile "com.android.support:appcompat-v7:${supportVersion}"
     compile "com.android.support:recyclerview-v7:${supportVersion}"
     compile "com.android.support:cardview-v7:${supportVersion}"
@@ -41,5 +54,5 @@ dependencies {
     compile 'com.facebook.stetho:stetho:1.2.0'
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'com.facebook.stetho:stetho-okhttp:1.2.0'
-    compile files('libs/YouTubeAndroidPlayerApi.jar')
+    compile "com.google.guava:guava:${guavaVersion}"
 }

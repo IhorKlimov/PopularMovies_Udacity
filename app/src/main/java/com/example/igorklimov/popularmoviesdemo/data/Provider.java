@@ -167,7 +167,7 @@ public class Provider extends ContentProvider {
             default:
                 throw new UnsupportedOperationException();
         }
-        mContentResolver.notifyChange(uri, null);
+        mContentResolver.notifyChange(uri, null, false);
         return result;
     }
 
@@ -240,7 +240,7 @@ public class Provider extends ContentProvider {
                 throw new UnsupportedOperationException();
         }
 
-        if (inserted != 0) mContentResolver.notifyChange(uri, null);
+        if (inserted != 0) mContentResolver.notifyChange(uri, null, false);
         return inserted;
     }
 
@@ -281,7 +281,7 @@ public class Provider extends ContentProvider {
             default:
                 throw new UnsupportedOperationException();
         }
-        if (deleted > 0) mContentResolver.notifyChange(uri, null);
+        if (deleted > 0) mContentResolver.notifyChange(uri, null, false);
 
         return deleted;
     }
